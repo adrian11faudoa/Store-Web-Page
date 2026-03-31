@@ -24,3 +24,14 @@ asos-clone/
 │
 ├── package.json
 
+
+HOW TO RUN
+1. Install dependencies
+npm install
+
+2. Start backend
+npm start
+
+3. Open frontend
+Just open:
+frontend/index.html
