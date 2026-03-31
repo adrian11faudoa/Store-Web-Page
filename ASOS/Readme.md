@@ -44,6 +44,11 @@ What you now have
 ✔ Cart (localStorage)
 ✔ API backend
 
+Next to do
+Convert this into React + Tailwind (ASOS-level UI)
+Add animations + modern UX (hover, quick view, etc.)
+Or make it a production-ready full stack (MongoDB + auth)
+
 
 Next upgrades (to make it real ASOS-level)
 React / Next.js frontend
