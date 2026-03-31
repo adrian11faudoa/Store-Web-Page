@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "name": "Oversized T-Shirt",
+    "price": 25,
+    "category": "tops",
+    "image": "https://via.placeholder.com/200"
+  },
+  {
+    "id": 2,
+    "name": "Slim Jeans",
+    "price": 50,
+    "category": "pants",
+    "image": "https://via.placeholder.com/200"
+  },
+  {
+    "id": 3,
+    "name": "Hoodie",
+    "price": 60,
+    "category": "tops",
+    "image": "https://via.placeholder.com/200"
+  }
+]
