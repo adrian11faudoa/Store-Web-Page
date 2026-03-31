@@ -35,3 +35,21 @@ npm start
 3. Open frontend
 Just open:
 frontend/index.html
+
+What you now have
+
+✔ Product listing
+✔ Filtering
+✔ Product page
+✔ Cart (localStorage)
+✔ API backend
+
+
+Next upgrades (to make it real ASOS-level)
+React / Next.js frontend
+Auth (JWT)
+Stripe payments
+Image CDN
+Elastic search (real search bar)
+Pagination + infinite scroll
+AWS deployment
