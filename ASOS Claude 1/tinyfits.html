@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>tiny.fits — Kids Clothes</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,sans-serif;background:#f5f5f3;color:#1a1a1a}
+
+  /* NAV */
+  .nav{background:#fff;border-bottom:0.5px solid rgba(0,0,0,0.12);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:10}
+  .nav-logo{font-size:20px;font-weight:500;letter-spacing:-0.5px}
+  .logo-dot{color:#D85A30}
+  .nav-links{display:flex;gap:1.5rem}
+  .nav-link{font-size:13px;color:#666;cursor:pointer;text-decoration:none;white-space:nowrap}
+  .nav-link:hover{color:#1a1a1a}
+  .nav-right{display:flex;gap:14px;align-items:center}
+  .icon-btn{background:none;border:none;cursor:pointer;color:#666;font-size:13px;padding:6px 10px;border-radius:8px;display:flex;align-items:center;gap:6px}
+  .icon-btn:hover{background:#f0f0ee}
+  .cart-badge{background:#D85A30;color:#fff;border-radius:999px;font-size:10px;padding:1px 5px;font-weight:500}
+
+  /* HERO */
+  .hero{background:#EEEDFE;padding:3.5rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:2rem;flex-wrap:wrap}
+  .hero-text{flex:1;min-width:200px}
+  .hero-tag{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#534AB7;margin-bottom:0.75rem;font-weight:500}
+  .hero-title{font-size:38px;font-weight:500;line-height:1.1;margin-bottom:1rem;letter-spacing:-1px;color:#26215C}
+  .hero-sub{font-size:15px;color:#534AB7;margin-bottom:1.75rem;line-height:1.6}
+  .btn-primary{background:#3C3489;color:#fff;border:none;padding:13px 28px;font-size:14px;font-weight:500;border-radius:8px;cursor:pointer}
+  .btn-outline{background:transparent;color:#3C3489;border:1.5px solid #AFA9EC;padding:13px 28px;font-size:14px;font-weight:500;border-radius:8px;cursor:pointer;margin-left:10px}
+  .hero-illo{flex:0 0 auto;width:180px;height:160px;background:#CECBF6;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:72px}
+
+  /* CATEGORY CHIPS */
+  .cats{display:flex;gap:10px;overflow-x:auto;padding:1.25rem 1.5rem;background:#fff;border-bottom:0.5px solid rgba(0,0,0,0.12)}
+  .cat-chip{background:#f0f0ee;border:0.5px solid rgba(0,0,0,0.12);border-radius:999px;padding:7px 18px;font-size:13px;cursor:pointer;white-space:nowrap;color:#1a1a1a;transition:all 0.15s}
+  .cat-chip:hover{border-color:rgba(0,0,0,0.25)}
+  .cat-chip.active{background:#3C3489;color:#fff;border-color:#3C3489}
+
+  /* SECTIONS */
+  .section{padding:1.75rem 1.5rem}
+  .section-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:1.25rem}
+  .section-title{font-size:18px;font-weight:500}
+  .see-all{font-size:13px;color:#666;cursor:pointer;text-decoration:underline}
+
+  /* FILTER BUTTONS */
+  .filters{display:flex;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap}
+  .filter-btn{background:none;border:0.5px solid rgba(0,0,0,0.12);border-radius:999px;padding:6px 14px;font-size:12px;cursor:pointer;color:#666}
+  .filter-btn:hover{border-color:rgba(0,0,0,0.25);color:#1a1a1a}
+  .filter-btn.on{background:#EEEDFE;border-color:#AFA9EC;color:#3C3489}
+
+  /* PRODUCT GRID */
+  .products{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
+  .card{background:#fff;border:0.5px solid rgba(0,0,0,0.12);border-radius:12px;overflow:hidden;cursor:pointer;transition:border-color 0.15s}
+  .card:hover{border-color:rgba(0,0,0,0.25)}
+  .card-img{height:180px;display:flex;align-items:center;justify-content:center;font-size:52px;position:relative}
+  .badge{position:absolute;top:10px;left:10px;font-size:11px;font-weight:500;padding:3px 8px;border-radius:8px}
+  .badge-sale{background:#FAECE7;color:#993C1D}
+  .badge-new{background:#EAF3DE;color:#3B6D11}
+  .card-body{padding:12px}
+  .card-name{font-size:14px;font-weight:500;margin-bottom:4px;line-height:1.3}
+  .card-sub{font-size:12px;color:#666;margin-bottom:8px}
+  .card-footer{display:flex;align-items:center;justify-content:space-between}
+  .price{font-size:15px;font-weight:500}
+  .price-old{font-size:12px;color:#aaa;text-decoration:line-through;margin-left:4px}
+  .add-btn{background:none;border:0.5px solid rgba(0,0,0,0.25);border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer;color:#1a1a1a}
+  .add-btn:hover{background:#f0f0ee}
+  .sizes{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+  .size-tag{background:#f0f0ee;border:0.5px solid rgba(0,0,0,0.12);border-radius:8px;padding:3px 8px;font-size:11px;color:#666}
+
+  /* PROMO BANNER */
+  .banner{background:#E1F5EE;border-radius:12px;padding:1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin:0 1.5rem 1.75rem}
+  .banner-text h3{font-size:16px;font-weight:500;color:#085041;margin-bottom:4px}
+  .banner-text p{font-size:13px;color:#0F6E56}
+  .banner-btn{background:#0F6E56;color:#fff;border:none;padding:10px 22px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap}
+
+  /* FOOTER */
+  .footer-strip{background:#fff;border-top:0.5px solid rgba(0,0,0,0.12);padding:1.5rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin-top:1rem}
+  .footer-col h4{font-size:12px;font-weight:500;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;color:#666}
+  .footer-col p{font-size:12px;color:#aaa;line-height:1.8;cursor:pointer}
+  .footer-col p:hover{color:#1a1a1a}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<div class="nav">
+  <div class="nav-logo">tiny<span class="logo-dot">.</span>fits</div>
+  <div class="nav-links">
+    <a class="nav-link">New in</a>
+    <a class="nav-link">Boys</a>
+    <a class="nav-link">Girls</a>
+    <a class="nav-link">Baby</a>
+    <a class="nav-link">Sale</a>
+  </div>
+  <div class="nav-right">
+    <button class="icon-btn">Search</button>
+    <button class="icon-btn">Wishlist</button>
+    <button class="icon-btn">Bag <span class="cart-badge">3</span></button>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-text">
+    <div class="hero-tag">Spring / Summer 2026</div>
+    <div class="hero-title">Clothes they'll actually want to wear</div>
+    <div class="hero-sub">Comfy, durable, and fun — for ages 0–14. Free returns always.</div>
+    <button class="btn-primary">Shop new arrivals</button>
+    <button class="btn-outline">View sale</button>
+  </div>
+  <div class="hero-illo">👕</div>
+</div>
+
+<!-- CATEGORY CHIPS -->
+<div class="cats">
+  <div class="cat-chip active">All</div>
+  <div class="cat-chip">Baby 0–18m</div>
+  <div class="cat-chip">Toddler 1–3y</div>
+  <div class="cat-chip">Kids 4–8y</div>
+  <div class="cat-chip">Older Kids 9–14y</div>
+  <div class="cat-chip">Swimwear</div>
+  <div class="cat-chip">Footwear</div>
+  <div class="cat-chip">Accessories</div>
+</div>
+
+<!-- NEW IN SECTION -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-title">New in this week</div>
+    <span class="see-all">See all 340 items</span>
+  </div>
+  <div class="filters">
+    <button class="filter-btn on">Sort: Featured</button>
+    <button class="filter-btn">Size</button>
+    <button class="filter-btn">Colour</button>
+    <button class="filter-btn">Price</button>
+    <button class="filter-btn">Brand</button>
+  </div>
+  <div class="products">
+
+    <div class="card">
+      <div class="card-img" style="background:#EEEDFE">
+        <span class="badge badge-new">New</span>🧥
+      </div>
+      <div class="card-body">
+        <div class="card-name">Colour-block hoodie</div>
+        <div class="card-sub">Ages 4–10</div>
+        <div class="sizes">
+          <span class="size-tag">4y</span>
+          <span class="size-tag">6y</span>
+          <span class="size-tag">8y</span>
+          <span class="size-tag">10y</span>
+        </div>
+        <div class="card-footer">
+          <span class="price">$28</span>
+          <button class="add-btn">+ Add</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-img" style="background:#FAECE7">
+        <span class="badge badge-sale">−30%</span>👗
+      </div>
+      <div class="card-body">
+        <div class="card-name">Floral wrap dress</div>
+        <div class="card-sub">Ages 3–8</div>
+        <div class="sizes">
+          <span class="size-tag">3y</span>
+          <span class="size-tag">5y</span>
+          <span class="size-tag">7y</span>
+        </div>
+        <div class="card-footer">
+          <span class="price">$19 <span class="price-old">$27</span></span>
+          <button class="add-btn">+ Add</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-img" style="background:#E1F5EE">
+        <span class="badge badge-new">New</span>👖
+      </div>
+      <div class="card-body">
+        <div class="card-name">Cargo joggers</div>
+        <div class="card-sub">Ages 6–14</div>
+        <div class="sizes">
+          <span class="size-tag">6y</span>
+          <span class="size-tag">8y</span>
+          <span class="size-tag">10y</span>
+          <span class="size-tag">12y</span>
+        </div>
+        <div class="card-footer">
+          <span class="price">$24</span>
+          <button class="add-btn">+ Add</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-img" style="background:#FBEAF0">👟</div>
+      <div class="card-body">
+        <div class="card-name">Velcro trainers</div>
+        <div class="card-sub">Ages 1–5</div>
+        <div class="sizes">
+          <span class="size-tag">EU 22</span>
+          <span class="size-tag">EU 24</span>
+          <span class="size-tag">EU 26</span>
+        </div>
+        <div class="card-footer">
+          <span class="price">$34</span>
+          <button class="add-btn">+ Add</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-img" style="background:#FAEEDA">
+        <span class="badge badge-sale">−20%</span>🧦
+      </div>
+      <div class="card-body">
+        <div class="card-name">Rainbow sock 5-pack</div>
+        <div class="card-sub">Ages 2–8</div>
+        <div class="sizes">
+          <span class="size-tag">S</span>
+          <span class="size-tag">M</span>
+        </div>
+        <div class="card-footer">
+          <span class="price">$12 <span class="price-old">$15</span></span>
+          <button class="add-btn">+ Add</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-img" style="background:#EAF3DE">
+        <span class="badge badge-new">New</span>🩳
+      </div>
+      <div class="card-body">
+        <div class="card-name">Pull-on shorts</div>
+        <div class="card-sub">Ages 4–12</div>
+        <div class="sizes">
+          <span class="size-tag">4y</span>
+          <span class="size-tag">6y</span>
+          <span class="size-tag">8y</span>
+          <span class="size-tag">10y</span>
+        </div>
+        <div class="card-footer">
+          <span class="price">$16</span>
+          <button class="add-btn">+ Add</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PROMO BANNER -->
+<div class="banner">
+  <div class="banner-text">
+    <h3>Free next-day delivery on orders over $50</h3>
+    <p>Plus free, no-hassle returns on every order. Always.</p>
+  </div>
+  <button class="banner-btn">Learn more</button>
+</div>
+
+<!-- BACK IN STOCK SECTION -->
+<div class="section" style="padding-top:0">
+  <div class="section-header">
+    <div class="section-title">Back in stock</div>
+    <span class="see-all">See all</span>
+  </div>
+  <div class="products">
+
+    <div class="card">
+      <div class="card-img" style="background:#EEEDFE">🧤</div>
+      <div class="card-body">
+        <div class="card-name">Knit mittens</div>
+        <div class="card-sub">Ages 2–6</div>
+        <div class="sizes"><span class="size-tag">One size</span></div>
+        <div class="card-footer">
+          <span class="price">$10</span>
+          <button class="add-btn">+ Add</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-img" style="background:#FAECE7">🧣</div>
+      <div class="card-body">
+        <div class="card-name">Stripe scarf</div>
+        <div class="card-sub">Ages 3–10</div>
+        <div class="sizes"><span class="size-tag">One size</span></div>
+        <div class="card-footer">
+          <span class="price">$14</span>
+          <button class="add-btn">+ Add</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-img" style="background:#E1F5EE">🧢</div>
+      <div class="card-body">
+        <div class="card-name">Logo cap</div>
+        <div class="card-sub">Ages 4–12</div>
+        <div class="sizes">
+          <span class="size-tag">S</span>
+          <span class="size-tag">M</span>
+        </div>
+        <div class="card-footer">
+          <span class="price">$18</span>
+          <button class="add-btn">+ Add</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-img" style="background:#FAEEDA">🩱</div>
+      <div class="card-body">
+        <div class="card-name">Swim bodysuit</div>
+        <div class="card-sub">Ages 0–18m</div>
+        <div class="sizes">
+          <span class="size-tag">0m</span>
+          <span class="size-tag">6m</span>
+          <span class="size-tag">12m</span>
+        </div>
+        <div class="card-footer">
+          <span class="price">$22</span>
+          <button class="add-btn">+ Add</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer-strip">
+  <div class="footer-col">
+    <h4>Shop</h4>
+    <p>New in</p><p>Boys</p><p>Girls</p><p>Baby</p><p>Sale</p>
+  </div>
+  <div class="footer-col">
+    <h4>Help</h4>
+    <p>Size guide</p><p>Returns</p><p>Delivery info</p><p>FAQs</p>
+  </div>
+  <div class="footer-col">
+    <h4>About</h4>
+    <p>Our story</p><p>Sustainability</p><p>Careers</p>
+  </div>
+  <div class="footer-col">
+    <h4>tiny.fits</h4>
+    <p>Clothes kids love, prices parents don't hate.</p>
+  </div>
+</div>
+
+<script>
+  // Category chip toggle
+  document.querySelectorAll('.cat-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+    });
+  });
+
+  // Filter button toggle
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.classList.toggle('on');
+    });
+  });
+
+  // Add to bag
+  document.querySelectorAll('.add-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const badge = document.querySelector('.cart-badge');
+      badge.textContent = parseInt(badge.textContent) + 1;
+      btn.textContent = '✓ Added';
+      btn.style.color = '#3B6D11';
+      btn.style.borderColor = '#97C459';
+      setTimeout(() => {
+        btn.textContent = '+ Add';
+        btn.style.color = '';
+        btn.style.borderColor = '';
+      }, 1500);
+    });
+  });
+</script>
+
+</body>
+</html>
