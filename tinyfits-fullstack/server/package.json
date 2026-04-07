@@ -5,22 +5,21 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon index.js",
+    "dev": "node --watch index.js",
     "start": "node index.js",
     "seed": "node db/seed.js",
     "migrate": "node db/migrate.js"
   },
   "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "compression": "^1.7.4",
+    "express": "^4.19.2",
+    "pg": "^8.12.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "express": "^4.19.2",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
     "express-rate-limit": "^7.4.0",
     "helmet": "^7.1.0",
-    "jsonwebtoken": "^9.0.2",
-    "morgan": "^1.10.0",
-    "pg": "^8.12.0",
-    "tinyfits": "file:.."
+    "compression": "^1.7.4",
+    "morgan": "^1.10.0"
   }
 }
