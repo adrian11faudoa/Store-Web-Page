@@ -1,7 +1,14 @@
 // server/db/seed.js
 // Run with: npm run seed
-import 'dotenv/config'
-import pool from './pool.js'
+import { config } from 'dotenv'
+import { fileURLToPath } from 'url'
+import { dirname, join } from 'path'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+config({ path: join(__dirname, '..', '.env') })
+
+// Dynamic import ensures pool.js loads AFTER dotenv has run
+const { default: pool } = await import('./pool.js')
 
 // ── Reference data ────────────────────────────────────────────────────────────
 
@@ -50,16 +57,22 @@ const NAMES = {
   sets:        ['Tie-dye matching set','Linen co-ord set','Jogger + hoodie set','Swim + rash guard set','Denim shorts + tee set','Floral top + skirt set','Sports set','Striped matching set','Velour tracksuit','Printed shorts set','Terry beach set','Gingham set','Ribbed co-ord','Colour-block set','Animal print set','Floral playsuit set','Linen holiday set','Rainbow co-ord','Broderie set','Retro tracksuit'],
 }
 
-const KEYWORDS = {
-  tops:        ['kids,hoodie','children,tshirt','kids,sweater','children,shirt','kids,blouse'],
-  bottoms:     ['kids,jeans','children,shorts','kids,pants','children,skirt','kids,leggings'],
-  dresses:     ['kids,dress','children,dress','girls,dress','kids,sundress','children,frock'],
-  outerwear:   ['kids,jacket','children,coat','kids,puffer','children,raincoat','kids,anorak'],
-  swimwear:    ['kids,swimsuit','children,swimwear','kids,bikini','children,swimtrunks','kids,rashguard'],
-  footwear:    ['kids,sneakers','children,shoes','kids,boots','children,sandals','kids,trainers'],
-  accessories: ['kids,hat','children,backpack','kids,scarf','children,accessories','kids,bag'],
-  sleepwear:   ['kids,pajamas','children,pyjamas','kids,onesie','children,nightwear','kids,sleepwear'],
-  sets:        ['kids,matching,outfit','children,co-ord','kids,tracksuit','children,set,outfit','kids,twinset'],
+// Picsum Photos: picsum.photos/seed/{SEED}/400/500
+// Each unique seed string returns a consistent, real photo.
+// We build seeds as "{category}-{i}" so:
+//   - every product within a category gets a different image
+//   - re-seeding the DB gives the same images (deterministic)
+// No API key needed. Service is actively maintained (unlike source.unsplash.com which shut down).
+const IMAGE_SEEDS = {
+  tops:        'fashion-top',
+  bottoms:     'fashion-pants',
+  dresses:     'fashion-dress',
+  outerwear:   'fashion-jacket',
+  swimwear:    'fashion-swim',
+  footwear:    'fashion-shoes',
+  accessories: 'fashion-accessory',
+  sleepwear:   'fashion-pajama',
+  sets:        'fashion-outfit',
 }
 
 function rand(arr)            { return arr[Math.floor(Math.random() * arr.length)] }
@@ -111,9 +124,9 @@ async function seed() {
     let total = 0
 
     for (const [catSlug, names] of Object.entries(NAMES)) {
-      const keywords = KEYWORDS[catSlug]
       const catId    = catMap[catSlug]
       const ageSlugs = Object.keys(SIZES)
+      const imgSeed  = IMAGE_SEEDS[catSlug]
 
       for (let i = 0; i < 100; i++) {
         const ageSlug  = ageSlugs[i % ageSlugs.length]
@@ -126,9 +139,12 @@ async function seed() {
         const badge    = onSale ? 'sale' : (Math.random() < 0.3 ? 'new' : null)
         const nameBase = names[i % names.length]
         const name     = i >= names.length ? `${nameBase} v${Math.floor(i/names.length)+1}` : nameBase
-        const keyword  = keywords[i % keywords.length]
-        const sig      = id * 7 + i
-        const imageUrl = `https://source.unsplash.com/400x500/?${encodeURIComponent(keyword)}&sig=${sig}`
+
+        // Unique seed per product: "{category-seed}-{product-index}"
+        // picsum.photos/seed/{seed}/400/500 always returns the same image for the same seed string
+        // so the DB is deterministic across re-seeds.
+        const imageUrl = `https://picsum.photos/seed/${imgSeed}-${i}/400/500`
+
         const bg       = PALETTES[id % PALETTES.length]
         const rating   = +(3.5 + Math.random() * 1.5).toFixed(1)
         const reviews  = randBetween(2, 340)

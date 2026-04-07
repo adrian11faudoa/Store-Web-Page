@@ -1,7 +1,14 @@
 // server/db/migrate.js
 // Run with: npm run migrate
-import 'dotenv/config'
-import pool from './pool.js'
+import { config } from 'dotenv'
+import { fileURLToPath } from 'url'
+import { dirname, join } from 'path'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+config({ path: join(__dirname, '..', '.env') })
+
+// Dynamic import ensures pool.js loads AFTER dotenv has run
+const { default: pool } = await import('./pool.js')
 
 const SQL = `
 -- Extensions

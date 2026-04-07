@@ -2,12 +2,12 @@
   "name": "tinyfits",
   "version": "1.0.0",
   "private": true,
-  "workspaces": ["server", "client"],
   "scripts": {
-    "dev": "concurrently \"npm run dev --workspace=server\" \"npm run dev --workspace=client\"",
-    "build": "npm run build --workspace=client",
-    "start": "npm run start --workspace=server",
-    "seed": "npm run seed --workspace=server"
+    "dev": "concurrently \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
+    "build": "npm run build --prefix client",
+    "start": "node server/index.js",
+    "seed": "node server/db/seed.js",
+    "migrate": "node server/db/migrate.js"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

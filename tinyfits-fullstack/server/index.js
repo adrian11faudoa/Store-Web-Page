@@ -1,12 +1,20 @@
 // server/index.js
-import 'dotenv/config'
+import { config } from 'dotenv'
+import { fileURLToPath } from 'url'
+import { dirname, join } from 'path'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+config({ path: join(__dirname, '..', '.env') })
+
+// Dynamic import ensures pool.js loads AFTER dotenv has run
+const { default: pool } = await import('./db/pool.js')
+
 import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
 import compression from 'compression'
 import morgan from 'morgan'
 import path from 'path'
-import { fileURLToPath } from 'url'
 
 import productsRouter from './routes/products.js'
 import categoriesRouter from './routes/categories.js'
@@ -15,7 +23,6 @@ import cartRouter from './routes/cart.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import { testConnection } from './db/pool.js'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const app = express()
 const PORT = process.env.PORT || 4000
 
