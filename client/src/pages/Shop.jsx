@@ -14,18 +14,36 @@ const SORT_OPTIONS = [
   { value: 'name',       label: 'A–Z' },
 ]
 
+// Gender options for the sidebar
+const GENDER_OPTIONS = [
+  { value: 'all',  label: 'All' },
+  { value: 'boy',  label: '👦 Boys' },
+  { value: 'girl', label: '👧 Girls' },
+]
+
+// Baby gender options
+const BABY_GENDER_OPTIONS = [
+  { value: 'all',  label: 'All babies' },
+  { value: 'boy',  label: '👦 Baby boys' },
+  { value: 'girl', label: '👧 Baby girls' },
+]
+
 export default function Shop() {
   const [searchParams] = useSearchParams()
-  const [cats,      setCats]      = useState([])
-  const [ageGroups, setAges]      = useState([])
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [cats,       setCats]       = useState([])
+  const [ageGroups,  setAgeGroups]  = useState([])
+  const [totalAll,   setTotalAll]   = useState(0)
+  const [sidebarOpen,setSidebarOpen]= useState(false)
 
-  // Derive initial filters directly from URL — recalculated every render
-  // so when the URL changes (navbar links), the hook gets fresh values
+  // Sidebar age-group UI state
+  const [ageSection, setAgeSection] = useState('all') // 'all' | 'boys' | 'girls' | 'baby'
+  const [babyGender, setBabyGender] = useState('all')  // 'all' | 'boy' | 'girl'
+
   const urlCategory = searchParams.get('category') || 'all'
   const urlAgeGroup = searchParams.get('ageGroup')  || 'all'
   const urlBadge    = searchParams.get('badge')     || ''
   const urlQ        = searchParams.get('q')         || ''
+  const urlGender   = searchParams.get('gender')    || 'all'
 
   const {
     products, total, totalPages, loading, error,
@@ -33,43 +51,101 @@ export default function Shop() {
   } = useProducts({
     category: urlCategory,
     ageGroup: urlAgeGroup,
+    gender:   urlGender,
     badge:    urlBadge,
     q:        urlQ,
   })
 
-  // When the URL params change (e.g. from navbar "Boys" button), sync filters
   useEffect(() => {
     update({
       category: urlCategory,
       ageGroup: urlAgeGroup,
+      gender:   urlGender,
       badge:    urlBadge,
       q:        urlQ,
       page:     1,
     })
-    // Close mobile sidebar whenever filters change from outside
     setSidebarOpen(false)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [urlCategory, urlAgeGroup, urlBadge, urlQ])
+  }, [urlCategory, urlAgeGroup, urlGender, urlBadge, urlQ])
 
   useEffect(() => {
-    catsApi.list().then(data =>
-      setCats([{ slug: 'all', label: 'All', product_count: total }, ...data])
-    )
-    catsApi.ageGroups().then(setAges)
+    catsApi.list().then(data => setCats(data))
+    catsApi.ageGroups().then(setAgeGroups)
+    catsApi.total().then(d => setTotalAll(d.total))
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Group age groups by type
+  const boysGroups  = ageGroups.filter(a => a.slug.startsWith('boys-'))
+  const girlsGroups = ageGroups.filter(a => a.slug.startsWith('girls-'))
+  const babyBoyGrp  = ageGroups.find(a => a.slug === 'baby-boy')
+  const babyGirlGrp = ageGroups.find(a => a.slug === 'baby-girl')
+
+  function selectGenderSection(section) {
+    setAgeSection(section)
+    setBabyGender('all')
+    // Reset age group and gender filters
+    if (section === 'all') {
+      update({ ageGroup: 'all', gender: 'all' })
+    } else if (section === 'boys') {
+      update({ gender: 'boy', ageGroup: 'all' })
+    } else if (section === 'girls') {
+      update({ gender: 'girl', ageGroup: 'all' })
+    } else if (section === 'baby') {
+      update({ ageGroup: 'all', gender: 'all' }) // sub-select below
+    }
+  }
+
+  function selectBabyGender(bg) {
+    setBabyGender(bg)
+    if (bg === 'all') {
+      update({ ageGroup: 'all', gender: 'all' })
+    } else if (bg === 'boy') {
+      update({ ageGroup: 'baby-boy', gender: 'boy' })
+    } else {
+      update({ ageGroup: 'baby-girl', gender: 'girl' })
+    }
+  }
+
+  function selectAgeGroup(slug) {
+    update({ ageGroup: slug })
+  }
 
   const activeFilterCount = [
     filters.category !== 'all',
     filters.ageGroup !== 'all',
+    filters.gender !== 'all',
     filters.badge !== '',
     filters.maxPrice < 70,
   ].filter(Boolean).length
 
+  // Render age group buttons for boys/girls sub-sections
+  function renderSubAgeGroups(groups) {
+    return (
+      <div style={{ marginLeft: 12 }}>
+        <button
+          className={`sidebar-option${filters.ageGroup === 'all' ? ' active' : ''}`}
+          onClick={() => selectAgeGroup('all')}
+        >
+          All ages
+        </button>
+        {groups.map(a => (
+          <button
+            key={a.slug}
+            className={`sidebar-option${filters.ageGroup === a.slug ? ' active' : ''}`}
+            onClick={() => selectAgeGroup(a.slug)}
+          >
+            {a.label}
+            <span className="sidebar-count">{a.product_count}</span>
+          </button>
+        ))}
+      </div>
+    )
+  }
+
   return (
     <div className="shop-layout">
-
-      {/* ── Mobile sidebar toggle ── */}
       <button
         className="sidebar-mobile-toggle"
         onClick={() => setSidebarOpen(o => !o)}
@@ -78,48 +154,110 @@ export default function Shop() {
         <span className="sidebar-chevron">{sidebarOpen ? '▲' : '▼'}</span>
       </button>
 
-      {/* ── Sidebar backdrop (mobile) ── */}
       {sidebarOpen && (
         <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />
       )}
 
-      {/* ── Sidebar ── */}
       <aside className={`sidebar${sidebarOpen ? ' sidebar--open' : ''}`}>
-
-        {/* Mobile header */}
         <div className="sidebar-mobile-header">
           <span style={{ fontWeight: 700 }}>Filters</span>
           <button className="sidebar-mobile-close" onClick={() => setSidebarOpen(false)}>✕ Close</button>
         </div>
 
+        {/* ── Category ── */}
         <h3>Category</h3>
+        <button
+          className={`sidebar-option${filters.category === 'all' ? ' active' : ''}`}
+          onClick={() => update({ category: 'all' })}
+        >
+          All
+          <span className="sidebar-count">{totalAll}</span>
+        </button>
         {cats.map(c => (
           <button
             key={c.slug}
             className={`sidebar-option${filters.category === c.slug ? ' active' : ''}`}
             onClick={() => update({ category: c.slug })}
           >
-            {c.label}
+            {c.icon} {c.label}
             <span className="sidebar-count">{c.product_count}</span>
           </button>
         ))}
 
-        <h3>Age group</h3>
-        <button
-          className={`sidebar-option${filters.ageGroup === 'all' ? ' active' : ''}`}
-          onClick={() => update({ ageGroup: 'all' })}
-        >All ages</button>
-        {ageGroups.map(a => (
-          <button
-            key={a.slug}
-            className={`sidebar-option${filters.ageGroup === a.slug ? ' active' : ''}`}
-            onClick={() => update({ ageGroup: a.slug })}
-          >
-            {a.label}
-            <span className="sidebar-count">{a.product_count}</span>
-          </button>
-        ))}
+        {/* ── Gender & Age ── */}
+        <h3>Gender &amp; Age</h3>
 
+        {/* Top-level gender tabs */}
+        <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
+          {[
+            { key: 'all',   label: 'All' },
+            { key: 'boys',  label: '👦 Boys' },
+            { key: 'girls', label: '👧 Girls' },
+            { key: 'baby',  label: '🍼 Baby' },
+          ].map(opt => (
+            <button
+              key={opt.key}
+              onClick={() => selectGenderSection(opt.key)}
+              style={{
+                flex: 1,
+                padding: '6px 4px',
+                borderRadius: 'var(--radius-md)',
+                border: '1.5px solid',
+                borderColor: ageSection === opt.key ? 'var(--color-brand)' : 'var(--color-border-md)',
+                background: ageSection === opt.key ? 'var(--color-brand-light)' : 'none',
+                color: ageSection === opt.key ? 'var(--color-brand)' : 'var(--color-text-muted)',
+                fontSize: 11,
+                fontWeight: 700,
+                cursor: 'pointer',
+                fontFamily: 'var(--font-body)',
+                transition: 'all 0.15s',
+              }}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Boys: age sub-selection 2-16y */}
+        {ageSection === 'boys' && (
+          <>
+            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--color-text-muted)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 }}>Age range</div>
+            {renderSubAgeGroups(boysGroups)}
+          </>
+        )}
+
+        {/* Girls: age sub-selection 2-16y */}
+        {ageSection === 'girls' && (
+          <>
+            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--color-text-muted)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 }}>Age range</div>
+            {renderSubAgeGroups(girlsGroups)}
+          </>
+        )}
+
+        {/* Baby: select boy/girl then see month sizes */}
+        {ageSection === 'baby' && (
+          <>
+            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--color-text-muted)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 }}>Baby gender</div>
+            {BABY_GENDER_OPTIONS.map(opt => (
+              <button
+                key={opt.value}
+                className={`sidebar-option${babyGender === opt.value ? ' active' : ''}`}
+                onClick={() => selectBabyGender(opt.value)}
+              >
+                {opt.label}
+                {opt.value === 'boy' && babyBoyGrp && <span className="sidebar-count">{babyBoyGrp.product_count}</span>}
+                {opt.value === 'girl' && babyGirlGrp && <span className="sidebar-count">{babyGirlGrp.product_count}</span>}
+              </button>
+            ))}
+            {babyGender !== 'all' && (
+              <div style={{ fontSize: 11, color: 'var(--color-text-muted)', padding: '4px 10px', fontWeight: 600 }}>
+                Sizes: 3M, 6M, 9M, 12M, 18M, 24M
+              </div>
+            )}
+          </>
+        )}
+
+        {/* ── Max Price ── */}
         <h3>Max price: <strong>${filters.maxPrice}</strong></h3>
         <input
           type="range" min="8" max="70" step="1"
@@ -131,6 +269,7 @@ export default function Shop() {
           <span>$8</span><span>$70</span>
         </div>
 
+        {/* ── Availability ── */}
         <h3>Availability</h3>
         <button
           className={`sidebar-option${filters.badge === 'sale' ? ' active' : ''}`}
@@ -144,7 +283,11 @@ export default function Shop() {
         {activeFilterCount > 0 && (
           <button
             className="sidebar-clear"
-            onClick={() => update({ category: 'all', ageGroup: 'all', badge: '', maxPrice: 70, q: '', page: 1 })}
+            onClick={() => {
+              update({ category: 'all', ageGroup: 'all', gender: 'all', badge: '', maxPrice: 70, q: '', page: 1 })
+              setAgeSection('all')
+              setBabyGender('all')
+            }}
           >
             Clear all filters
           </button>
@@ -153,7 +296,6 @@ export default function Shop() {
 
       {/* ── Main content ── */}
       <main className="shop-main">
-
         <div className="shop-toolbar">
           <span className="result-count">
             <strong>{total}</strong> items
@@ -190,7 +332,11 @@ export default function Shop() {
             <button
               className="btn btn--primary"
               style={{ marginTop: '1.5rem' }}
-              onClick={() => update({ category: 'all', ageGroup: 'all', badge: '', q: '', maxPrice: 70 })}
+              onClick={() => {
+                update({ category: 'all', ageGroup: 'all', gender: 'all', badge: '', q: '', maxPrice: 70 })
+                setAgeSection('all')
+                setBabyGender('all')
+              }}
             >
               Clear all filters
             </button>
@@ -201,7 +347,6 @@ export default function Shop() {
           </div>
         )}
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="pagination">
             <button

@@ -1,5 +1,4 @@
 // server/db/seed.js
-// Run with: npm run seed
 import { config } from 'dotenv'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
@@ -7,10 +6,7 @@ import { dirname, join } from 'path'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 config({ path: join(__dirname, '..', '.env') })
 
-// Dynamic import ensures pool.js loads AFTER dotenv has run
 const { default: pool } = await import('./pool.js')
-
-// ── Reference data ────────────────────────────────────────────────────────────
 
 const CATEGORIES = [
   { slug: 'tops',        label: 'Tops',        icon: '👕', sort_order: 1 },
@@ -24,18 +20,46 @@ const CATEGORIES = [
   { slug: 'sets',        label: 'Sets',         icon: '🎁', sort_order: 9 },
 ]
 
+// New age group structure: boys 2-16y, girls 2-16y, baby-boy 3-24m, baby-girl 3-24m
 const AGE_GROUPS = [
-  { slug: 'baby',    label: 'Baby',       range: '0–18m', sort_order: 1 },
-  { slug: 'toddler', label: 'Toddler',    range: '1–3y',  sort_order: 2 },
-  { slug: 'kids',    label: 'Kids',       range: '4–8y',  sort_order: 3 },
-  { slug: 'older',   label: 'Older Kids', range: '9–14y', sort_order: 4 },
+  { slug: 'baby-boy',    label: 'Baby Boy',    range: '3M–24M', sort_order: 1 },
+  { slug: 'baby-girl',   label: 'Baby Girl',   range: '3M–24M', sort_order: 2 },
+  { slug: 'boys-2-4',    label: 'Boys 2–4y',   range: '2–4y',   sort_order: 3 },
+  { slug: 'boys-5-8',    label: 'Boys 5–8y',   range: '5–8y',   sort_order: 4 },
+  { slug: 'boys-9-12',   label: 'Boys 9–12y',  range: '9–12y',  sort_order: 5 },
+  { slug: 'boys-13-16',  label: 'Boys 13–16y', range: '13–16y', sort_order: 6 },
+  { slug: 'girls-2-4',   label: 'Girls 2–4y',  range: '2–4y',   sort_order: 7 },
+  { slug: 'girls-5-8',   label: 'Girls 5–8y',  range: '5–8y',   sort_order: 8 },
+  { slug: 'girls-9-12',  label: 'Girls 9–12y', range: '9–12y',  sort_order: 9 },
+  { slug: 'girls-13-16', label: 'Girls 13–16y',range: '13–16y', sort_order: 10 },
 ]
 
+// Sizes per age group
 const SIZES = {
-  baby:    ['0m','3m','6m','9m','12m','18m'],
-  toddler: ['1y','2y','3y'],
-  kids:    ['4y','5y','6y','7y','8y'],
-  older:   ['9y','10y','11y','12y','13y','14y'],
+  'baby-boy':    ['3M','6M','9M','12M','18M','24M'],
+  'baby-girl':   ['3M','6M','9M','12M','18M','24M'],
+  'boys-2-4':    ['2Y','3Y','4Y'],
+  'boys-5-8':    ['5Y','6Y','7Y','8Y'],
+  'boys-9-12':   ['9Y','10Y','11Y','12Y'],
+  'boys-13-16':  ['13Y','14Y','15Y','16Y'],
+  'girls-2-4':   ['2Y','3Y','4Y'],
+  'girls-5-8':   ['5Y','6Y','7Y','8Y'],
+  'girls-9-12':  ['9Y','10Y','11Y','12Y'],
+  'girls-13-16': ['13Y','14Y','15Y','16Y'],
+}
+
+// Gender assignment based on age group
+const AGE_GROUP_GENDER = {
+  'baby-boy':    'boy',
+  'baby-girl':   'girl',
+  'boys-2-4':    'boy',
+  'boys-5-8':    'boy',
+  'boys-9-12':   'boy',
+  'boys-13-16':  'boy',
+  'girls-2-4':   'girl',
+  'girls-5-8':   'girl',
+  'girls-9-12':  'girl',
+  'girls-13-16': 'girl',
 }
 
 const PALETTES = [
@@ -57,12 +81,6 @@ const NAMES = {
   sets:        ['Tie-dye matching set','Linen co-ord set','Jogger + hoodie set','Swim + rash guard set','Denim shorts + tee set','Floral top + skirt set','Sports set','Striped matching set','Velour tracksuit','Printed shorts set','Terry beach set','Gingham set','Ribbed co-ord','Colour-block set','Animal print set','Floral playsuit set','Linen holiday set','Rainbow co-ord','Broderie set','Retro tracksuit'],
 }
 
-// Picsum Photos: picsum.photos/seed/{SEED}/400/500
-// Each unique seed string returns a consistent, real photo.
-// We build seeds as "{category}-{i}" so:
-//   - every product within a category gets a different image
-//   - re-seeding the DB gives the same images (deterministic)
-// No API key needed. Service is actively maintained (unlike source.unsplash.com which shut down).
 const IMAGE_SEEDS = {
   tops:        'fashion-top',
   bottoms:     'fashion-pants',
@@ -78,15 +96,12 @@ const IMAGE_SEEDS = {
 function rand(arr)            { return arr[Math.floor(Math.random() * arr.length)] }
 function randBetween(min,max) { return Math.floor(Math.random() * (max - min + 1)) + min }
 
-// ── Seed function ─────────────────────────────────────────────────────────────
-
 async function seed() {
   const client = await pool.connect()
   try {
     await client.query('BEGIN')
 
-    // Clear existing data
-    console.log('Clearing existing data…')
+    console.log('Clearing existing data...')
     await client.query('DELETE FROM cart_items')
     await client.query('DELETE FROM carts')
     await client.query('DELETE FROM wishlists')
@@ -94,43 +109,39 @@ async function seed() {
     await client.query('DELETE FROM categories')
     await client.query('DELETE FROM age_groups')
 
-    // Insert categories
-    console.log('Seeding categories…')
+    console.log('Seeding categories...')
     const catMap = {}
     for (const cat of CATEGORIES) {
       const res = await client.query(
-        `INSERT INTO categories (slug, label, icon, sort_order)
-         VALUES ($1,$2,$3,$4) RETURNING id`,
+        'INSERT INTO categories (slug, label, icon, sort_order) VALUES ($1,$2,$3,$4) RETURNING id',
         [cat.slug, cat.label, cat.icon, cat.sort_order]
       )
       catMap[cat.slug] = res.rows[0].id
     }
 
-    // Insert age groups
-    console.log('Seeding age groups…')
+    console.log('Seeding age groups...')
     const ageMap = {}
     for (const ag of AGE_GROUPS) {
       const res = await client.query(
-        `INSERT INTO age_groups (slug, label, range, sort_order)
-         VALUES ($1,$2,$3,$4) RETURNING id`,
+        'INSERT INTO age_groups (slug, label, range, sort_order) VALUES ($1,$2,$3,$4) RETURNING id',
         [ag.slug, ag.label, ag.range, ag.sort_order]
       )
       ageMap[ag.slug] = res.rows[0].id
     }
 
-    // Insert products — 100 per category = 900 total
-    console.log('Seeding products…')
+    console.log('Seeding products...')
     let id = 1
     let total = 0
+    const ageSlugs = Object.keys(SIZES)
 
     for (const [catSlug, names] of Object.entries(NAMES)) {
-      const catId    = catMap[catSlug]
-      const ageSlugs = Object.keys(SIZES)
-      const imgSeed  = IMAGE_SEEDS[catSlug]
+      const catId   = catMap[catSlug]
+      const imgSeed = IMAGE_SEEDS[catSlug]
 
       for (let i = 0; i < 100; i++) {
         const ageSlug  = ageSlugs[i % ageSlugs.length]
         const ageId    = ageMap[ageSlug]
+        const gender   = AGE_GROUP_GENDER[ageSlug]
         const sizesArr = SIZES[ageSlug].slice(0, randBetween(2, SIZES[ageSlug].length))
         const basePrice= randBetween(8, 65)
         const onSale   = Math.random() < 0.2
@@ -139,22 +150,17 @@ async function seed() {
         const badge    = onSale ? 'sale' : (Math.random() < 0.3 ? 'new' : null)
         const nameBase = names[i % names.length]
         const name     = i >= names.length ? `${nameBase} v${Math.floor(i/names.length)+1}` : nameBase
-
-        // Unique seed per product: "{category-seed}-{product-index}"
-        // picsum.photos/seed/{seed}/400/500 always returns the same image for the same seed string
-        // so the DB is deterministic across re-seeds.
         const imageUrl = `https://picsum.photos/seed/${imgSeed}-${i}/400/500`
-
         const bg       = PALETTES[id % PALETTES.length]
         const rating   = +(3.5 + Math.random() * 1.5).toFixed(1)
         const reviews  = randBetween(2, 340)
 
         await client.query(
           `INSERT INTO products
-             (name, category_id, age_group_id, price, old_price, badge,
+             (name, category_id, age_group_id, gender, price, old_price, badge,
               image_url, fallback_bg, sizes, in_stock, rating, reviews)
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
-          [name, catId, ageId, price, oldPrice, badge,
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
+          [name, catId, ageId, gender, price, oldPrice, badge,
            imageUrl, bg, sizesArr, Math.random() > 0.05, rating, reviews]
         )
         id++

@@ -8,13 +8,11 @@ export default function CartDrawer({ open, onClose }) {
   const total  = items.reduce((s, i) => s + i.price * i.qty, 0)
   const count  = items.reduce((s, i) => s + i.qty, 0)
 
-  // Lock body scroll when open
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
   }, [open])
 
-  // Close on Escape
   useEffect(() => {
     const handler = e => { if (e.key === 'Escape') onClose() }
     window.addEventListener('keydown', handler)
@@ -23,16 +21,12 @@ export default function CartDrawer({ open, onClose }) {
 
   return (
     <>
-      {/* Backdrop */}
       <div
         className={`drawer-backdrop${open ? ' open' : ''}`}
         onClick={onClose}
       />
 
-      {/* Drawer panel */}
       <div className={`cart-drawer${open ? ' open' : ''}`} role="dialog" aria-label="Shopping bag">
-
-        {/* Header */}
         <div className="cart-drawer__header">
           <div>
             <span className="cart-drawer__title">Your bag</span>
@@ -41,7 +35,6 @@ export default function CartDrawer({ open, onClose }) {
           <button className="cart-drawer__close" onClick={onClose}>✕</button>
         </div>
 
-        {/* Items */}
         <div className="cart-drawer__body">
           {items.length === 0 ? (
             <div className="cart-drawer__empty">
@@ -55,7 +48,6 @@ export default function CartDrawer({ open, onClose }) {
             <ul className="cart-drawer__list">
               {items.map((item, idx) => (
                 <li key={item.product_id ?? idx} className="cart-item">
-                  {/* Image / fallback */}
                   <div
                     className="cart-item__img"
                     style={{ background: item.fallback_bg || '#EEEDFE' }}
@@ -71,7 +63,6 @@ export default function CartDrawer({ open, onClose }) {
                     )}
                   </div>
 
-                  {/* Info */}
                   <div className="cart-item__info">
                     <div className="cart-item__name">{item.name}</div>
                     <div className="cart-item__meta">
@@ -79,10 +70,10 @@ export default function CartDrawer({ open, onClose }) {
                     </div>
                   </div>
 
-                  {/* Remove */}
+                  {/* Remove by product_id — matches store.remove() */}
                   <button
                     className="cart-item__remove"
-                    onClick={() => remove(item.product_id ?? item.id)}
+                    onClick={() => remove(item.product_id)}
                     aria-label="Remove item"
                   >
                     ✕
@@ -93,7 +84,6 @@ export default function CartDrawer({ open, onClose }) {
           )}
         </div>
 
-        {/* Footer */}
         {items.length > 0 && (
           <div className="cart-drawer__footer">
             <div className="cart-drawer__total">

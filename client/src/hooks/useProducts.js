@@ -6,6 +6,7 @@ export function useProducts(initialFilters = {}) {
   const [filters, setFilters] = useState({
     category: 'all',
     ageGroup: 'all',
+    gender:   'all',
     maxPrice: 70,
     badge: '',
     q: '',
@@ -29,6 +30,7 @@ export function useProducts(initialFilters = {}) {
       const params = {
         ...(f.category && f.category !== 'all' ? { category: f.category } : {}),
         ...(f.ageGroup && f.ageGroup !== 'all' ? { ageGroup: f.ageGroup } : {}),
+        ...(f.gender && f.gender !== 'all' ? { gender: f.gender } : {}),
         maxPrice: f.maxPrice,
         ...(f.badge ? { badge: f.badge } : {}),
         ...(f.q ? { q: f.q } : {}),
@@ -49,7 +51,7 @@ export function useProducts(initialFilters = {}) {
   }, [filters, fetchProducts])
 
   function update(patch) {
-    setFilters(f => ({ ...f, ...patch, page: 1 }))
+    setFilters(f => ({ ...f, ...patch, page: patch.page ?? 1 }))
   }
 
   function setPage(page) {
@@ -59,7 +61,6 @@ export function useProducts(initialFilters = {}) {
   return { ...state, filters, update, setPage }
 }
 
-// Single product
 export function useProduct(id) {
   const [state, setState] = useState({ product: null, related: [], loading: true, error: null })
 

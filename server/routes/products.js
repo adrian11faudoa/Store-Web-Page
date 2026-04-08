@@ -5,12 +5,12 @@ import pool from '../db/pool.js'
 const router = Router()
 
 // GET /api/products
-// Query params: category, ageGroup, minPrice, maxPrice, badge, q, sort, page, limit
 router.get('/', async (req, res, next) => {
   try {
     const {
       category,
       ageGroup,
+      gender,
       minPrice = 0,
       maxPrice = 9999,
       badge,
@@ -24,31 +24,32 @@ router.get('/', async (req, res, next) => {
     const params = []
     const conditions = ['p.in_stock = TRUE']
 
-    // Category filter
     if (category && category !== 'all') {
       params.push(category)
       conditions.push(`c.slug = $${params.length}`)
     }
 
-    // Age group filter
     if (ageGroup && ageGroup !== 'all') {
       params.push(ageGroup)
       conditions.push(`ag.slug = $${params.length}`)
     }
 
-    // Price filter
+    if (gender && gender !== 'all') {
+      // 'unisex' shows for both boys and girls
+      params.push(gender)
+      conditions.push(`(p.gender = $${params.length} OR p.gender = 'unisex')`)
+    }
+
     params.push(parseFloat(minPrice))
     conditions.push(`p.price >= $${params.length}`)
     params.push(parseFloat(maxPrice))
     conditions.push(`p.price <= $${params.length}`)
 
-    // Badge filter
     if (badge && badge !== 'all') {
       params.push(badge)
       conditions.push(`p.badge = $${params.length}`)
     }
 
-    // Full-text search
     if (q) {
       params.push(q)
       conditions.push(`p.search_vector @@ plainto_tsquery('english', $${params.length})`)
@@ -56,7 +57,6 @@ router.get('/', async (req, res, next) => {
 
     const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''
 
-    // Sort order
     const orderMap = {
       featured:   'p.reviews DESC, p.rating DESC',
       'price-asc':  'p.price ASC',
@@ -67,7 +67,6 @@ router.get('/', async (req, res, next) => {
     }
     const orderBy = orderMap[sort] || orderMap.featured
 
-    // Count query
     const countRes = await pool.query(
       `SELECT COUNT(*) FROM products p
        LEFT JOIN categories c  ON p.category_id  = c.id
@@ -77,13 +76,13 @@ router.get('/', async (req, res, next) => {
     )
     const totalCount = parseInt(countRes.rows[0].count)
 
-    // Data query
     params.push(parseInt(limit))
     params.push(offset)
     const dataRes = await pool.query(
       `SELECT
          p.id, p.name, p.price, p.old_price, p.badge,
          p.image_url, p.fallback_bg, p.sizes, p.rating, p.reviews,
+         p.gender,
          c.slug  AS category,
          c.label AS category_label,
          c.icon  AS category_icon,
@@ -141,8 +140,10 @@ router.get('/:id/related', async (req, res, next) => {
 
     const related = await pool.query(
       `SELECT p.id, p.name, p.price, p.old_price, p.badge, p.image_url, p.fallback_bg,
-              p.sizes, p.rating
+              p.sizes, p.rating, p.gender,
+              ag.range AS age_range
        FROM products p
+       LEFT JOIN age_groups ag ON p.age_group_id = ag.id
        WHERE p.category_id = $1 AND p.id != $2 AND p.in_stock = TRUE
        ORDER BY RANDOM() LIMIT 8`,
       [product.rows[0].category_id, id]

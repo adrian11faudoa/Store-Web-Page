@@ -4,18 +4,20 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useCart, useAuth } from '../store/index.js'
 import CartDrawer from './CartDrawer.jsx'
 import AuthModal from './AuthModal.jsx'
+import UserMenu from './UserMenu.jsx'
 
 export default function Navbar() {
   const items  = useCart(s => s.items)
   const count  = items.reduce((s, i) => s + i.qty, 0)
   const user   = useAuth(s => s.user)
-  const logout = useAuth(s => s.logout)
 
-  const [cartOpen,   setCartOpen]   = useState(false)
-  const [authOpen,   setAuthOpen]   = useState(false)
-  const [searchOpen, setSearchOpen] = useState(false)
-  const [searchQ,    setSearchQ]    = useState('')
+  const [cartOpen,    setCartOpen]    = useState(false)
+  const [authOpen,    setAuthOpen]    = useState(false)
+  const [userMenuOpen,setUserMenuOpen]= useState(false)
+  const [searchOpen,  setSearchOpen]  = useState(false)
+  const [searchQ,     setSearchQ]     = useState('')
   const searchRef = useRef(null)
+  const userBtnRef = useRef(null)
   const navigate  = useNavigate()
   const location  = useLocation()
 
@@ -23,10 +25,10 @@ export default function Navbar() {
     if (searchOpen && searchRef.current) searchRef.current.focus()
   }, [searchOpen])
 
-  // Close search whenever the route changes
   useEffect(() => {
     setSearchOpen(false)
     setSearchQ('')
+    setUserMenuOpen(false)
   }, [location.pathname + location.search])
 
   function handleSearchSubmit(e) {
@@ -37,7 +39,6 @@ export default function Navbar() {
     setSearchQ('')
   }
 
-  // navigate() works from any page — this is what was broken with <Link>
   function navTo(params) {
     navigate(`/shop?${params}`)
   }
@@ -49,9 +50,6 @@ export default function Navbar() {
 
         <ul className="navbar__links">
           <li><button className="nav-link-btn" onClick={() => navTo('badge=new')}>New in</button></li>
-          <li><button className="nav-link-btn" onClick={() => navTo('category=tops')}>Boys</button></li>
-          <li><button className="nav-link-btn" onClick={() => navTo('category=dresses')}>Girls</button></li>
-          <li><button className="nav-link-btn" onClick={() => navTo('ageGroup=baby')}>Baby</button></li>
           <li><button className="nav-link-btn accent" onClick={() => navTo('badge=sale')}>Sale</button></li>
         </ul>
 
@@ -63,14 +61,26 @@ export default function Navbar() {
             🔍 Search
           </button>
 
-          {user
-            ? <button className="nav-icon-btn" onClick={logout}>
-                👋 {user.name?.split(' ')[0] || 'Log out'}
+          {user ? (
+            <div style={{ position: 'relative' }}>
+              <button
+                ref={userBtnRef}
+                className="nav-icon-btn"
+                onClick={() => setUserMenuOpen(o => !o)}
+              >
+                👤 {user.name?.split(' ')[0] || 'Account'} ▾
               </button>
-            : <button className="nav-icon-btn" onClick={() => setAuthOpen(true)}>
-                👤 Sign in
-              </button>
-          }
+              <UserMenu
+                open={userMenuOpen}
+                onClose={() => setUserMenuOpen(false)}
+                anchorRef={userBtnRef}
+              />
+            </div>
+          ) : (
+            <button className="nav-icon-btn" onClick={() => setAuthOpen(true)}>
+              👤 Sign in
+            </button>
+          )}
 
           <button className="cart-btn" onClick={() => setCartOpen(true)}>
             🛍 Bag <span className="cart-count">{count}</span>
@@ -78,7 +88,6 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Inline search bar — slides in below navbar, no page navigation */}
       <div className={`search-bar-expanded${searchOpen ? ' open' : ''}`}>
         <form className="search-bar-form" onSubmit={handleSearchSubmit}>
           <span className="search-bar-icon">🔍</span>

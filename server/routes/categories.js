@@ -4,7 +4,7 @@ import pool from '../db/pool.js'
 
 const router = Router()
 
-// GET /api/categories  — with product counts
+// GET /api/categories — with product counts
 router.get('/', async (req, res, next) => {
   try {
     const result = await pool.query(
@@ -33,6 +33,16 @@ router.get('/age-groups', async (req, res, next) => {
        ORDER BY ag.sort_order`
     )
     res.json(result.rows)
+  } catch (err) {
+    next(err)
+  }
+})
+
+// GET /api/categories/total — total in-stock product count
+router.get('/total', async (req, res, next) => {
+  try {
+    const result = await pool.query('SELECT COUNT(*) FROM products WHERE in_stock = TRUE')
+    res.json({ total: parseInt(result.rows[0].count) })
   } catch (err) {
     next(err)
   }

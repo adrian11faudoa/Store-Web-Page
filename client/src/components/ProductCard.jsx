@@ -1,10 +1,11 @@
 // client/src/components/ProductCard.jsx
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useCart } from '../store/index.js'
 
 export default function ProductCard({ product: p }) {
   const add      = useCart(s => s.add)
+  const navigate = useNavigate()
   const [added,  setAdded]  = useState(false)
   const [wished, setWished] = useState(false)
   const [imgErr, setImgErr] = useState(false)
@@ -13,8 +14,15 @@ export default function ProductCard({ product: p }) {
     ? Math.round((1 - p.price / p.old_price) * 100)
     : null
 
+  const hasSizes = p.sizes && p.sizes.length > 0
+
   function handleAdd(e) {
     e.preventDefault()
+    // If product has sizes, redirect to product page to select one
+    if (hasSizes) {
+      navigate(`/product/${p.id}`)
+      return
+    }
     add(p)
     setAdded(true)
     setTimeout(() => setAdded(false), 1800)
@@ -67,8 +75,12 @@ export default function ProductCard({ product: p }) {
             ${p.price}
             {p.old_price && <span className="price__old">${p.old_price}</span>}
           </span>
-          <button className={`add-to-cart${added ? ' added' : ''}`} onClick={handleAdd}>
-            {added ? '✓ Added' : '+ Add'}
+          <button
+            className={`add-to-cart${added ? ' added' : ''}`}
+            onClick={handleAdd}
+            title={hasSizes ? 'Select a size first' : 'Add to bag'}
+          >
+            {hasSizes ? '👕 Select size' : (added ? '✓ Added' : '+ Add')}
           </button>
         </div>
       </div>

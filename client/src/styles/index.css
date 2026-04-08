@@ -329,3 +329,33 @@ img{display:block;max-width:100%}
   .navbar__actions .nav-icon-btn:not(:last-child){display:none}
   .search-bar-expanded.open{padding:10px 1rem}
 }
+
+/* ── User dropdown menu ── */
+.user-menu{position:absolute;top:calc(100% + 8px);right:0;background:var(--color-surface);border:1px solid var(--color-border-md);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);min-width:220px;z-index:150;overflow:hidden;animation:menu-in 0.15s ease}
+@keyframes menu-in{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.user-menu__header{padding:14px 16px;background:var(--color-surface-2)}
+.user-menu__name{display:block;font-size:14px;font-weight:800;color:var(--color-text);margin-bottom:2px}
+.user-menu__email{display:block;font-size:12px;color:var(--color-text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-menu__divider{height:1px;background:var(--color-border);margin:0}
+.user-menu__item{display:block;width:100%;background:none;border:none;padding:12px 16px;font-size:13px;font-weight:700;color:var(--color-text);text-align:left;cursor:pointer;font-family:var(--font-body);transition:background var(--transition)}
+.user-menu__item:hover{background:var(--color-surface-2)}
+.user-menu__item--danger{color:var(--color-accent)}
+.user-menu__item--danger:hover{background:var(--color-accent-light)}
+.user-menu__back{background:none;border:none;color:var(--color-brand);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-body);padding:0;margin-right:8px}
+.user-menu__form{padding:12px 16px;display:flex;flex-direction:column;gap:8px}
+.user-menu__form .form-input{font-size:13px;padding:8px 12px}
+
+/* ── Social login buttons ── */
+.social-login-group{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.social-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:10px 16px;border-radius:var(--radius-md);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-body);transition:all var(--transition);border:1.5px solid}
+.social-btn--google{background:#fff;border-color:#dadce0;color:#3c4043}
+.social-btn--google:hover{background:#f8f9fa;border-color:#c0c0c0}
+.social-btn--facebook{background:#1877F2;border-color:#1877F2;color:#fff}
+.social-btn--facebook:hover{background:#166fe5}
+.social-divider{display:flex;align-items:center;gap:12px;margin:4px 0 12px;font-size:12px;color:var(--color-text-muted);font-weight:600}
+.social-divider::before,.social-divider::after{content:'';flex:1;height:1px;background:var(--color-border)}
+
+/* ── Form success state ── */
+.form-success{background:var(--color-green-light);color:var(--color-green);font-size:13px;padding:8px 12px;border-radius:var(--radius-md);font-weight:600}
+
+

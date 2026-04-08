@@ -1,6 +1,4 @@
 // client/src/api.js
-// Central API client — all backend calls go through here
-
 const BASE = '/api'
 
 function getHeaders() {
@@ -26,8 +24,6 @@ async function request(path, options = {}) {
   return res.json()
 }
 
-// ── Products ──────────────────────────────────────────────────────────────────
-
 export const products = {
   list(params = {}) {
     const qs = new URLSearchParams(
@@ -39,21 +35,19 @@ export const products = {
   related(id)     { return request(`/products/${id}/related`) },
 }
 
-// ── Categories ────────────────────────────────────────────────────────────────
-
 export const categories = {
   list()      { return request('/categories') },
   ageGroups() { return request('/categories/age-groups') },
+  total()     { return request('/categories/total') },
 }
-
-// ── Auth ──────────────────────────────────────────────────────────────────────
 
 export const auth = {
-  register(body) { return request('/auth/register', { method: 'POST', body: JSON.stringify(body) }) },
-  login(body)    { return request('/auth/login',    { method: 'POST', body: JSON.stringify(body) }) },
+  register(body)          { return request('/auth/register',         { method: 'POST', body: JSON.stringify(body) }) },
+  login(body)             { return request('/auth/login',            { method: 'POST', body: JSON.stringify(body) }) },
+  changePassword(body)    { return request('/auth/change-password',  { method: 'POST', body: JSON.stringify(body) }) },
+  forgotPassword(body)    { return request('/auth/forgot-password',  { method: 'POST', body: JSON.stringify(body) }) },
+  resetPassword(body)     { return request('/auth/reset-password',   { method: 'POST', body: JSON.stringify(body) }) },
 }
-
-// ── Cart ──────────────────────────────────────────────────────────────────────
 
 export const cart = {
   get()              { return request('/cart') },
