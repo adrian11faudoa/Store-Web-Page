@@ -1,8 +1,24 @@
-Store Proyect Prototype: Sahara Kids
+Store Proyect: Sahara Kids
 
-References:
-- ASOS
-    https://www.asos.com/men/shoes-boots-trainers/cat/?cid=4209#nlid=mw|shoes|shop+by+product|view+all
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 Debbunging:
