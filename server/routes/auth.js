@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import pool from '../db/pool.js'
 import { rateLimit } from 'express-rate-limit'
-import { optionalAuth } from '../middleware/auth.js'
+import { optionalAuth, requireAuth } from '../middleware/auth.js'
 
 const router = Router()
 
@@ -74,9 +74,8 @@ router.post('/login', authLimiter, async (req, res, next) => {
 })
 
 // POST /api/auth/change-password  (requires auth)
-router.post('/change-password', optionalAuth, async (req, res, next) => {
+router.post('/change-password', requireAuth, async (req, res, next) => {
   try {
-    if (!req.user) return res.status(401).json({ error: 'Not authenticated' })
     const { currentPassword, newPassword } = req.body
     if (!currentPassword || !newPassword) return res.status(400).json({ error: 'All fields required' })
     if (newPassword.length < 8) return res.status(400).json({ error: 'New password must be at least 8 characters' })

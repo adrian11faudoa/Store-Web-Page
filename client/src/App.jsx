@@ -10,6 +10,7 @@ import { useCart } from './store/index.js'
 
 export default function App() {
   const fetchCart = useCart(s => s.fetch)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchCart() }, [])
 
   return (

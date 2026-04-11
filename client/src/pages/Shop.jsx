@@ -355,20 +355,27 @@ export default function Shop() {
               onClick={() => setPage(filters.page - 1)}
             >← Prev</button>
 
-            {Array.from({ length: Math.min(totalPages, 7) }).map((_, i) => {
-              const p = i + 1
-              return (
-                <button
-                  key={p}
-                  className={`page-btn${filters.page === p ? ' active' : ''}`}
-                  onClick={() => setPage(p)}
-                >{p}</button>
-              )
-            })}
-
-            {totalPages > 7 && (
-              <span className="page-btn" style={{ border: 'none' }}>…{totalPages}</span>
-            )}
+            {(() => {
+              const current = filters.page
+              let start = Math.max(1, current - 3)
+              const end = Math.min(totalPages, start + 6)
+              if (end - start < 6) start = Math.max(1, end - 6)
+              const pages = []
+              if (start > 1) {
+                pages.push(<button key={1} className="page-btn" onClick={() => setPage(1)}>1</button>)
+                if (start > 2) pages.push(<span key="e1" className="page-btn" style={{ border: 'none' }}>…</span>)
+              }
+              for (let pg = start; pg <= end; pg++) {
+                pages.push(
+                  <button key={pg} className={`page-btn${current === pg ? ' active' : ''}`} onClick={() => setPage(pg)}>{pg}</button>
+                )
+              }
+              if (end < totalPages) {
+                if (end < totalPages - 1) pages.push(<span key="e2" className="page-btn" style={{ border: 'none' }}>…</span>)
+                pages.push(<button key={totalPages} className="page-btn" onClick={() => setPage(totalPages)}>{totalPages}</button>)
+              }
+              return pages
+            })()}
 
             <button
               className="page-btn"

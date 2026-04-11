@@ -84,6 +84,31 @@ router.post('/add', optionalAuth, async (req, res, next) => {
   }
 })
 
+// DELETE /api/cart/product/:productId  — deletes by product_id (used by guest/cookie flow)
+router.delete('/product/:productId', optionalAuth, async (req, res, next) => {
+  try {
+    const userId    = req.user?.id || null
+    const sessionId = req.headers['x-session-id'] || null
+
+    if (userId) {
+      await pool.query(
+        `DELETE FROM cart_items ci
+         USING carts c
+         WHERE ci.product_id = $1 AND ci.cart_id = c.id AND c.user_id = $2`,
+        [req.params.productId, userId]
+      )
+    } else {
+      await pool.query(
+        `DELETE FROM cart_items ci
+         USING carts c
+         WHERE ci.product_id = $1 AND ci.cart_id = c.id AND c.session_id = $2`,
+        [req.params.productId, sessionId]
+      )
+    }
+    res.json({ ok: true })
+  } catch (err) { next(err) }
+})
+
 // DELETE /api/cart/:itemId  — deletes by cart_item id
 router.delete('/:itemId', optionalAuth, async (req, res, next) => {
   try {

@@ -55,4 +55,5 @@ export const cart = {
     return request('/cart/add', { method: 'POST', body: JSON.stringify({ productId, qty }) })
   },
   remove(itemId) { return request(`/cart/${itemId}`, { method: 'DELETE' }) },
+  removeByProduct(productId) { return request(`/cart/product/${productId}`, { method: 'DELETE' }) },
 }

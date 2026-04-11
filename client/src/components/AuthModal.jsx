@@ -22,7 +22,7 @@ export default function AuthModal({ open, onClose }) {
   const error    = useAuth(s => s.error)
   const user     = useAuth(s => s.user)
 
-  useEffect(() => { if (user && open) onClose() }, [user])
+  useEffect(() => { if (user && open) onClose() }, [user, open, onClose])
 
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : ''

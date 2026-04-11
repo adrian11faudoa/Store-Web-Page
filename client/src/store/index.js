@@ -77,9 +77,6 @@ export const useCart = create((set, get) => ({
 
   async remove(productId) {
     const isLoggedIn = !!localStorage.getItem('tf_token')
-    // Find the item to get the DB id for the API call
-    const item = get().items.find(i => i.product_id === productId || i.id === productId)
-    const dbId = item?.id
 
     // Optimistic: remove by product_id
     set(s => {
@@ -88,18 +85,14 @@ export const useCart = create((set, get) => ({
       return { items }
     })
 
-    if (dbId) {
-      try { await cartApi.remove(dbId) } catch {}
-    }
+    // Always remove by product_id — works for both guest (cookie) and logged-in users
+    try { await cartApi.removeByProduct(productId) } catch {}
   },
 
   clearCart() {
     deleteCookie('tf_cart')
     set({ items: [] })
   },
-
-  get count() { return get().items.reduce((s, i) => s + i.qty, 0) },
-  get total()  { return get().items.reduce((s, i) => s + i.price * i.qty, 0) },
 }))
 
 // ── Auth store ────────────────────────────────────────────────────────────────

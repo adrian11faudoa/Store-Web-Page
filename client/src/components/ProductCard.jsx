@@ -33,7 +33,7 @@ export default function ProductCard({ product: p }) {
       <div className="product-card__img" style={{ background: p.fallback_bg }}>
         {p.badge && (
           <span className={`badge badge--${p.badge}`}>
-            {p.badge === 'new' ? 'New' : `−${discount}%`}
+            {p.badge === 'new' ? 'New' : discount ? `−${discount}%` : 'Sale'}
           </span>
         )}
         <button
