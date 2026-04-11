@@ -6,10 +6,9 @@ import { useProducts } from '../hooks/useProducts.js'
 import ProductCard from '../components/ProductCard.jsx'
 
 const AGE_CARDS = [
-  { label:'Baby',       sub:'0–18 months', emoji:'🍼', age:'baby',    bg:'#FAEEDA' },
-  { label:'Toddler',    sub:'1–3 years',   emoji:'🧸', age:'toddler', bg:'#EEEDFE' },
-  { label:'Kids',       sub:'4–8 years',   emoji:'⚽', age:'kids',    bg:'#E1F5EE' },
-  { label:'Older Kids', sub:'9–14 years',  emoji:'🎒', age:'older',   bg:'#FAECE7' },
+  { label:'Bebé',        sub:'3M–24M',    emoji:'🍼', age:'baby',  bg:'#FAEEDA' },
+  { label:'Niños',       sub:'2–16 años', emoji:'👦', age:'boys',  bg:'#EEEDFE', gender:'boy'  },
+  { label:'Niñas',       sub:'2–16 años', emoji:'👧', age:'girls', bg:'#E1F5EE', gender:'girl' },
 ]
 
 const BANNERS = [
@@ -53,7 +52,7 @@ export default function Home() {
       {/* AGE CARDS */}
       <div className="age-strip">
         {AGE_CARDS.map(a => (
-          <Link key={a.age} to={`/shop?ageGroup=${a.age}`} className="age-card" style={{background:a.bg}}>
+          <Link key={a.age} to={a.gender ? `/shop?ageGroup=${a.age}&gender=${a.gender}` : `/shop?ageGroup=${a.age}`} className="age-card" style={{background:a.bg}}>
             <span className="age-card__emoji">{a.emoji}</span>
             <span className="age-card__label">{a.label}</span>
             <span className="age-card__sub">{a.sub}</span>

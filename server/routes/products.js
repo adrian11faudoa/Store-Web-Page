@@ -30,8 +30,13 @@ router.get('/', async (req, res, next) => {
     }
 
     if (ageGroup && ageGroup !== 'all') {
-      params.push(ageGroup)
-      conditions.push(`ag.slug = $${params.length}`)
+      if (ageGroup === 'baby') {
+        // Match both baby-boy and baby-girl
+        conditions.push(`ag.slug IN ('baby-boy', 'baby-girl')`)
+      } else {
+        params.push(ageGroup)
+        conditions.push(`ag.slug = $${params.length}`)
+      }
     }
 
     if (gender && gender !== 'all') {

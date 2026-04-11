@@ -18,8 +18,8 @@ export default function Footer() {
           <h4>Shop</h4>
           <ul>
             <li><Link to="/shop?badge=new">New in</Link></li>
-            <li><Link to="/shop?category=tops">Boys</Link></li>
-            <li><Link to="/shop?category=dresses">Girls</Link></li>
+            <li><Link to="/shop?ageGroup=boys&gender=boy">Boys</Link></li>
+            <li><Link to="/shop?ageGroup=girls&gender=girl">Girls</Link></li>
             <li><Link to="/shop?ageGroup=baby">Baby</Link></li>
             <li><Link to="/shop?badge=sale">Sale</Link></li>
           </ul>

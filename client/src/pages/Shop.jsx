@@ -66,6 +66,19 @@ export default function Shop() {
       page:     1,
     })
     setSidebarOpen(false)
+    // Sync sidebar age section UI to URL params
+    if (urlAgeGroup === 'baby' || urlAgeGroup === 'baby-boy' || urlAgeGroup === 'baby-girl') {
+      setAgeSection('baby')
+      if (urlAgeGroup === 'baby-boy') setBabyGender('boy')
+      else if (urlAgeGroup === 'baby-girl') setBabyGender('girl')
+      else setBabyGender('all')
+    } else if (urlGender === 'boy' || urlAgeGroup.startsWith('boys-')) {
+      setAgeSection('boys')
+    } else if (urlGender === 'girl' || urlAgeGroup.startsWith('girls-')) {
+      setAgeSection('girls')
+    } else {
+      setAgeSection('all')
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlCategory, urlAgeGroup, urlGender, urlBadge, urlQ])
 
@@ -76,16 +89,18 @@ export default function Shop() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Group age groups by type
+  // Group age groups by type (boys-/girls- slugs exclude baby-boy/baby-girl)
   const boysGroups  = ageGroups.filter(a => a.slug.startsWith('boys-'))
   const girlsGroups = ageGroups.filter(a => a.slug.startsWith('girls-'))
   const babyBoyGrp  = ageGroups.find(a => a.slug === 'baby-boy')
   const babyGirlGrp = ageGroups.find(a => a.slug === 'baby-girl')
 
+  // Baby month sizes for display
+  const BABY_MONTHS = ['3M','6M','9M','12M','18M','24M']
+
   function selectGenderSection(section) {
     setAgeSection(section)
     setBabyGender('all')
-    // Reset age group and gender filters
     if (section === 'all') {
       update({ ageGroup: 'all', gender: 'all' })
     } else if (section === 'boys') {
@@ -93,14 +108,15 @@ export default function Shop() {
     } else if (section === 'girls') {
       update({ gender: 'girl', ageGroup: 'all' })
     } else if (section === 'baby') {
-      update({ ageGroup: 'all', gender: 'all' }) // sub-select below
+      // Show all babies (both baby-boy and baby-girl) until user sub-selects
+      update({ ageGroup: 'baby', gender: 'all' })
     }
   }
 
   function selectBabyGender(bg) {
     setBabyGender(bg)
     if (bg === 'all') {
-      update({ ageGroup: 'all', gender: 'all' })
+      update({ ageGroup: 'baby', gender: 'all' })
     } else if (bg === 'boy') {
       update({ ageGroup: 'baby-boy', gender: 'boy' })
     } else {
@@ -234,7 +250,7 @@ export default function Shop() {
           </>
         )}
 
-        {/* Baby: select boy/girl then see month sizes */}
+        {/* Baby: select boy/girl, then filter by month */}
         {ageSection === 'baby' && (
           <>
             <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--color-text-muted)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 }}>Baby gender</div>
@@ -247,12 +263,35 @@ export default function Shop() {
                 {opt.label}
                 {opt.value === 'boy' && babyBoyGrp && <span className="sidebar-count">{babyBoyGrp.product_count}</span>}
                 {opt.value === 'girl' && babyGirlGrp && <span className="sidebar-count">{babyGirlGrp.product_count}</span>}
+                {opt.value === 'all' && babyBoyGrp && babyGirlGrp && (
+                  <span className="sidebar-count">{+babyBoyGrp.product_count + +babyGirlGrp.product_count}</span>
+                )}
               </button>
             ))}
             {babyGender !== 'all' && (
-              <div style={{ fontSize: 11, color: 'var(--color-text-muted)', padding: '4px 10px', fontWeight: 600 }}>
-                Sizes: 3M, 6M, 9M, 12M, 18M, 24M
-              </div>
+              <>
+                <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--color-text-muted)', margin: '10px 0 6px', textTransform: 'uppercase', letterSpacing: 1 }}>Talla (meses)</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, paddingLeft: 4 }}>
+                  {BABY_MONTHS.map(m => (
+                    <button
+                      key={m}
+                      style={{
+                        padding: '4px 9px',
+                        borderRadius: 'var(--radius-md)',
+                        border: '1.5px solid var(--color-border-md)',
+                        background: 'none',
+                        color: 'var(--color-text-muted)',
+                        fontSize: 11,
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        fontFamily: 'var(--font-body)',
+                      }}
+                    >
+                      {m}
+                    </button>
+                  ))}
+                </div>
+              </>
             )}
           </>
         )}
