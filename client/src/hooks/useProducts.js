@@ -12,7 +12,7 @@ export function useProducts(initialFilters = {}) {
     q: '',
     sort: 'featured',
     page: 1,
-    limit: 48,
+    limit: 20,
     ...initialFilters,
   })
 

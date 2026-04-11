@@ -153,11 +153,19 @@ img{display:block;max-width:100%}
 .empty-state p{color:var(--color-text-muted);font-size:14px}
 
 /* ── Pagination ── */
-.pagination{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:2.5rem;flex-wrap:wrap}
-.page-btn{background:var(--color-surface);border:1px solid var(--color-border-md);border-radius:var(--radius-md);padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;color:var(--color-text-muted);transition:all var(--transition);font-family:var(--font-body)}
+.pagination{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:2.5rem;padding:1rem 0;border-top:1px solid var(--color-border)}
+.pagination__info{display:flex;align-items:center;gap:4px;font-size:13px;color:var(--color-text-muted);font-weight:600;white-space:nowrap}
+.pagination__current{font-size:15px;font-weight:800;color:var(--color-text)}
+.pagination__sep{color:var(--color-text-muted)}
+.pagination__total{font-size:15px;font-weight:700;color:var(--color-text)}
+.pagination__count{color:var(--color-text-muted)}
+.page-btn{background:var(--color-surface);border:1.5px solid var(--color-border-md);border-radius:var(--radius-md);padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;color:var(--color-text-muted);transition:all var(--transition);font-family:var(--font-body)}
+.page-btn--nav{padding:10px 22px;font-size:14px;font-weight:800;color:var(--color-brand);border-color:var(--color-brand-mid);background:var(--color-brand-light)}
+.page-btn--nav:hover:not(:disabled){background:var(--color-brand);color:#fff;border-color:var(--color-brand)}
 .page-btn:hover:not(:disabled){background:var(--color-brand-light);color:var(--color-brand);border-color:var(--color-brand-mid)}
 .page-btn.active{background:var(--color-brand);color:#fff;border-color:var(--color-brand)}
-.page-btn:disabled{opacity:.4;cursor:not-allowed}
+.page-btn:disabled{opacity:.35;cursor:not-allowed}
+@media(max-width:540px){.pagination{flex-direction:column;align-items:center;gap:10px}.pagination__info{flex-wrap:wrap;justify-content:center}}
 
 /* ── Product detail ── */
 .product-detail{max-width:1100px;margin:0 auto;padding:2rem}

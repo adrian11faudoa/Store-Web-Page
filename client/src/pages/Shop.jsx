@@ -359,7 +359,7 @@ export default function Shop() {
 
         {loading ? (
           <div className="product-grid">
-            {Array.from({ length: 12 }).map((_, i) => (
+            {Array.from({ length: 20 }).map((_, i) => (
               <div key={i} className="product-card skeleton" style={{ height: 340 }} />
             ))}
           </div>
@@ -389,37 +389,23 @@ export default function Shop() {
         {totalPages > 1 && (
           <div className="pagination">
             <button
-              className="page-btn"
+              className="page-btn page-btn--nav"
               disabled={filters.page <= 1}
-              onClick={() => setPage(filters.page - 1)}
-            >← Prev</button>
+              onClick={() => { setPage(filters.page - 1); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+            >← Previous</button>
 
-            {(() => {
-              const current = filters.page
-              let start = Math.max(1, current - 3)
-              const end = Math.min(totalPages, start + 6)
-              if (end - start < 6) start = Math.max(1, end - 6)
-              const pages = []
-              if (start > 1) {
-                pages.push(<button key={1} className="page-btn" onClick={() => setPage(1)}>1</button>)
-                if (start > 2) pages.push(<span key="e1" className="page-btn" style={{ border: 'none' }}>…</span>)
-              }
-              for (let pg = start; pg <= end; pg++) {
-                pages.push(
-                  <button key={pg} className={`page-btn${current === pg ? ' active' : ''}`} onClick={() => setPage(pg)}>{pg}</button>
-                )
-              }
-              if (end < totalPages) {
-                if (end < totalPages - 1) pages.push(<span key="e2" className="page-btn" style={{ border: 'none' }}>…</span>)
-                pages.push(<button key={totalPages} className="page-btn" onClick={() => setPage(totalPages)}>{totalPages}</button>)
-              }
-              return pages
-            })()}
+            <div className="pagination__info">
+              <span className="pagination__current">Page {filters.page}</span>
+              <span className="pagination__sep">of</span>
+              <span className="pagination__total">{totalPages}</span>
+              <span className="pagination__sep" style={{ margin: '0 6px' }}>·</span>
+              <span className="pagination__count">{total} items</span>
+            </div>
 
             <button
-              className="page-btn"
+              className="page-btn page-btn--nav"
               disabled={filters.page >= totalPages}
-              onClick={() => setPage(filters.page + 1)}
+              onClick={() => { setPage(filters.page + 1); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
             >Next →</button>
           </div>
         )}
