@@ -65,10 +65,17 @@ CREATE INDEX IF NOT EXISTS idx_products_search ON products USING gin(search_vect
 CREATE TABLE IF NOT EXISTS users (
   id            SERIAL PRIMARY KEY,
   email         VARCHAR(255) UNIQUE NOT NULL,
-  password_hash TEXT NOT NULL,
+  password_hash TEXT,
   name          VARCHAR(200),
+  google_id     VARCHAR(100) UNIQUE,
+  avatar_url    TEXT,
   created_at    TIMESTAMPTZ DEFAULT NOW()
 );
+-- Allow google-only users to have no password
+ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;
+-- Add google columns if upgrading existing DB
+ALTER TABLE users ADD COLUMN IF NOT EXISTS google_id   VARCHAR(100) UNIQUE;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url  TEXT;
 
 CREATE TABLE IF NOT EXISTS password_reset_codes (
   id         SERIAL PRIMARY KEY,

@@ -134,6 +134,21 @@ export const useAuth = create((set) => ({
     }
   },
 
+  // Called after Google OAuth redirect — stores token + user from URL payload
+  setGoogleUser(token, user) {
+    localStorage.setItem('tf_token', token)
+    localStorage.setItem('tf_user', JSON.stringify(user))
+    set({ user, error: null, loading: false })
+    // Fetch server cart for this user and merge into local state
+    import('../api.js').then(m => m.cart.get()).then(data => {
+      const items = data.items || []
+      if (items.length > 0) {
+        useCart.setState({ items })
+        saveCartCookie(items, true)
+      }
+    }).catch(() => {})
+  },
+
   logout() {
     localStorage.removeItem('tf_token')
     localStorage.removeItem('tf_user')

@@ -21,6 +21,7 @@ import categoriesRouter from './routes/categories.js'
 import authRouter from './routes/auth.js'
 import cartRouter from './routes/cart.js'
 import { errorHandler } from './middleware/errorHandler.js'
+import googleRouter, { passport } from './routes/google.js'
 import { testConnection } from './db/pool.js'
 
 const app = express()
@@ -39,6 +40,16 @@ app.use(cors({
 app.use(express.json())
 
 // ── API Routes ───────────────────────────────────────────────────────────────
+// ── Passport (Google OAuth) ──────────────────────────────────────────────────
+// Only initialize if Google credentials are configured
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+  app.use(passport.initialize())
+  app.use('/api/auth', googleRouter)
+  console.log('✓ Google OAuth enabled')
+} else {
+  console.log('ℹ Google OAuth disabled — set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to enable')
+}
+
 app.use('/api/products',   productsRouter)
 app.use('/api/categories', categoriesRouter)
 app.use('/api/auth',       authRouter)
