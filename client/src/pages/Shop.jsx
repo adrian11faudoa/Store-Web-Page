@@ -38,6 +38,7 @@ export default function Shop() {
   // Sidebar age-group UI state
   const [ageSection, setAgeSection] = useState('all') // 'all' | 'boys' | 'girls' | 'baby'
   const [babyGender, setBabyGender] = useState('all')  // 'all' | 'boy' | 'girl'
+  const [babyMonth,  setBabyMonth]  = useState('')    // '' | '3M' | '6M' | etc.
 
   const urlCategory = searchParams.get('category') || 'all'
   const urlAgeGroup = searchParams.get('ageGroup')  || 'all'
@@ -79,6 +80,7 @@ export default function Shop() {
     } else {
       setAgeSection('all')
     }
+    setBabyMonth('')
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlCategory, urlAgeGroup, urlGender, urlBadge, urlQ])
 
@@ -101,6 +103,7 @@ export default function Shop() {
   function selectGenderSection(section) {
     setAgeSection(section)
     setBabyGender('all')
+    setBabyMonth('')
     if (section === 'all') {
       update({ ageGroup: 'all', gender: 'all' })
     } else if (section === 'boys') {
@@ -115,13 +118,20 @@ export default function Shop() {
 
   function selectBabyGender(bg) {
     setBabyGender(bg)
+    setBabyMonth('')
     if (bg === 'all') {
-      update({ ageGroup: 'baby', gender: 'all' })
+      update({ ageGroup: 'baby', gender: 'all', sizeFilter: '' })
     } else if (bg === 'boy') {
-      update({ ageGroup: 'baby-boy', gender: 'boy' })
+      update({ ageGroup: 'baby-boy', gender: 'boy', sizeFilter: '' })
     } else {
-      update({ ageGroup: 'baby-girl', gender: 'girl' })
+      update({ ageGroup: 'baby-girl', gender: 'girl', sizeFilter: '' })
     }
+  }
+
+  function selectBabyMonth(m) {
+    const next = babyMonth === m ? '' : m
+    setBabyMonth(next)
+    update({ sizeFilter: next })
   }
 
   function selectAgeGroup(slug) {
@@ -134,6 +144,7 @@ export default function Shop() {
     filters.gender !== 'all',
     filters.badge !== '',
     filters.maxPrice < 70,
+    !!filters.sizeFilter,
   ].filter(Boolean).length
 
   // Render age group buttons for boys/girls sub-sections
@@ -275,16 +286,18 @@ export default function Shop() {
                   {BABY_MONTHS.map(m => (
                     <button
                       key={m}
+                      onClick={e => { e.stopPropagation(); selectBabyMonth(m) }}
                       style={{
                         padding: '4px 9px',
                         borderRadius: 'var(--radius-md)',
-                        border: '1.5px solid var(--color-border-md)',
-                        background: 'none',
-                        color: 'var(--color-text-muted)',
+                        border: `1.5px solid ${babyMonth === m ? 'var(--color-brand)' : 'var(--color-border-md)'}`,
+                        background: babyMonth === m ? 'var(--color-brand)' : 'none',
+                        color: babyMonth === m ? '#fff' : 'var(--color-text-muted)',
                         fontSize: 11,
                         fontWeight: 700,
                         cursor: 'pointer',
                         fontFamily: 'var(--font-body)',
+                        transition: 'all 0.15s',
                       }}
                     >
                       {m}
@@ -323,9 +336,10 @@ export default function Shop() {
           <button
             className="sidebar-clear"
             onClick={() => {
-              update({ category: 'all', ageGroup: 'all', gender: 'all', badge: '', maxPrice: 70, q: '', page: 1 })
+              update({ category: 'all', ageGroup: 'all', gender: 'all', badge: '', maxPrice: 70, q: '', page: 1, sizeFilter: '' })
               setAgeSection('all')
               setBabyGender('all')
+              setBabyMonth('')
             }}
           >
             Clear all filters
@@ -372,9 +386,10 @@ export default function Shop() {
               className="btn btn--primary"
               style={{ marginTop: '1.5rem' }}
               onClick={() => {
-                update({ category: 'all', ageGroup: 'all', gender: 'all', badge: '', q: '', maxPrice: 70 })
+                update({ category: 'all', ageGroup: 'all', gender: 'all', badge: '', q: '', maxPrice: 70, sizeFilter: '' })
                 setAgeSection('all')
                 setBabyGender('all')
+                setBabyMonth('')
               }}
             >
               Clear all filters

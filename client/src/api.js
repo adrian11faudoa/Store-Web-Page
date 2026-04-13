@@ -42,11 +42,13 @@ export const categories = {
 }
 
 export const auth = {
-  register(body)          { return request('/auth/register',         { method: 'POST', body: JSON.stringify(body) }) },
-  login(body)             { return request('/auth/login',            { method: 'POST', body: JSON.stringify(body) }) },
-  changePassword(body)    { return request('/auth/change-password',  { method: 'POST', body: JSON.stringify(body) }) },
-  forgotPassword(body)    { return request('/auth/forgot-password',  { method: 'POST', body: JSON.stringify(body) }) },
-  resetPassword(body)     { return request('/auth/reset-password',   { method: 'POST', body: JSON.stringify(body) }) },
+  register(body)            { return request('/auth/register',             { method: 'POST', body: JSON.stringify(body) }) },
+  login(body)               { return request('/auth/login',                { method: 'POST', body: JSON.stringify(body) }) },
+  verifyEmail(body)         { return request('/auth/verify-email',         { method: 'POST', body: JSON.stringify(body) }) },
+  resendVerification(body)  { return request('/auth/resend-verification',  { method: 'POST', body: JSON.stringify(body) }) },
+  changePassword(body)      { return request('/auth/change-password',      { method: 'POST', body: JSON.stringify(body) }) },
+  forgotPassword(body)      { return request('/auth/forgot-password',      { method: 'POST', body: JSON.stringify(body) }) },
+  resetPassword(body)       { return request('/auth/reset-password',       { method: 'POST', body: JSON.stringify(body) }) },
 }
 
 export const cart = {

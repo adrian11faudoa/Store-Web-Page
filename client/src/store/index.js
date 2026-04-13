@@ -108,7 +108,7 @@ export const useAuth = create((set) => ({
       localStorage.setItem('tf_token', token)
       localStorage.setItem('tf_user', JSON.stringify(user))
       set({ user, loading: false })
-      // Fetch server cart and merge, then resave cookie without expiry
+      // Fetch server cart and merge
       try {
         const data = await import('../api.js').then(m => m.cart.get())
         const items = data.items || []
@@ -119,18 +119,20 @@ export const useAuth = create((set) => ({
       } catch {}
     } catch (err) {
       set({ error: err.message, loading: false })
+      throw err // re-throw so AuthModal can handle unverified case
     }
   },
 
   async register(email, password, name) {
     set({ loading: true, error: null })
     try {
-      const { token, user } = await authApi.register({ email, password, name })
-      localStorage.setItem('tf_token', token)
-      localStorage.setItem('tf_user', JSON.stringify(user))
-      set({ user, loading: false })
+      // Server returns { pending: true } — account created but not yet verified
+      // The AuthModal handles the transition to verify-email view
+      await authApi.register({ email, password, name })
+      set({ loading: false })
     } catch (err) {
       set({ error: err.message, loading: false })
+      throw err // re-throw so AuthModal can catch
     }
   },
 

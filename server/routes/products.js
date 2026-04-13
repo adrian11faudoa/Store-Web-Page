@@ -15,6 +15,7 @@ router.get('/', async (req, res, next) => {
       maxPrice = 9999,
       badge,
       q,
+      sizeFilter,
       sort = 'featured',
       page = 1,
       limit = 48,
@@ -55,6 +56,11 @@ router.get('/', async (req, res, next) => {
       conditions.push(`p.badge = $${params.length}`)
     }
 
+    if (sizeFilter) {
+      params.push(sizeFilter)
+      conditions.push(`$${params.length} = ANY(p.sizes)`)
+    }
+
     if (q) {
       params.push(q)
       conditions.push(`p.search_vector @@ plainto_tsquery('english', $${params.length})`)
@@ -63,12 +69,12 @@ router.get('/', async (req, res, next) => {
     const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''
 
     const orderMap = {
-      featured:   'p.reviews DESC, p.rating DESC',
-      'price-asc':  'p.price ASC',
-      'price-desc': 'p.price DESC',
-      rating:     'p.rating DESC',
-      name:       'p.name ASC',
-      newest:     'p.created_at DESC',
+      featured:    'p.reviews DESC, p.rating DESC, p.id ASC',
+      'price-asc': 'p.price ASC, p.id ASC',
+      'price-desc':'p.price DESC, p.id ASC',
+      rating:      'p.rating DESC, p.reviews DESC, p.id ASC',
+      name:        'p.name ASC, p.id ASC',
+      newest:      'p.created_at DESC, p.id DESC',
     }
     const orderBy = orderMap[sort] || orderMap.featured
 

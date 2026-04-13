@@ -4,15 +4,16 @@ import { products as productsApi } from '../api.js'
 
 export function useProducts(initialFilters = {}) {
   const [filters, setFilters] = useState({
-    category: 'all',
-    ageGroup: 'all',
-    gender:   'all',
-    maxPrice: 70,
-    badge: '',
-    q: '',
-    sort: 'featured',
-    page: 1,
-    limit: 20,
+    category:   'all',
+    ageGroup:   'all',
+    gender:     'all',
+    maxPrice:   70,
+    badge:      '',
+    q:          '',
+    sizeFilter: '',
+    sort:       'featured',
+    page:       1,
+    limit:      20,
     ...initialFilters,
   })
 
@@ -34,6 +35,7 @@ export function useProducts(initialFilters = {}) {
         maxPrice: f.maxPrice,
         ...(f.badge ? { badge: f.badge } : {}),
         ...(f.q ? { q: f.q } : {}),
+        ...(f.sizeFilter ? { sizeFilter: f.sizeFilter } : {}),
         sort: f.sort,
         page: f.page,
         limit: f.limit,

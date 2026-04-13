@@ -29,6 +29,12 @@ export default function Navbar() {
     setSearchOpen(false)
     setSearchQ('')
     setUserMenuOpen(false)
+    // Auto-open auth modal when redirected from Google-account password reset email
+    const params = new URLSearchParams(location.search)
+    if (params.get('openAuth') === '1') {
+      setAuthOpen(true)
+      window.history.replaceState({}, '', location.pathname)
+    }
   }, [location.pathname + location.search])
 
   function handleSearchSubmit(e) {
