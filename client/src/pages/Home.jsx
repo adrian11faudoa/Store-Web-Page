@@ -4,6 +4,7 @@ import { Splide, SplideSlide } from '@splidejs/react-splide'
 import '@splidejs/splide/dist/css/splide.min.css'
 import { useProducts } from '../hooks/useProducts.js'
 import ProductCard from '../components/ProductCard.jsx'
+import MixMatch from '../components/MixMatch.jsx'
 
 const AGE_CARDS = [
   { label:'Bebé',        sub:'3M–24M',    emoji:'🍼', age:'baby',  bg:'#FAEEDA' },
@@ -96,6 +97,11 @@ export default function Home() {
           </div>
         )}
       </section>
+
+      {/* MIX & MATCH */}
+      <div className="section">
+        <MixMatch />
+      </div>
 
       {/* TRUST STRIP */}
       <div className="trust-strip">

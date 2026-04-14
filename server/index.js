@@ -20,6 +20,7 @@ import productsRouter from './routes/products.js'
 import categoriesRouter from './routes/categories.js'
 import authRouter from './routes/auth.js'
 import cartRouter from './routes/cart.js'
+import mixMatchRouter from './routes/mixmatch.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import googleRouter, { passport } from './routes/google.js'
 import { testConnection } from './db/pool.js'
@@ -54,6 +55,7 @@ app.use('/api/products',   productsRouter)
 app.use('/api/categories', categoriesRouter)
 app.use('/api/auth',       authRouter)
 app.use('/api/cart',       cartRouter)
+app.use('/api/mix-match',  mixMatchRouter)
 
 // ── Health check ─────────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {

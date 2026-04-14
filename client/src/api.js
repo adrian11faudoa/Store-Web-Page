@@ -51,6 +51,12 @@ export const auth = {
   resetPassword(body)       { return request('/auth/reset-password',       { method: 'POST', body: JSON.stringify(body) }) },
 }
 
+export const mixMatch = {
+  get(gender = 'girl', limit = 12) {
+    return request(`/mix-match?gender=${gender}&limit=${limit}`)
+  },
+}
+
 export const cart = {
   get()              { return request('/cart') },
   add(productId, qty = 1) {

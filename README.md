@@ -66,4 +66,4 @@ make a requirement to confirm email when creating an account, make a message to 
 make the reset password template mail when forgot the password, for a google account, and process to do it for a outlook account
 
 
-
+dont open a new menu to select the size of the article, 

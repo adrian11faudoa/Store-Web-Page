@@ -73,9 +73,9 @@ export default function Shop() {
       if (urlAgeGroup === 'baby-boy') setBabyGender('boy')
       else if (urlAgeGroup === 'baby-girl') setBabyGender('girl')
       else setBabyGender('all')
-    } else if (urlGender === 'boy' || urlAgeGroup.startsWith('boys-')) {
+    } else if (urlGender === 'boy' || urlAgeGroup === 'boys' || urlAgeGroup === 'toddler-boys' || urlAgeGroup.startsWith('boys-')) {
       setAgeSection('boys')
-    } else if (urlGender === 'girl' || urlAgeGroup.startsWith('girls-')) {
+    } else if (urlGender === 'girl' || urlAgeGroup === 'girls' || urlAgeGroup === 'toddler-girls' || urlAgeGroup.startsWith('girls-')) {
       setAgeSection('girls')
     } else {
       setAgeSection('all')
@@ -107,11 +107,13 @@ export default function Shop() {
     if (section === 'all') {
       update({ ageGroup: 'all', gender: 'all' })
     } else if (section === 'boys') {
-      update({ gender: 'boy', ageGroup: 'all' })
+      // 'boys' wildcard matches all boys-N slugs in the server
+      update({ gender: 'boy', ageGroup: 'boys' })
     } else if (section === 'girls') {
-      update({ gender: 'girl', ageGroup: 'all' })
+      // 'girls' wildcard matches all girls-N slugs in the server
+      update({ gender: 'girl', ageGroup: 'girls' })
     } else if (section === 'baby') {
-      // Show all babies (both baby-boy and baby-girl) until user sub-selects
+      // Show all babies until user sub-selects gender
       update({ ageGroup: 'baby', gender: 'all' })
     }
   }

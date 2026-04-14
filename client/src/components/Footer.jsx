@@ -6,8 +6,8 @@ export default function Footer() {
     <footer className="footer">
       <div className="footer__grid">
         <div>
-          <div className="footer__brand-logo">tiny<span>.</span>fits</div>
-          <p className="footer__tagline">Clothes kids love,<br />prices parents don't hate.</p>
+          <div className="footer__brand-logo">Sahara<span>Kids</span></div>
+          <p className="footer__tagline">Moda infantil que los niños aman,<br />a precios que los padres adoran.</p>
           <div className="footer__social">
             {['📸','🐦','📌','▶️'].map(icon => (
               <button key={icon} className="social-btn">{icon}</button>
@@ -42,7 +42,7 @@ export default function Footer() {
         </div>
       </div>
       <div className="footer__bottom">
-        <p className="footer__copy">© 2026 tiny.fits Ltd. All rights reserved.</p>
+        <p className="footer__copy">© 2026 Sahara Kids Ltd. All rights reserved.</p>
         <div className="footer__legal">
           <a href="#">Privacy</a>
           <a href="#">Terms</a>
