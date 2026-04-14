@@ -32,9 +32,22 @@ router.get('/', async (req, res, next) => {
 
     if (ageGroup && ageGroup !== 'all') {
       if (ageGroup === 'baby') {
-        // Match both baby-boy and baby-girl
+        // All baby products (both boy and girl)
         conditions.push(`ag.slug IN ('baby-boy', 'baby-girl')`)
+      } else if (ageGroup === 'girls') {
+        // All girls age groups (girls-2 through girls-16 + girls-unitalla)
+        conditions.push(`ag.slug LIKE 'girls-%'`)
+      } else if (ageGroup === 'boys') {
+        // All boys age groups (boys-2 through boys-16 + boys-unitalla)
+        conditions.push(`ag.slug LIKE 'boys-%'`)
+      } else if (ageGroup === 'toddler-girls') {
+        // Toddler girls: ages 2–5 (sizes 6M–5T range)
+        conditions.push(`ag.slug IN ('girls-2','girls-3','girls-4','girls-5')`)
+      } else if (ageGroup === 'toddler-boys') {
+        // Toddler boys: ages 2–5 (sizes 6M–5T range)
+        conditions.push(`ag.slug IN ('boys-2','boys-3','boys-4','boys-5')`)
       } else {
+        // Exact slug match (e.g. girls-5, boys-10, baby-boy)
         params.push(ageGroup)
         conditions.push(`ag.slug = $${params.length}`)
       }
