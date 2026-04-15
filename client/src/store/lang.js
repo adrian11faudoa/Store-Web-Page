@@ -45,6 +45,8 @@ export const T = {
     shopByAge:   'Shop By Age',
     createAccount: 'Create Account',
     login:       'Login',
+    specialOffers: 'Special Offers',
+    seeAll:      'See all',
   },
   es: {
     girl:        'Niña',
@@ -73,6 +75,8 @@ export const T = {
     shopByAge:   'Comprar por Edad',
     createAccount: 'Crear Cuenta',
     login:       'Iniciar sesión',
+    specialOffers: 'Ofertas Especiales',
+    seeAll:      'Ver todo',
   },
 }
 
