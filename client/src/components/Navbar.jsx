@@ -20,14 +20,13 @@ function LangSwitcher() {
     return () => document.removeEventListener('mousedown', h)
   }, [])
 
-  const flags = { en: '🇺🇸', es: '🇲🇽' }
+  const flags = { en: 'US', es: 'MX' }
   const labels = { en: 'ENG', es: 'ESP' }
 
   return (
     <div ref={ref} className="lang-switcher">
       <button className="lang-btn" onClick={() => setOpen(o => !o)}>
-        <span>{flags[lang]}</span>
-        <span>{labels[lang]}</span>
+        <span>{flags[lang]} | {labels[lang]}</span>
         <span className="lang-chevron">{open ? '▲' : '▼'}</span>
       </button>
       {open && (
@@ -38,7 +37,7 @@ function LangSwitcher() {
               className={`lang-option${lang === l ? ' active' : ''}`}
               onClick={() => { setLang(l); setOpen(false) }}
             >
-              {flags[l]} {labels[l]}
+              {flags[l]} | {labels[l]}
             </button>
           ))}
         </div>
@@ -47,16 +46,77 @@ function LangSwitcher() {
   )
 }
 
-// ── Icon button ───────────────────────────────────────────────────────────────
-function IconBtn({ icon, label, onClick, badge }) {
+// ── Giraffe mascot SVG ───────────────────────────────────────────────────────
+function GiraffeMascot({ className }) {
   return (
-    <button className="navbar-icon-btn" onClick={onClick} aria-label={label} title={label}>
-      <span className="navbar-icon-btn__icon">{icon}</span>
-      {badge != null && badge > 0 && (
-        <span className="navbar-icon-btn__badge">{badge}</span>
-      )}
-    </button>
+    <svg className={className} viewBox="0 0 120 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Cloud behind */}
+      <ellipse cx="30" cy="95" rx="28" ry="16" fill="#e8e0d8" opacity="0.5"/>
+      <ellipse cx="22" cy="90" rx="18" ry="12" fill="#e8e0d8" opacity="0.4"/>
+      {/* Body */}
+      <ellipse cx="62" cy="112" rx="22" ry="18" fill="#F9C846"/>
+      {/* Legs */}
+      <rect x="48" y="122" width="6" height="14" rx="3" fill="#F9C846"/>
+      <rect x="68" y="122" width="6" height="14" rx="3" fill="#F9C846"/>
+      {/* Hooves */}
+      <rect x="47" y="133" width="8" height="4" rx="2" fill="#8B6914"/>
+      <rect x="67" y="133" width="8" height="4" rx="2" fill="#8B6914"/>
+      {/* Neck */}
+      <rect x="56" y="55" width="14" height="60" rx="7" fill="#F9C846"/>
+      {/* Spots on neck */}
+      <circle cx="60" cy="70" r="3" fill="#D4951A" opacity="0.6"/>
+      <circle cx="66" cy="82" r="2.5" fill="#D4951A" opacity="0.6"/>
+      <circle cx="59" cy="92" r="3" fill="#D4951A" opacity="0.6"/>
+      {/* Spots on body */}
+      <circle cx="52" cy="108" r="3.5" fill="#D4951A" opacity="0.5"/>
+      <circle cx="72" cy="105" r="3" fill="#D4951A" opacity="0.5"/>
+      <circle cx="62" cy="118" r="2.5" fill="#D4951A" opacity="0.5"/>
+      {/* Head */}
+      <ellipse cx="63" cy="45" rx="18" ry="16" fill="#F9C846"/>
+      {/* Ears */}
+      <ellipse cx="47" cy="34" rx="5" ry="8" fill="#F9C846" transform="rotate(-15 47 34)"/>
+      <ellipse cx="47" cy="34" rx="3" ry="5" fill="#FFB6C1" transform="rotate(-15 47 34)"/>
+      <ellipse cx="79" cy="34" rx="5" ry="8" fill="#F9C846" transform="rotate(15 79 34)"/>
+      <ellipse cx="79" cy="34" rx="3" ry="5" fill="#FFB6C1" transform="rotate(15 79 34)"/>
+      {/* Horns (ossicones) */}
+      <line x1="55" y1="30" x2="53" y2="18" stroke="#8B6914" strokeWidth="3" strokeLinecap="round"/>
+      <circle cx="53" cy="16" r="3.5" fill="#8B6914"/>
+      <line x1="71" y1="30" x2="73" y2="18" stroke="#8B6914" strokeWidth="3" strokeLinecap="round"/>
+      <circle cx="73" cy="16" r="3.5" fill="#8B6914"/>
+      {/* Eyes */}
+      <circle cx="55" cy="44" r="4" fill="#2c1a0e"/>
+      <circle cx="55" cy="43" r="1.5" fill="#fff"/>
+      <circle cx="71" cy="44" r="4" fill="#2c1a0e"/>
+      <circle cx="71" cy="43" r="1.5" fill="#fff"/>
+      {/* Snout */}
+      <ellipse cx="63" cy="52" rx="8" ry="5" fill="#FFE0A0"/>
+      {/* Nostrils */}
+      <circle cx="60" cy="52" r="1" fill="#D4951A"/>
+      <circle cx="66" cy="52" r="1" fill="#D4951A"/>
+      {/* Smile */}
+      <path d="M58 55 Q63 59 68 55" stroke="#8B6914" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+      {/* Blush */}
+      <circle cx="49" cy="50" r="3" fill="#FFB6C1" opacity="0.4"/>
+      <circle cx="77" cy="50" r="3" fill="#FFB6C1" opacity="0.4"/>
+      {/* Tail */}
+      <path d="M84 108 Q92 100 88 92" stroke="#F9C846" strokeWidth="3" fill="none" strokeLinecap="round"/>
+      <ellipse cx="88" cy="90" rx="3" ry="4" fill="#8B6914"/>
+      {/* Leaf at feet */}
+      <path d="M40 134 Q36 128 42 126" stroke="#6AAF50" strokeWidth="2" fill="#8BC34A" opacity="0.7"/>
+      <path d="M42 132 Q38 126 44 124" stroke="#6AAF50" strokeWidth="1.5" fill="#8BC34A" opacity="0.5"/>
+    </svg>
   )
+}
+
+// ── Category avatar emojis with colored backgrounds ──────────────────────────
+const CAT_AVATARS = {
+  girl:        { emoji: '👧', bg: '#FFE0EC', border: '#FFB6D0' },
+  boy:         { emoji: '👦', bg: '#DBEAFE', border: '#93C5FD' },
+  toddlerGirl: { emoji: '👧🏻', bg: '#F3E8FF', border: '#D8B4FE' },
+  toddlerBoy:  { emoji: '🧒', bg: '#D1FAE5', border: '#6EE7B7' },
+  baby:        { emoji: '👶', bg: '#FEF3C7', border: '#FCD34D' },
+  pajamas:     { emoji: '👕', bg: '#EDE9FE', border: '#C4B5FD' },
+  shoes:       { emoji: '👟', bg: '#E0F2FE', border: '#7DD3FC' },
 }
 
 // ── Main Navbar ───────────────────────────────────────────────────────────────
@@ -99,7 +159,7 @@ export default function Navbar() {
 
   function navTo(params) { navigate(`/shop?${params}`) }
 
-  // Category nav items — structured like the reference image
+  // Category nav items
   const NAV_CATS = [
     { key: 'girl',        sub: t(lang, 'sizes418'),  onClick: () => navTo('ageGroup=girls&gender=girl') },
     { key: 'boy',         sub: t(lang, 'sizes418'),  onClick: () => navTo('ageGroup=boys&gender=boy')  },
@@ -112,128 +172,169 @@ export default function Navbar() {
 
   return (
     <>
-      {/* ── TOP ROW: logo + search + icons ── */}
-      <div className="navbar-top">
-        {/* Hamburger — visible only on mobile via CSS */}
-        <button
-          className="navbar-hamburger"
-          onClick={() => setNavDrawer(o => !o)}
-          aria-label="Menu"
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="3" y1="6" x2="21" y2="6"/>
-            <line x1="3" y1="12" x2="21" y2="12"/>
-            <line x1="3" y1="18" x2="21" y2="18"/>
-          </svg>
-        </button>
-
-        <Link to="/" className="navbar-logo">
-          Sahara<span>Kids</span>
-        </Link>
-
-        <form className="navbar-search" onSubmit={handleSearchSubmit}>
-          <span className="navbar-search__icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      {/* ── TOP BAR ── */}
+      <header className="sk-navbar">
+        <div className="sk-navbar__top">
+          {/* Hamburger — mobile only */}
+          <button
+            className="sk-hamburger"
+            onClick={() => setNavDrawer(o => !o)}
+            aria-label="Menu"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E91E63" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="4" y1="6" x2="20" y2="6"/>
+              <line x1="4" y1="12" x2="20" y2="12"/>
+              <line x1="4" y1="18" x2="20" y2="18"/>
             </svg>
-          </span>
-          <input
-            ref={searchRef}
-            type="text"
-            placeholder={t(lang, 'search')}
-            value={searchQ}
-            onChange={e => setSearchQ(e.target.value)}
-            className="navbar-search__input"
-          />
-          {searchQ && (
-            <button type="button" className="navbar-search__clear" onClick={() => setSearchQ('')}>✕</button>
-          )}
-        </form>
+          </button>
 
-        <div className="navbar-icons">
-          {/* Language switcher */}
-          <LangSwitcher />
+          {/* Giraffe mascot + Logo */}
+          <Link to="/" className="sk-brand">
+            <GiraffeMascot className="sk-brand__giraffe" />
+            <div className="sk-brand__text">
+              <span className="sk-brand__heart">&#x2764;&#xFE0F;</span>
+              <span className="sk-brand__name">
+                Sahara<span className="sk-brand__kids">Kids</span>
+              </span>
+            </div>
+          </Link>
 
-          {/* Location */}
-          <IconBtn
-            icon={
+          {/* Sparkle decoration */}
+          <span className="sk-sparkle" aria-hidden="true">✦</span>
+
+          {/* Search bar */}
+          <form className="sk-search" onSubmit={handleSearchSubmit}>
+            <span className="sk-search__icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </span>
+            <input
+              ref={searchRef}
+              type="text"
+              placeholder={t(lang, 'search')}
+              value={searchQ}
+              onChange={e => setSearchQ(e.target.value)}
+              className="sk-search__input"
+            />
+            {searchQ && (
+              <button type="button" className="sk-search__clear" onClick={() => setSearchQ('')}>✕</button>
+            )}
+            <button type="submit" className="sk-search__btn" aria-label={t(lang, 'searchBtn')}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </button>
+          </form>
+
+          {/* Icons strip */}
+          <div className="sk-icons">
+            <LangSwitcher />
+
+            {/* Location */}
+            <button
+              className="sk-icon-btn sk-icon-btn--loc"
+              onClick={() => setLocOpen(true)}
+              aria-label={t(lang, 'location')}
+              title={t(lang, 'location')}
+            >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
                 <circle cx="12" cy="9" r="2.5"/>
               </svg>
-            }
-            label={t(lang, 'location')}
-            onClick={() => setLocOpen(true)}
-          />
-          {locStore.location && (
-            <span className="navbar-loc-label">{locStore.location.label}</span>
-          )}
+            </button>
 
-          {/* Wishlist */}
-          <IconBtn
-            icon={
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            {/* Wishlist */}
+            <button
+              className="sk-icon-btn sk-icon-btn--wish"
+              onClick={() => {}}
+              aria-label={t(lang, 'wishlist')}
+              title={t(lang, 'wishlist')}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
               </svg>
-            }
-            label={t(lang, 'wishlist')}
-            onClick={() => {}}
-          />
+            </button>
 
-          {/* Account */}
-          {user ? (
-            <div style={{ position: 'relative' }}>
-              <button ref={userBtnRef} className="navbar-icon-btn" onClick={() => setUserMenuOpen(o => !o)} title={t(lang, 'account')}>
-                <span className="navbar-icon-btn__icon">
+            {/* Account */}
+            {user ? (
+              <div style={{ position: 'relative' }}>
+                <button
+                  ref={userBtnRef}
+                  className="sk-icon-btn sk-icon-btn--acct"
+                  onClick={() => setUserMenuOpen(o => !o)}
+                  title={t(lang, 'account')}
+                >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                     <circle cx="12" cy="7" r="4"/>
                   </svg>
-                </span>
-              </button>
-              <UserMenu open={userMenuOpen} onClose={() => setUserMenuOpen(false)} anchorRef={userBtnRef} />
-            </div>
-          ) : (
-            <IconBtn
-              icon={
+                </button>
+                <UserMenu open={userMenuOpen} onClose={() => setUserMenuOpen(false)} anchorRef={userBtnRef} />
+              </div>
+            ) : (
+              <button
+                className="sk-icon-btn sk-icon-btn--acct"
+                onClick={() => navigate('/signin')}
+                aria-label={t(lang, 'signIn')}
+                title={t(lang, 'signIn')}
+              >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                   <circle cx="12" cy="7" r="4"/>
                 </svg>
-              }
-              label={t(lang, 'signIn')}
-              onClick={() => navigate('/signin')}
-            />
-          )}
-
-          {/* Cart */}
-          <button className="navbar-cart-btn" onClick={() => setCartOpen(true)} aria-label={t(lang, 'bag')}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
-              <line x1="3" y1="6" x2="21" y2="6"/>
-              <path d="M16 10a4 4 0 01-8 0"/>
-            </svg>
-            {count > 0 && <span className="navbar-cart-badge">{count}</span>}
-          </button>
-        </div>
-      </div>
-
-      {/* ── BOTTOM ROW: category links (desktop only, hidden via CSS on mobile) ── */}
-      <div className="navbar-bottom">
-        <ul className="navbar-cats">
-          {NAV_CATS.map(cat => (
-            <li key={cat.key}>
-              <button
-                className={`navbar-cat-btn${cat.accent ? ' navbar-cat-btn--sale' : ''}`}
-                onClick={cat.onClick}
-              >
-                <span className="navbar-cat-btn__name">{t(lang, cat.key)}</span>
-                {cat.sub && <span className="navbar-cat-btn__sub">{cat.sub}</span>}
               </button>
-            </li>
-          ))}
-        </ul>
-      </div>
+            )}
+
+            {/* Cart */}
+            <button
+              className="sk-icon-btn sk-icon-btn--cart"
+              onClick={() => setCartOpen(true)}
+              aria-label={t(lang, 'bag')}
+              title={t(lang, 'bag')}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <path d="M16 10a4 4 0 01-8 0"/>
+              </svg>
+              {count > 0 && <span className="sk-icon-btn__badge">{count}</span>}
+            </button>
+          </div>
+        </div>
+
+        {/* ── CATEGORY BAR (desktop only) ── */}
+        <div className="sk-catbar">
+          <div className="sk-catbar__inner">
+            {NAV_CATS.map(cat => {
+              const av = CAT_AVATARS[cat.key]
+              return (
+                <button key={cat.key} className="sk-catcard" onClick={cat.onClick}>
+                  <div
+                    className="sk-catcard__avatar"
+                    style={{ background: av.bg, borderColor: av.border }}
+                  >
+                    <span className="sk-catcard__emoji">{av.emoji}</span>
+                  </div>
+                  <span className="sk-catcard__name">{t(lang, cat.key)}</span>
+                  {cat.sub && <span className="sk-catcard__sub">{cat.sub}</span>}
+                </button>
+              )
+            })}
+
+            {/* Ofertas Especiales card */}
+            <button className="sk-catcard sk-catcard--offers" onClick={() => navTo('sort=price_asc')}>
+              <div className="sk-catcard__offers-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="#E91E63" stroke="none">
+                  <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/>
+                </svg>
+              </div>
+              <span className="sk-catcard__name">{t(lang, 'specialOffers')}</span>
+              <span className="sk-catcard__see-all">{t(lang, 'seeAll')} →</span>
+            </button>
+          </div>
+        </div>
+      </header>
 
       {/* ── Mobile nav drawer (sidebar) ── */}
       <div
@@ -285,6 +386,17 @@ export default function Navbar() {
               <span className="nav-drawer__chevron">›</span>
             </button>
           ))}
+
+          {/* Special Offers link in sidebar */}
+          <button
+            className="nav-drawer__item"
+            onClick={() => { navTo('sort=price_asc'); setNavDrawer(false) }}
+          >
+            <span className="nav-drawer__item-label" style={{ color: '#E91E63' }}>
+              {t(lang, 'specialOffers')}
+            </span>
+            <span className="nav-drawer__chevron">›</span>
+          </button>
         </div>
       </nav>
 
