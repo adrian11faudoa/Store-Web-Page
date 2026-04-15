@@ -14,14 +14,14 @@ const SORT_OPTIONS = [
   { value: 'name',       label: 'A–Z' },
 ]
 
-// Gender options for the sidebar
-const GENDER_OPTIONS = [
-  { value: 'all',  label: 'All' },
-  { value: 'boy',  label: '👦 Boys' },
-  { value: 'girl', label: '👧 Girls' },
+// Same icon style as Navbar catbar
+const GENDER_AGE_CARDS = [
+  { key: 'all',   emoji: '🛍️', bg: '#F5F5F5', border: '#E0E0E0', label: 'All' },
+  { key: 'girls', emoji: '👧',  bg: '#FFE0EC', border: '#FFB6D0', label: 'Girl' },
+  { key: 'boys',  emoji: '👦',  bg: '#DBEAFE', border: '#93C5FD', label: 'Boy' },
+  { key: 'baby',  emoji: '👶',  bg: '#FEF3C7', border: '#FCD34D', label: 'Baby' },
 ]
 
-// Baby gender options
 const BABY_GENDER_OPTIONS = [
   { value: 'all',  label: 'All babies' },
   { value: 'boy',  label: '👦 Baby boys' },
@@ -30,15 +30,14 @@ const BABY_GENDER_OPTIONS = [
 
 export default function Shop() {
   const [searchParams] = useSearchParams()
-  const [cats,       setCats]       = useState([])
-  const [ageGroups,  setAgeGroups]  = useState([])
-  const [totalAll,   setTotalAll]   = useState(0)
-  const [sidebarOpen,setSidebarOpen]= useState(false)
+  const [cats,        setCats]        = useState([])
+  const [ageGroups,   setAgeGroups]   = useState([])
+  const [totalAll,    setTotalAll]    = useState(0)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
-  // Sidebar age-group UI state
-  const [ageSection, setAgeSection] = useState('all') // 'all' | 'boys' | 'girls' | 'baby'
-  const [babyGender, setBabyGender] = useState('all')  // 'all' | 'boy' | 'girl'
-  const [babyMonth,  setBabyMonth]  = useState('')    // '' | '3M' | '6M' | etc.
+  const [ageSection, setAgeSection] = useState('all')
+  const [babyGender, setBabyGender] = useState('all')
+  const [babyMonth,  setBabyMonth]  = useState('')
 
   const urlCategory = searchParams.get('category') || 'all'
   const urlAgeGroup = searchParams.get('ageGroup')  || 'all'
@@ -67,7 +66,6 @@ export default function Shop() {
       page:     1,
     })
     setSidebarOpen(false)
-    // Sync sidebar age section UI to URL params
     if (urlAgeGroup === 'baby' || urlAgeGroup === 'baby-boy' || urlAgeGroup === 'baby-girl') {
       setAgeSection('baby')
       if (urlAgeGroup === 'baby-boy') setBabyGender('boy')
@@ -91,13 +89,11 @@ export default function Shop() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Group age groups by type (boys-/girls- slugs exclude baby-boy/baby-girl)
   const boysGroups  = ageGroups.filter(a => a.slug.startsWith('boys-'))
   const girlsGroups = ageGroups.filter(a => a.slug.startsWith('girls-'))
   const babyBoyGrp  = ageGroups.find(a => a.slug === 'baby-boy')
   const babyGirlGrp = ageGroups.find(a => a.slug === 'baby-girl')
 
-  // Baby month sizes for display
   const BABY_MONTHS = ['3M','6M','9M','12M','18M','24M']
 
   function selectGenderSection(section) {
@@ -107,13 +103,10 @@ export default function Shop() {
     if (section === 'all') {
       update({ ageGroup: 'all', gender: 'all' })
     } else if (section === 'boys') {
-      // 'boys' wildcard matches all boys-N slugs in the server
       update({ gender: 'boy', ageGroup: 'boys' })
     } else if (section === 'girls') {
-      // 'girls' wildcard matches all girls-N slugs in the server
       update({ gender: 'girl', ageGroup: 'girls' })
     } else if (section === 'baby') {
-      // Show all babies until user sub-selects gender
       update({ ageGroup: 'baby', gender: 'all' })
     }
   }
@@ -149,16 +142,13 @@ export default function Shop() {
     !!filters.sizeFilter,
   ].filter(Boolean).length
 
-  // Render age group buttons for boys/girls sub-sections
   function renderSubAgeGroups(groups) {
     return (
       <div style={{ marginLeft: 12 }}>
         <button
           className={`sidebar-option${filters.ageGroup === 'all' ? ' active' : ''}`}
           onClick={() => selectAgeGroup('all')}
-        >
-          All ages
-        </button>
+        >All ages</button>
         {groups.map(a => (
           <button
             key={a.slug}
@@ -175,17 +165,12 @@ export default function Shop() {
 
   return (
     <div className="shop-layout">
-      <button
-        className="sidebar-mobile-toggle"
-        onClick={() => setSidebarOpen(o => !o)}
-      >
+      <button className="sidebar-mobile-toggle" onClick={() => setSidebarOpen(o => !o)}>
         🎛 Filters{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
         <span className="sidebar-chevron">{sidebarOpen ? '▲' : '▼'}</span>
       </button>
 
-      {sidebarOpen && (
-        <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />
-      )}
+      {sidebarOpen && <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />}
 
       <aside className={`sidebar${sidebarOpen ? ' sidebar--open' : ''}`}>
         <div className="sidebar-mobile-header">
@@ -193,8 +178,91 @@ export default function Shop() {
           <button className="sidebar-mobile-close" onClick={() => setSidebarOpen(false)}>✕ Close</button>
         </div>
 
+        {/* ── Gender & Age — FIRST with icon cards matching navbar ── */}
+        <h3>Gender &amp; Age</h3>
+        <div className="sidebar-gender-cards">
+          {GENDER_AGE_CARDS.map(card => (
+            <button
+              key={card.key}
+              className={`sidebar-gender-card${ageSection === card.key ? ' sidebar-gender-card--active' : ''}`}
+              onClick={() => selectGenderSection(card.key)}
+            >
+              <div
+                className="sidebar-gender-card__avatar"
+                style={{
+                  background: card.bg,
+                  borderColor: ageSection === card.key ? card.border : card.border,
+                  boxShadow: ageSection === card.key ? `0 0 0 2px ${card.border}` : 'none',
+                }}
+              >
+                <span className="sidebar-gender-card__emoji">{card.emoji}</span>
+              </div>
+              <span className="sidebar-gender-card__label">{card.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Boys: age sub-selection */}
+        {ageSection === 'boys' && (
+          <>
+            <div className="sidebar-sub-label">Age range</div>
+            {renderSubAgeGroups(boysGroups)}
+          </>
+        )}
+
+        {/* Girls: age sub-selection */}
+        {ageSection === 'girls' && (
+          <>
+            <div className="sidebar-sub-label">Age range</div>
+            {renderSubAgeGroups(girlsGroups)}
+          </>
+        )}
+
+        {/* Baby: gender then month */}
+        {ageSection === 'baby' && (
+          <>
+            <div className="sidebar-sub-label">Baby gender</div>
+            {BABY_GENDER_OPTIONS.map(opt => (
+              <button
+                key={opt.value}
+                className={`sidebar-option${babyGender === opt.value ? ' active' : ''}`}
+                onClick={() => selectBabyGender(opt.value)}
+              >
+                {opt.label}
+                {opt.value === 'boy'  && babyBoyGrp  && <span className="sidebar-count">{babyBoyGrp.product_count}</span>}
+                {opt.value === 'girl' && babyGirlGrp && <span className="sidebar-count">{babyGirlGrp.product_count}</span>}
+                {opt.value === 'all'  && babyBoyGrp  && babyGirlGrp && (
+                  <span className="sidebar-count">{+babyBoyGrp.product_count + +babyGirlGrp.product_count}</span>
+                )}
+              </button>
+            ))}
+            {babyGender !== 'all' && (
+              <>
+                <div className="sidebar-sub-label" style={{ marginTop: 10 }}>Size (months)</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, paddingLeft: 4 }}>
+                  {BABY_MONTHS.map(m => (
+                    <button
+                      key={m}
+                      onClick={e => { e.stopPropagation(); selectBabyMonth(m) }}
+                      style={{
+                        padding: '4px 9px',
+                        borderRadius: 'var(--radius-md)',
+                        border: `1.5px solid ${babyMonth === m ? 'var(--color-brand)' : 'var(--color-border-md)'}`,
+                        background: babyMonth === m ? 'var(--color-brand)' : 'none',
+                        color: babyMonth === m ? '#fff' : 'var(--color-text-muted)',
+                        fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                        fontFamily: 'var(--font-body)', transition: 'all 0.15s',
+                      }}
+                    >{m}</button>
+                  ))}
+                </div>
+              </>
+            )}
+          </>
+        )}
+
         {/* ── Category ── */}
-        <h3>Category</h3>
+        <h3 style={{ marginTop: 20 }}>Category</h3>
         <button
           className={`sidebar-option${filters.category === 'all' ? ' active' : ''}`}
           onClick={() => update({ category: 'all' })}
@@ -213,104 +281,6 @@ export default function Shop() {
           </button>
         ))}
 
-        {/* ── Gender & Age ── */}
-        <h3>Gender &amp; Age</h3>
-
-        {/* Top-level gender tabs */}
-        <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
-          {[
-            { key: 'all',   label: 'All' },
-            { key: 'boys',  label: '👦 Boys' },
-            { key: 'girls', label: '👧 Girls' },
-            { key: 'baby',  label: '🍼 Baby' },
-          ].map(opt => (
-            <button
-              key={opt.key}
-              onClick={() => selectGenderSection(opt.key)}
-              style={{
-                flex: 1,
-                padding: '6px 4px',
-                borderRadius: 'var(--radius-md)',
-                border: '1.5px solid',
-                borderColor: ageSection === opt.key ? 'var(--color-brand)' : 'var(--color-border-md)',
-                background: ageSection === opt.key ? 'var(--color-brand-light)' : 'none',
-                color: ageSection === opt.key ? 'var(--color-brand)' : 'var(--color-text-muted)',
-                fontSize: 11,
-                fontWeight: 700,
-                cursor: 'pointer',
-                fontFamily: 'var(--font-body)',
-                transition: 'all 0.15s',
-              }}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Boys: age sub-selection 2-16y */}
-        {ageSection === 'boys' && (
-          <>
-            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--color-text-muted)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 }}>Age range</div>
-            {renderSubAgeGroups(boysGroups)}
-          </>
-        )}
-
-        {/* Girls: age sub-selection 2-16y */}
-        {ageSection === 'girls' && (
-          <>
-            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--color-text-muted)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 }}>Age range</div>
-            {renderSubAgeGroups(girlsGroups)}
-          </>
-        )}
-
-        {/* Baby: select boy/girl, then filter by month */}
-        {ageSection === 'baby' && (
-          <>
-            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--color-text-muted)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 }}>Baby gender</div>
-            {BABY_GENDER_OPTIONS.map(opt => (
-              <button
-                key={opt.value}
-                className={`sidebar-option${babyGender === opt.value ? ' active' : ''}`}
-                onClick={() => selectBabyGender(opt.value)}
-              >
-                {opt.label}
-                {opt.value === 'boy' && babyBoyGrp && <span className="sidebar-count">{babyBoyGrp.product_count}</span>}
-                {opt.value === 'girl' && babyGirlGrp && <span className="sidebar-count">{babyGirlGrp.product_count}</span>}
-                {opt.value === 'all' && babyBoyGrp && babyGirlGrp && (
-                  <span className="sidebar-count">{+babyBoyGrp.product_count + +babyGirlGrp.product_count}</span>
-                )}
-              </button>
-            ))}
-            {babyGender !== 'all' && (
-              <>
-                <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--color-text-muted)', margin: '10px 0 6px', textTransform: 'uppercase', letterSpacing: 1 }}>Talla (meses)</div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, paddingLeft: 4 }}>
-                  {BABY_MONTHS.map(m => (
-                    <button
-                      key={m}
-                      onClick={e => { e.stopPropagation(); selectBabyMonth(m) }}
-                      style={{
-                        padding: '4px 9px',
-                        borderRadius: 'var(--radius-md)',
-                        border: `1.5px solid ${babyMonth === m ? 'var(--color-brand)' : 'var(--color-border-md)'}`,
-                        background: babyMonth === m ? 'var(--color-brand)' : 'none',
-                        color: babyMonth === m ? '#fff' : 'var(--color-text-muted)',
-                        fontSize: 11,
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        fontFamily: 'var(--font-body)',
-                        transition: 'all 0.15s',
-                      }}
-                    >
-                      {m}
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
-          </>
-        )}
-
         {/* ── Max Price ── */}
         <h3>Max price: <strong>${filters.maxPrice}</strong></h3>
         <input
@@ -325,14 +295,8 @@ export default function Shop() {
 
         {/* ── Availability ── */}
         <h3>Availability</h3>
-        <button
-          className={`sidebar-option${filters.badge === 'sale' ? ' active' : ''}`}
-          onClick={() => update({ badge: filters.badge === 'sale' ? '' : 'sale' })}
-        >🏷 On sale</button>
-        <button
-          className={`sidebar-option${filters.badge === 'new' ? ' active' : ''}`}
-          onClick={() => update({ badge: filters.badge === 'new' ? '' : 'new' })}
-        >✨ New in</button>
+        <button className={`sidebar-option${filters.badge === 'sale' ? ' active' : ''}`} onClick={() => update({ badge: filters.badge === 'sale' ? '' : 'sale' })}>🏷 On sale</button>
+        <button className={`sidebar-option${filters.badge === 'new'  ? ' active' : ''}`} onClick={() => update({ badge: filters.badge === 'new'  ? '' : 'new'  })}>✨ New in</button>
 
         {activeFilterCount > 0 && (
           <button
@@ -343,9 +307,7 @@ export default function Shop() {
               setBabyGender('all')
               setBabyMonth('')
             }}
-          >
-            Clear all filters
-          </button>
+          >Clear all filters</button>
         )}
       </aside>
 
@@ -356,14 +318,8 @@ export default function Shop() {
             <strong>{total}</strong> items
             {filters.q && <span style={{ fontWeight: 400 }}> for "{filters.q}"</span>}
           </span>
-          <select
-            className="sort-select"
-            value={filters.sort}
-            onChange={e => update({ sort: e.target.value })}
-          >
-            {SORT_OPTIONS.map(o => (
-              <option key={o.value} value={o.value}>{o.label}</option>
-            ))}
+          <select className="sort-select" value={filters.sort} onChange={e => update({ sort: e.target.value })}>
+            {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
         </div>
 
@@ -393,9 +349,7 @@ export default function Shop() {
                 setBabyGender('all')
                 setBabyMonth('')
               }}
-            >
-              Clear all filters
-            </button>
+            >Clear all filters</button>
           </div>
         ) : (
           <div className="product-grid">
@@ -410,7 +364,6 @@ export default function Shop() {
               disabled={filters.page <= 1}
               onClick={() => { setPage(filters.page - 1); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
             >← Previous</button>
-
             <div className="pagination__info">
               <span className="pagination__current">Page {filters.page}</span>
               <span className="pagination__sep">of</span>
@@ -418,7 +371,6 @@ export default function Shop() {
               <span className="pagination__sep" style={{ margin: '0 6px' }}>·</span>
               <span className="pagination__count">{total} items</span>
             </div>
-
             <button
               className="page-btn page-btn--nav"
               disabled={filters.page >= totalPages}

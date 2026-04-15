@@ -98,18 +98,19 @@ img{display:block;max-width:100%}
 .lang-option.active{color:#E91E63;background:#FFF0F5}
 
 /* ── Category bar (desktop) ── */
-.sk-catbar{background:#fff;border-top:1px solid #f0f0f0;padding:12px 2rem}
-.sk-catbar__inner{display:flex;align-items:stretch;gap:12px;max-width:1400px;margin:0 auto;overflow-x:auto;scrollbar-width:none;border:1px solid #eee;border-radius:16px;padding:16px 12px}
+.sk-catbar{background:#fff;border-top:1px solid #f0f0f0;padding:6px 2rem;overflow:hidden;max-height:120px;transition:max-height 0.28s ease,padding 0.28s ease,opacity 0.2s ease;opacity:1}
+.sk-catbar--hidden{max-height:0;padding-top:0;padding-bottom:0;opacity:0;pointer-events:none}
+.sk-catbar__inner{display:flex;align-items:stretch;gap:8px;max-width:1400px;margin:0 auto;overflow-x:auto;scrollbar-width:none;border:1px solid #eee;border-radius:14px;padding:8px 10px}
 .sk-catbar__inner::-webkit-scrollbar{display:none}
 
-/* Category card */
-.sk-catcard{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 10px;min-width:100px;flex:1;font-family:var(--font-body);transition:transform var(--transition)}
+/* Category card — smaller than original */
+.sk-catcard{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 8px;min-width:76px;flex:1;font-family:var(--font-body);transition:transform var(--transition)}
 .sk-catcard:hover{transform:translateY(-2px)}
-.sk-catcard__avatar{width:72px;height:72px;border-radius:16px;display:flex;align-items:center;justify-content:center;border:2px solid;flex-shrink:0;transition:box-shadow var(--transition)}
+.sk-catcard__avatar{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;border:2px solid;flex-shrink:0;transition:box-shadow var(--transition)}
 .sk-catcard:hover .sk-catcard__avatar{box-shadow:0 4px 12px rgba(0,0,0,.1)}
-.sk-catcard__emoji{font-size:36px;line-height:1}
-.sk-catcard__name{font-size:13px;font-weight:700;color:var(--color-text);text-align:center;line-height:1.2}
-.sk-catcard__sub{font-size:11px;font-weight:700;color:#fff;background:#F06292;border-radius:var(--radius-pill);padding:2px 10px;white-space:nowrap}
+.sk-catcard__emoji{font-size:26px;line-height:1}
+.sk-catcard__name{font-size:11px;font-weight:700;color:var(--color-text);text-align:center;line-height:1.2}
+.sk-catcard__sub{font-size:10px;font-weight:700;color:#fff;background:#F06292;border-radius:var(--radius-pill);padding:1px 8px;white-space:nowrap}
 
 /* Special color pills for category sizes */
 .sk-catcard:nth-child(1) .sk-catcard__sub{background:#F06292}
@@ -119,10 +120,10 @@ img{display:block;max-width:100%}
 .sk-catcard:nth-child(5) .sk-catcard__sub{background:#FFD54F;color:#5D4037}
 
 /* Ofertas Especiales card */
-.sk-catcard--offers{background:#FFF0F5;border:2px dashed #F48FB1;border-radius:16px;padding:12px 16px;min-width:120px;flex:0 0 auto}
+.sk-catcard--offers{background:#FFF0F5;border:2px dashed #F48FB1;border-radius:14px;padding:8px 12px;min-width:100px;flex:0 0 auto}
 .sk-catcard--offers:hover{background:#FFE4EC}
 .sk-catcard__offers-icon{margin-bottom:2px}
-.sk-catcard__see-all{font-size:12px;font-weight:700;color:#fff;background:#F06292;border-radius:var(--radius-pill);padding:4px 14px;white-space:nowrap;margin-top:2px}
+.sk-catcard__see-all{font-size:11px;font-weight:700;color:#fff;background:#F06292;border-radius:var(--radius-pill);padding:3px 10px;white-space:nowrap;margin-top:2px}
 
 /* Hamburger — hidden on desktop */
 .sk-hamburger{display:none;width:44px;height:44px;border-radius:50%;background:#FCE4EC;border:none;cursor:pointer;align-items:center;justify-content:center;flex-shrink:0}
@@ -411,6 +412,16 @@ img{display:block;max-width:100%}
 .sidebar-backdrop{display:none}
 .sidebar-clear{width:100%;margin-top:1rem;background:none;border:1px solid var(--color-border-md);border-radius:var(--radius-md);padding:8px;font-size:12px;font-weight:700;color:var(--color-text-muted);cursor:pointer;font-family:var(--font-body);transition:all var(--transition)}
 .sidebar-clear:hover{border-color:var(--color-accent);color:var(--color-accent)}
+/* Sidebar gender/age icon cards */
+.sidebar-gender-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px}
+.sidebar-gender-card{background:none;border:2px solid transparent;border-radius:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 4px;font-family:var(--font-body);transition:all 0.15s}
+.sidebar-gender-card:hover .sidebar-gender-card__avatar{box-shadow:0 3px 8px rgba(0,0,0,.12)}
+.sidebar-gender-card--active{background:var(--color-brand-light)}
+.sidebar-gender-card__avatar{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;border:2px solid;transition:box-shadow 0.15s}
+.sidebar-gender-card__emoji{font-size:22px;line-height:1}
+.sidebar-gender-card__label{font-size:10px;font-weight:800;color:var(--color-text-muted)}
+.sidebar-gender-card--active .sidebar-gender-card__label{color:var(--color-brand)}
+.sidebar-sub-label{font-size:11px;font-weight:800;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
 
 @media(max-width:768px){
   .shop-layout{grid-template-columns:1fr;position:relative}
