@@ -70,6 +70,7 @@ export default function Navbar() {
   const [cartOpen,     setCartOpen]     = useState(false)
   const [locOpen,      setLocOpen]      = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const [navDrawer,    setNavDrawer]    = useState(false)
   const [searchQ,      setSearchQ]      = useState('')
   const searchRef  = useRef(null)
   const userBtnRef = useRef(null)
@@ -79,7 +80,15 @@ export default function Navbar() {
   useEffect(() => {
     setSearchQ('')
     setUserMenuOpen(false)
+    setNavDrawer(false)
   }, [location.pathname + location.search])
+
+  // Close nav drawer on resize to desktop
+  useEffect(() => {
+    function onResize() { if (window.innerWidth > 900) setNavDrawer(false) }
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
 
   function handleSearchSubmit(e) {
     e.preventDefault()
@@ -99,14 +108,25 @@ export default function Navbar() {
     { key: 'baby',        sub: t(lang, 'sizes024m'), onClick: () => navTo('ageGroup=baby') },
     { key: 'pajamas',     sub: null,                  onClick: () => navTo('category=sleepwear') },
     { key: 'shoes',       sub: null,                  onClick: () => navTo('category=footwear') },
-    { key: 'newIn',       sub: null,                  onClick: () => navTo('badge=new') },
-    { key: 'sale',        sub: null,                  onClick: () => navTo('badge=sale'), accent: true },
   ]
 
   return (
     <>
       {/* ── TOP ROW: logo + search + icons ── */}
       <div className="navbar-top">
+        {/* Hamburger — visible only on mobile via CSS */}
+        <button
+          className="navbar-hamburger"
+          onClick={() => setNavDrawer(o => !o)}
+          aria-label="Menu"
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+
         <Link to="/" className="navbar-logo">
           Sahara<span>Kids</span>
         </Link>
@@ -198,7 +218,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* ── BOTTOM ROW: category links ── */}
+      {/* ── BOTTOM ROW: category links (desktop only, hidden via CSS on mobile) ── */}
       <div className="navbar-bottom">
         <ul className="navbar-cats">
           {NAV_CATS.map(cat => (
@@ -214,6 +234,59 @@ export default function Navbar() {
           ))}
         </ul>
       </div>
+
+      {/* ── Mobile nav drawer (sidebar) ── */}
+      <div
+        className={`drawer-backdrop${navDrawer ? ' open' : ''}`}
+        onClick={() => setNavDrawer(false)}
+      />
+      <nav className={`nav-drawer${navDrawer ? ' open' : ''}`}>
+        <div className="nav-drawer__header">
+          {user
+            ? <span className="nav-drawer__greeting">{t(lang, 'account')}</span>
+            : (
+              <div className="nav-drawer__auth">
+                <button className="nav-drawer__auth-link" onClick={() => { setNavDrawer(false); navigate('/signin') }}>
+                  {t(lang, 'createAccount')}
+                </button>
+                <span className="nav-drawer__auth-sep">|</span>
+                <button className="nav-drawer__auth-link" onClick={() => { setNavDrawer(false); navigate('/signin') }}>
+                  {t(lang, 'login')}
+                </button>
+              </div>
+            )
+          }
+          <button className="nav-drawer__close" onClick={() => setNavDrawer(false)} aria-label="Close">✕</button>
+        </div>
+
+        <div className="nav-drawer__body">
+          <h3 className="nav-drawer__heading">{t(lang, 'shopByAge')}</h3>
+          {NAV_CATS.filter(c => c.sub).map(cat => (
+            <button
+              key={cat.key}
+              className="nav-drawer__item"
+              onClick={() => { cat.onClick(); setNavDrawer(false) }}
+            >
+              <span className="nav-drawer__item-label">
+                {t(lang, cat.key)}
+                <span className="nav-drawer__item-sub">({cat.sub})</span>
+              </span>
+              <span className="nav-drawer__chevron">›</span>
+            </button>
+          ))}
+
+          {NAV_CATS.filter(c => !c.sub).map(cat => (
+            <button
+              key={cat.key}
+              className="nav-drawer__item"
+              onClick={() => { cat.onClick(); setNavDrawer(false) }}
+            >
+              <span className="nav-drawer__item-label">{t(lang, cat.key)}</span>
+              <span className="nav-drawer__chevron">›</span>
+            </button>
+          ))}
+        </div>
+      </nav>
 
       <CartDrawer   open={cartOpen}  onClose={() => setCartOpen(false)} />
       <LocationModal open={locOpen}  onClose={() => setLocOpen(false)} />

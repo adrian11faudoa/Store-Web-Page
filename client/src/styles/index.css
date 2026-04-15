@@ -92,6 +92,29 @@ img{display:block;max-width:100%}
 .navbar-cat-btn--sale .navbar-cat-btn__name{color:var(--color-accent)}
 .navbar-cat-btn--sale:hover{border-bottom-color:var(--color-accent)}
 
+/* Hamburger button — hidden on desktop */
+.navbar-hamburger{display:none;background:none;border:none;color:#fff;cursor:pointer;padding:4px;flex-shrink:0;align-items:center;justify-content:center}
+
+/* ── Mobile nav drawer (sidebar) ── */
+.nav-drawer{position:fixed;top:0;left:0;height:100%;width:min(380px,85vw);background:var(--color-surface);z-index:201;display:flex;flex-direction:column;transform:translateX(-100%);transition:transform 0.28s cubic-bezier(0.4,0,0.2,1);overflow-y:auto}
+.nav-drawer.open{transform:translateX(0)}
+.nav-drawer__header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--color-border);flex-shrink:0}
+.nav-drawer__greeting{font-size:14px;font-weight:700;color:var(--color-text)}
+.nav-drawer__auth{display:flex;align-items:center;gap:10px}
+.nav-drawer__auth-link{background:none;border:none;font-size:14px;font-weight:700;color:var(--color-brand);cursor:pointer;font-family:var(--font-body);text-decoration:underline;padding:0}
+.nav-drawer__auth-link:hover{color:var(--color-brand-dark)}
+.nav-drawer__auth-sep{color:var(--color-text-muted);font-size:14px}
+.nav-drawer__close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--color-text-muted);padding:4px 8px;border-radius:var(--radius-md);line-height:1}
+.nav-drawer__close:hover{background:var(--color-surface-2);color:var(--color-text)}
+.nav-drawer__body{padding:8px 0;flex:1}
+.nav-drawer__heading{font-size:15px;font-weight:800;color:var(--color-text);padding:16px 20px 8px;margin:0}
+.nav-drawer__item{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:none;border-bottom:1px solid var(--color-border-light,#f0f0f0);padding:14px 20px;cursor:pointer;font-family:var(--font-body);color:var(--color-text);transition:background var(--transition);text-align:left}
+.nav-drawer__item:hover{background:var(--color-surface-2)}
+.nav-drawer__item:last-child{border-bottom:none}
+.nav-drawer__item-label{font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px}
+.nav-drawer__item-sub{font-size:13px;font-weight:400;color:var(--color-text-muted)}
+.nav-drawer__chevron{font-size:20px;color:var(--color-text-muted);font-weight:300}
+
 /* Location modal extras */
 .loc-modal{max-width:360px}
 .loc-current{display:flex;align-items:center;justify-content:space-between;background:var(--color-brand-light);border-radius:var(--radius-md);padding:10px 14px;font-size:13px;font-weight:700;color:var(--color-brand);margin-bottom:14px}
@@ -422,13 +445,13 @@ img{display:block;max-width:100%}
 /* ── Form success state ── */
 .form-success{background:var(--color-green-light);color:var(--color-green);font-size:13px;padding:8px 12px;border-radius:var(--radius-md);font-weight:600}
 
-@media(max-width:768px){
+@media(max-width:900px){
+  .navbar-hamburger{display:flex}
+  .navbar-bottom{display:none}
   .navbar-top{padding:0 1rem;gap:.75rem;height:56px}
   .navbar-logo{font-size:20px}
   .navbar-search{max-width:none;flex:1}
   .navbar-loc-label{display:none}
-  .navbar-bottom{top:56px}
-  .navbar-cat-btn{padding:10px 12px}
 }
 @media(max-width:480px){
   .navbar-icons .navbar-icon-btn:nth-child(3){display:none}
