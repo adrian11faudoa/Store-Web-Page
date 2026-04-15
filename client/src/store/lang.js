@@ -21,8 +21,6 @@ export const T = {
     toddlerGirl: 'Toddler Girl',
     toddlerBoy:  'Toddler Boy',
     baby:        'Baby',
-    newIn:       'New In',
-    sale:        'Sale',
     search:      'What are you looking for?',
     searchBtn:   'Search',
     signIn:      'Sign in',
@@ -44,6 +42,9 @@ export const T = {
     trendingNow: 'Trending Now',
     shoes:       'Shoes & Accessories',
     pajamas:     'Pajamas',
+    shopByAge:   'Shop By Age',
+    createAccount: 'Create Account',
+    login:       'Login',
   },
   es: {
     girl:        'Niña',
@@ -51,8 +52,6 @@ export const T = {
     toddlerGirl: 'Niña Pequeña',
     toddlerBoy:  'Niño Pequeño',
     baby:        'Bebé',
-    newIn:       'Novedades',
-    sale:        'Oferta',
     search:      '¿Qué estás buscando?',
     searchBtn:   'Buscar',
     signIn:      'Iniciar sesión',
@@ -71,6 +70,9 @@ export const T = {
     trendingNow: 'Tendencias',
     shoes:       'Zapatos y Accesorios',
     pajamas:     'Pijamas',
+    shopByAge:   'Comprar por Edad',
+    createAccount: 'Crear Cuenta',
+    login:       'Iniciar sesión',
   },
 }
 
