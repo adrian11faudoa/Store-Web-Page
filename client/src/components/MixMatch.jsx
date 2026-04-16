@@ -1,125 +1,115 @@
-// client/src/components/MixMatch.jsx
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { mixMatch as mixMatchApi } from '../api.js'
 import { useCart } from '../store/index.js'
 
-// Simple image with fallback
-function ProductImg({ src, bg, name, size = 160 }) {
-  const [err, setErr] = useState(false)
+function ProductImg({ src, bg, name, size, ratio = 1.16, fit = 'contain' }) {
+  const [errored, setErrored] = useState(false)
+
+  useEffect(() => {
+    setErrored(false)
+  }, [src])
+
   return (
     <div
+      className="mm-builder__image-shell"
       style={{
-        width: size, height: size * 1.2,
-        background: bg || '#f0eef8',
-        borderRadius: 12,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        overflow: 'hidden', flexShrink: 0, position: 'relative',
+        width: size,
+        height: size * ratio,
+        background: bg || 'transparent',
       }}
     >
-      {err || !src ? (
-        <span style={{ fontSize: size * 0.4 }}>👕</span>
+      {errored || !src ? (
+        <span className="mm-builder__fallback" aria-hidden="true">👕</span>
       ) : (
         <img
-          src={src} alt={name}
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          onError={() => setErr(true)}
+          src={src}
+          alt={name}
+          style={{ width: '100%', height: '100%', objectFit: fit }}
+          onError={() => setErrored(true)}
         />
       )}
     </div>
   )
 }
 
-// A single carousel row
-function ItemCarousel({ items, activeIdx, onSelect, type }) {
-  if (!items.length) return null
+function wrapIndex(index, length) {
+  if (!length) return 0
+  return (index % length + length) % length
+}
+
+function getRailItems(items, activeIdx) {
+  if (!items.length) return []
+
+  return [-2, -1, 1, 2].map(offset => {
+    const index = wrapIndex(activeIdx + offset, items.length)
+    return {
+      index,
+      offset,
+      item: items[index],
+    }
+  })
+}
+
+function Arrow({ direction, onClick, label }) {
+  return (
+    <button className="mm-builder__arrow" onClick={onClick} aria-label={label}>
+      {direction === 'left' ? '‹' : '›'}
+    </button>
+  )
+}
+
+function Rail({ items, activeIdx, onSelect, row, side }) {
+  const railItems = getRailItems(items, activeIdx).filter(entry =>
+    side === 'left' ? entry.offset < 0 : entry.offset > 0
+  )
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 0, width: '100%' }}>
-      {/* Scrollable row */}
-      <div
-        style={{
-          display: 'flex',
-          gap: 12,
-          overflowX: 'auto',
-          paddingBottom: 8,
-          scrollSnapType: 'x mandatory',
-          WebkitOverflowScrolling: 'touch',
-          scrollbarWidth: 'none',
-        }}
-        className="mm-scroll-row"
-      >
-        {items.map((item, i) => {
-          const isActive = i === activeIdx
-          return (
-            <button
-              key={item.id}
-              onClick={() => onSelect(i)}
-              style={{
-                flexShrink: 0,
-                scrollSnapAlign: 'center',
-                background: isActive ? '#fff' : 'transparent',
-                border: isActive ? '2.5px solid var(--color-brand, #3C3489)' : '2.5px solid transparent',
-                borderRadius: 14,
-                padding: isActive ? 6 : 4,
-                cursor: 'pointer',
-                transition: 'all 0.18s ease',
-                transform: isActive ? 'scale(1.07)' : 'scale(0.92)',
-                boxShadow: isActive ? '0 4px 18px rgba(60,52,137,0.18)' : 'none',
-                outline: 'none',
-                position: 'relative',
-              }}
-            >
-              <ProductImg
-                src={item.image_url}
-                bg={item.fallback_bg}
-                name={item.name}
-                size={isActive ? 130 : 110}
-              />
-              {isActive && (
-                <div style={{
-                  position: 'absolute',
-                  bottom: -28,
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  fontSize: 11,
-                  fontWeight: 700,
-                  color: 'var(--color-brand, #3C3489)',
-                  whiteSpace: 'nowrap',
-                  maxWidth: 140,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  textAlign: 'center',
-                }}>
-                  {item.name}
-                </div>
-              )}
-            </button>
-          )
-        })}
-      </div>
+    <div className={`mm-builder__rail mm-builder__rail--${side}`}>
+      {railItems.map(({ item, index, offset }) => {
+        const nearCenter = Math.abs(offset) === 1
+        const size = row === 'top'
+          ? (nearCenter ? 146 : 178)
+          : (nearCenter ? 140 : 162)
+
+        return (
+          <button
+            key={`${row}-${item.id}-${offset}`}
+            className="mm-builder__tile"
+            onClick={() => onSelect(index)}
+            aria-label={item.name}
+          >
+            <ProductImg
+              src={item.image_url}
+              bg={item.fallback_bg}
+              name={item.name}
+              size={size}
+              ratio={row === 'top' ? 1.16 : 1.08}
+            />
+          </button>
+        )
+      })}
     </div>
   )
 }
 
 export default function MixMatch() {
-  const navigate = useNavigate()
-  const add = useCart(s => s.add)
+  const add = useCart(state => state.add)
 
-  const [gender,     setGender]     = useState('girl')
-  const [data,       setData]       = useState({ tops: [], bottoms: [] })
-  const [loading,    setLoading]    = useState(true)
-  const [topIdx,     setTopIdx]     = useState(0)
-  const [bottomIdx,  setBottomIdx]  = useState(0)
-  const [added,      setAdded]      = useState(false)
+  const [gender, setGender] = useState('girl')
+  const [data, setData] = useState({ tops: [], bottoms: [] })
+  const [loading, setLoading] = useState(true)
+  const [topIdx, setTopIdx] = useState(0)
+  const [bottomIdx, setBottomIdx] = useState(0)
+  const [added, setAdded] = useState(false)
 
-  const load = useCallback(async (g) => {
+  const load = useCallback(async currentGender => {
     setLoading(true)
     setTopIdx(0)
     setBottomIdx(0)
+
     try {
-      const res = await mixMatchApi.get(g, 12)
-      setData(res)
+      const response = await mixMatchApi.get(currentGender, 12)
+      setData(response)
     } catch {
       setData({ tops: [], bottoms: [] })
     } finally {
@@ -127,203 +117,389 @@ export default function MixMatch() {
     }
   }, [])
 
-  useEffect(() => { load(gender) }, [gender, load])
+  useEffect(() => {
+    load(gender)
+  }, [gender, load])
 
-  const top    = data.tops[topIdx]
+  const top = data.tops[topIdx]
   const bottom = data.bottoms[bottomIdx]
 
-  const combinedPrice = top && bottom
-    ? (parseFloat(top.price) + parseFloat(bottom.price)).toFixed(2)
-    : null
+  function shiftTop(step) {
+    setTopIdx(current => wrapIndex(current + step, data.tops.length))
+  }
+
+  function shiftBottom(step) {
+    setBottomIdx(current => wrapIndex(current + step, data.bottoms.length))
+  }
 
   function handleAddBoth() {
     if (!top || !bottom) return
-    add({ ...top,    selectedSize: top.sizes?.[0]    || null })
+
+    add({ ...top, selectedSize: top.sizes?.[0] || null })
     add({ ...bottom, selectedSize: bottom.sizes?.[0] || null })
     setAdded(true)
     setTimeout(() => setAdded(false), 2000)
   }
 
-  function handleShopLook() {
-    navigate(`/shop?category=tops&gender=${gender}`)
-  }
-
   if (!loading && data.tops.length === 0 && data.bottoms.length === 0) return null
 
   return (
-    <section
-      className="section"
-      style={{
-        background: gender === 'girl'
-          ? 'linear-gradient(160deg, #fff5f8 0%, #fce4f0 100%)'
-          : 'linear-gradient(160deg, #f0f4ff 0%, #dce8fb 100%)',
-        borderRadius: 24,
-        margin: '0 0 2rem',
-        padding: '2.5rem 1.5rem 2rem',
-        overflow: 'hidden',
-        transition: 'background 0.4s ease',
-      }}
-    >
-      {/* Header */}
-      <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-        <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: 1.5, color: 'var(--color-brand, #3C3489)', textTransform: 'uppercase', marginBottom: 6 }}>
-          Mix &amp; Match
+    <section className="mm-builder">
+      <div className="mm-builder__header">
+        <h2 className="mm-builder__title">Pick a top, pick a bottom, shop the whole look in one click!</h2>
+        <div className="mm-builder__offer">up to 50% off</div>
+        <div className="mm-builder__tabs" role="tablist" aria-label="Mix and match by gender">
+          {['girl', 'boy'].map(option => (
+            <button
+              key={option}
+              className={`mm-builder__tab${gender === option ? ' mm-builder__tab--active' : ''}`}
+              onClick={() => setGender(option)}
+              role="tab"
+              aria-selected={gender === option}
+            >
+              {option.toUpperCase()}
+            </button>
+          ))}
         </div>
-        <h2 style={{ fontSize: 22, fontWeight: 900, margin: '0 0 4px', color: '#1a1a2e', lineHeight: 1.2 }}>
-          Pick a top, pick a bottom,
-        </h2>
-        <h2 style={{ fontSize: 22, fontWeight: 900, margin: '0 0 8px', color: '#1a1a2e', lineHeight: 1.2 }}>
-          shop the whole look in one click!
-        </h2>
-        <div style={{
-          display: 'inline-block',
-          background: gender === 'girl' ? '#ff5fa0' : '#3C3489',
-          color: '#fff',
-          borderRadius: 99,
-          padding: '3px 14px',
-          fontSize: 13,
-          fontWeight: 800,
-          transition: 'background 0.3s',
-        }}>
-          up to 50% off
-        </div>
-      </div>
-
-      {/* Gender tabs */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: '2rem' }}>
-        {[
-          { key: 'girl', label: 'GIRL', color: '#ff5fa0' },
-          { key: 'boy',  label: 'BOY',  color: '#3C3489' },
-        ].map(g => (
-          <button
-            key={g.key}
-            onClick={() => setGender(g.key)}
-            style={{
-              padding: '8px 32px',
-              borderRadius: 99,
-              border: 'none',
-              background: gender === g.key ? g.color : 'rgba(255,255,255,0.6)',
-              color: gender === g.key ? '#fff' : '#666',
-              fontWeight: 800,
-              fontSize: 14,
-              letterSpacing: 1.5,
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              boxShadow: gender === g.key ? '0 4px 14px rgba(0,0,0,0.15)' : 'none',
-            }}
-          >
-            {g.label}
-          </button>
-        ))}
       </div>
 
       {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 320 }}>
-          <div style={{ fontSize: 13, color: '#999', fontWeight: 600 }}>Loading looks…</div>
-        </div>
+        <div className="mm-builder__loading">Loading looks...</div>
       ) : (
         <>
-          {/* Tops carousel */}
-          <div style={{ marginBottom: 52 }}>
-            <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 2, color: '#aaa', textTransform: 'uppercase', marginBottom: 16, paddingLeft: 4 }}>
-              Tops
-            </div>
-            <ItemCarousel
-              items={data.tops}
-              activeIdx={topIdx}
-              onSelect={setTopIdx}
-              type="top"
-            />
-          </div>
+          <div className="mm-builder__stage">
+            <div className="mm-builder__row">
+              <Arrow direction="left" onClick={() => shiftTop(-1)} label="Previous top" />
+              <Rail items={data.tops} activeIdx={topIdx} onSelect={setTopIdx} row="top" side="left" />
+              <div className="mm-builder__focus-card">
+                {top && (
+                  <div className="mm-builder__focus-slot mm-builder__focus-slot--top">
+                    <ProductImg
+                      src={top.image_url}
+                      bg={top.fallback_bg}
+                      name={top.name}
+                      size={182}
+                      ratio={1.18}
+                    />
+                  </div>
+                )}
 
-          {/* Center divider with + icon */}
-          <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '8px 0 16px',
-            gap: 10,
-          }}>
-            <div style={{ flex: 1, height: 1.5, background: 'rgba(0,0,0,0.12)', borderRadius: 99 }} />
-            <div style={{
-              width: 40, height: 40,
-              borderRadius: '50%',
-              border: '2px solid rgba(0,0,0,0.18)',
-              background: '#fff',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 22, fontWeight: 300, color: '#333',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-              flexShrink: 0,
-            }}>+</div>
-            <div style={{ flex: 1, height: 1.5, background: 'rgba(0,0,0,0.12)', borderRadius: 99 }} />
-          </div>
-
-          {/* Bottoms carousel */}
-          <div style={{ marginTop: 8, marginBottom: 52 }}>
-            <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 2, color: '#aaa', textTransform: 'uppercase', marginBottom: 16, paddingLeft: 4 }}>
-              Bottoms
-            </div>
-            <ItemCarousel
-              items={data.bottoms}
-              activeIdx={bottomIdx}
-              onSelect={setBottomIdx}
-              type="bottom"
-            />
-          </div>
-
-          {/* Footer: price + add to bag */}
-          {top && bottom && (
-            <div style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              flexWrap: 'wrap', gap: 16, marginTop: 8,
-            }}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 11, color: '#999', fontWeight: 600, marginBottom: 2 }}>Combined total</div>
-                <div style={{ fontSize: 22, fontWeight: 900, color: '#1a1a2e' }}>
-                  ${combinedPrice}
+                <div className="mm-builder__divider" aria-hidden="true">
+                  <span className="mm-builder__divider-line" />
+                  <span className="mm-builder__divider-plus">+</span>
+                  <span className="mm-builder__divider-line" />
                 </div>
+
+                {bottom && (
+                  <div className="mm-builder__focus-slot mm-builder__focus-slot--bottom">
+                    <ProductImg
+                      src={bottom.image_url}
+                      bg={bottom.fallback_bg}
+                      name={bottom.name}
+                      size={174}
+                      ratio={1.08}
+                    />
+                  </div>
+                )}
               </div>
-              <button
-                onClick={handleAddBoth}
-                style={{
-                  background: added
-                    ? '#10b981'
-                    : (gender === 'girl' ? '#ff5fa0' : '#3C3489'),
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: 99,
-                  padding: '13px 32px',
-                  fontSize: 15,
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  boxShadow: '0 4px 18px rgba(0,0,0,0.18)',
-                  letterSpacing: 0.5,
-                }}
-              >
-                {added ? '✓ Added to bag!' : 'ADD TO BAG'}
-              </button>
-              <button
-                onClick={handleShopLook}
-                style={{
-                  background: 'rgba(255,255,255,0.7)',
-                  border: '1.5px solid rgba(0,0,0,0.12)',
-                  borderRadius: 99,
-                  padding: '12px 24px',
-                  fontSize: 13,
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  color: '#444',
-                  transition: 'all 0.15s',
-                }}
-              >
-                Shop all →
-              </button>
+              <Rail items={data.tops} activeIdx={topIdx} onSelect={setTopIdx} row="top" side="right" />
+              <Arrow direction="right" onClick={() => shiftTop(1)} label="Next top" />
             </div>
-          )}
+
+            <div className="mm-builder__row">
+              <Arrow direction="left" onClick={() => shiftBottom(-1)} label="Previous bottom" />
+              <Rail items={data.bottoms} activeIdx={bottomIdx} onSelect={setBottomIdx} row="bottom" side="left" />
+              <div className="mm-builder__focus-spacer" aria-hidden="true" />
+              <Rail items={data.bottoms} activeIdx={bottomIdx} onSelect={setBottomIdx} row="bottom" side="right" />
+              <Arrow direction="right" onClick={() => shiftBottom(1)} label="Next bottom" />
+            </div>
+          </div>
+
+          <div className="mm-builder__actions">
+            <button
+              onClick={handleAddBoth}
+              className={`mm-builder__add${added ? ' mm-builder__add--added' : ''}`}
+            >
+              {added ? 'ADDED TO BAG' : 'ADD TO BAG'}
+            </button>
+          </div>
         </>
       )}
 
       <style>{`
-        .mm-scroll-row::-webkit-scrollbar { display: none; }
+        .mm-builder {
+          background: #f8f5f5;
+          padding: 0.2rem 0.9rem 1rem;
+          border-radius: 0;
+        }
+
+        .mm-builder__header {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          gap: 0.28rem;
+          margin-bottom: 0.35rem;
+        }
+
+        .mm-builder__title {
+          margin: 0;
+          max-width: 700px;
+          color: #1f9df0;
+          font-size: clamp(0.88rem, 0.58vw + 0.72rem, 1.08rem);
+          line-height: 1.15;
+          font-weight: 800;
+        }
+
+        .mm-builder__offer {
+          color: #123af0;
+          font-size: clamp(0.82rem, 0.42vw + 0.68rem, 0.94rem);
+          font-weight: 800;
+        }
+
+        .mm-builder__tabs {
+          display: flex;
+          align-items: center;
+          gap: 0.7rem;
+        }
+
+        .mm-builder__tab {
+          border: none;
+          border-bottom: 1px solid transparent;
+          background: transparent;
+          color: #2d2d2d;
+          font-size: 0.62rem;
+          font-weight: 700;
+          letter-spacing: 0.03em;
+          padding: 0 0 0.14rem;
+        }
+
+        .mm-builder__tab--active {
+          color: #123af0;
+          border-bottom-color: currentColor;
+        }
+
+        .mm-builder__loading {
+          min-height: 300px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #5f7cb8;
+          font-weight: 700;
+        }
+
+        .mm-builder__stage {
+          display: grid;
+          gap: 1.05rem;
+          max-width: 1580px;
+          margin: 0 auto;
+        }
+
+        .mm-builder__row {
+          display: grid;
+          grid-template-columns: 28px minmax(0, 1fr) 284px minmax(0, 1fr) 28px;
+          align-items: center;
+          gap: 0.75rem;
+        }
+
+        .mm-builder__rail {
+          display: flex;
+          align-items: center;
+          gap: clamp(1.1rem, 2vw, 2.3rem);
+          min-width: 0;
+        }
+
+        .mm-builder__rail--left {
+          justify-content: flex-end;
+        }
+
+        .mm-builder__rail--right {
+          justify-content: flex-start;
+        }
+
+        .mm-builder__tile {
+          border: none;
+          background: transparent;
+          padding: 0;
+          flex: 0 0 auto;
+          transition: transform 0.18s ease;
+        }
+
+        .mm-builder__tile:hover {
+          transform: translateY(-2px);
+        }
+
+        .mm-builder__image-shell {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+        }
+
+        .mm-builder__image-shell img {
+          width: 100%;
+          height: 100%;
+          filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.08));
+        }
+
+        .mm-builder__fallback {
+          font-size: 3rem;
+        }
+
+        .mm-builder__arrow {
+          border: none;
+          background: transparent;
+          color: #8d8480;
+          font-size: 2.4rem;
+          line-height: 1;
+          width: 28px;
+          height: 48px;
+          padding: 0;
+        }
+
+        .mm-builder__focus-card {
+          grid-row: span 2;
+          background: #fff;
+          border: 1px solid #ededed;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+          min-height: 480px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          padding: 0.82rem 0.4rem 0.72rem;
+        }
+
+        .mm-builder__focus-slot {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 208px;
+        }
+
+        .mm-builder__divider {
+          display: flex;
+          align-items: center;
+          gap: 0.28rem;
+          margin: 0.1rem 0 0.15rem;
+        }
+
+        .mm-builder__divider-line {
+          flex: 1;
+          height: 1px;
+          background: #545454;
+        }
+
+        .mm-builder__divider-plus {
+          width: 19px;
+          height: 19px;
+          border-radius: 999px;
+          border: 1px solid #404040;
+          background: #fff;
+          color: #1d1d1d;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.95rem;
+          font-weight: 700;
+          flex: 0 0 auto;
+        }
+
+        .mm-builder__focus-spacer {
+          min-height: 1px;
+        }
+
+        .mm-builder__actions {
+          display: flex;
+          justify-content: center;
+          margin-top: 0.38rem;
+        }
+
+        .mm-builder__add {
+          min-width: 276px;
+          border: 1px solid #a2a2a2;
+          background: #fff;
+          color: #2e2e2e;
+          font-size: 0.52rem;
+          font-weight: 800;
+          letter-spacing: 0.08em;
+          padding: 0.5rem 1rem;
+        }
+
+        .mm-builder__add--added {
+          background: #f4fff7;
+          border-color: #39a857;
+          color: #1f7d3b;
+        }
+
+        @media (max-width: 1280px) {
+          .mm-builder__row {
+            grid-template-columns: 24px minmax(0, 1fr) 244px minmax(0, 1fr) 24px;
+            gap: 0.55rem;
+          }
+
+          .mm-builder__focus-card {
+            min-height: 432px;
+          }
+
+          .mm-builder__rail {
+            gap: 0.9rem;
+          }
+        }
+
+        @media (max-width: 980px) {
+          .mm-builder__stage {
+            gap: 1rem;
+          }
+
+          .mm-builder__row {
+            grid-template-columns: 26px 1fr 26px;
+          }
+
+          .mm-builder__focus-card {
+            grid-row: auto;
+            grid-column: 1 / -1;
+            order: -1;
+            min-height: auto;
+          }
+
+          .mm-builder__focus-spacer {
+            display: none;
+          }
+
+          .mm-builder__rail {
+            overflow-x: auto;
+            justify-content: flex-start;
+            padding-bottom: 0.2rem;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .mm-builder {
+            padding-left: 0.55rem;
+            padding-right: 0.55rem;
+          }
+
+          .mm-builder__row {
+            grid-template-columns: 1fr;
+          }
+
+          .mm-builder__arrow {
+            display: none;
+          }
+
+          .mm-builder__title {
+            max-width: 22rem;
+          }
+
+          .mm-builder__focus-card {
+            order: 0;
+          }
+
+          .mm-builder__add {
+            min-width: min(258px, 100%);
+            width: 100%;
+          }
+        }
       `}</style>
     </section>
   )

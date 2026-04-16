@@ -1,132 +1,153 @@
-// client/src/pages/Shop.jsx
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { useProducts } from '../hooks/useProducts.js'
 import { categories as catsApi } from '../api.js'
 import ProductCard from '../components/ProductCard.jsx'
+import { CAT_AVATARS } from '../constants/navCategories.js'
+import { useProducts } from '../hooks/useProducts.js'
 
 const SORT_OPTIONS = [
-  { value: 'featured',   label: 'Featured' },
-  { value: 'newest',     label: 'Newest' },
-  { value: 'price-asc',  label: 'Price: Low → High' },
-  { value: 'price-desc', label: 'Price: High → Low' },
-  { value: 'rating',     label: 'Top rated' },
-  { value: 'name',       label: 'A–Z' },
+  { value: 'featured', label: 'Featured' },
+  { value: 'newest', label: 'Newest' },
+  { value: 'price-asc', label: 'Price: Low to High' },
+  { value: 'price-desc', label: 'Price: High to Low' },
+  { value: 'rating', label: 'Top rated' },
+  { value: 'name', label: 'A-Z' },
 ]
 
-// Same icon style as Navbar catbar
-const GENDER_AGE_CARDS = [
-  { key: 'all',   emoji: '🛍️', bg: '#F5F5F5', border: '#E0E0E0', label: 'All' },
-  { key: 'girls', emoji: '👧',  bg: '#FFE0EC', border: '#FFB6D0', label: 'Girl' },
-  { key: 'boys',  emoji: '👦',  bg: '#DBEAFE', border: '#93C5FD', label: 'Boy' },
-  { key: 'baby',  emoji: '👶',  bg: '#FEF3C7', border: '#FCD34D', label: 'Baby' },
+const SHOP_AGE_CARDS = [
+  { key: 'girls', label: 'Girl', avatar: CAT_AVATARS.girl },
+  { key: 'boys', label: 'Boy', avatar: CAT_AVATARS.boy },
+  { key: 'toddler-girls', label: 'Toddler Girl', avatar: CAT_AVATARS.toddlerGirl },
+  { key: 'toddler-boys', label: 'Toddler Boy', avatar: CAT_AVATARS.toddlerBoy },
+  { key: 'baby', label: 'Baby', avatar: CAT_AVATARS.baby },
 ]
 
 const BABY_GENDER_OPTIONS = [
-  { value: 'all',  label: 'All babies' },
-  { value: 'boy',  label: '👦 Baby boys' },
-  { value: 'girl', label: '👧 Baby girls' },
+  { value: 'all', label: 'All babies' },
+  { value: 'boy', label: 'Baby boys' },
+  { value: 'girl', label: 'Baby girls' },
 ]
+
+function isToddlerSlug(slug) {
+  return /-(2|3|4|5)$/.test(slug)
+}
 
 export default function Shop() {
   const [searchParams] = useSearchParams()
-  const [cats,        setCats]        = useState([])
-  const [ageGroups,   setAgeGroups]   = useState([])
-  const [totalAll,    setTotalAll]    = useState(0)
+  const [cats, setCats] = useState([])
+  const [ageGroups, setAgeGroups] = useState([])
+  const [totalAll, setTotalAll] = useState(0)
   const [sidebarOpen, setSidebarOpen] = useState(false)
-
   const [ageSection, setAgeSection] = useState('all')
   const [babyGender, setBabyGender] = useState('all')
-  const [babyMonth,  setBabyMonth]  = useState('')
+  const [babyMonth, setBabyMonth] = useState('')
 
   const urlCategory = searchParams.get('category') || 'all'
-  const urlAgeGroup = searchParams.get('ageGroup')  || 'all'
-  const urlBadge    = searchParams.get('badge')     || ''
-  const urlQ        = searchParams.get('q')         || ''
-  const urlGender   = searchParams.get('gender')    || 'all'
+  const urlAgeGroup = searchParams.get('ageGroup') || 'all'
+  const urlBadge = searchParams.get('badge') || ''
+  const urlQ = searchParams.get('q') || ''
+  const urlGender = searchParams.get('gender') || 'all'
 
   const {
-    products, total, totalPages, loading, error,
-    filters, update, setPage,
+    products,
+    total,
+    totalPages,
+    loading,
+    error,
+    filters,
+    update,
+    setPage,
   } = useProducts({
     category: urlCategory,
     ageGroup: urlAgeGroup,
-    gender:   urlGender,
-    badge:    urlBadge,
-    q:        urlQ,
+    gender: urlGender,
+    badge: urlBadge,
+    q: urlQ,
   })
 
   useEffect(() => {
     update({
       category: urlCategory,
       ageGroup: urlAgeGroup,
-      gender:   urlGender,
-      badge:    urlBadge,
-      q:        urlQ,
-      page:     1,
+      gender: urlGender,
+      badge: urlBadge,
+      q: urlQ,
+      page: 1,
     })
     setSidebarOpen(false)
+
     if (urlAgeGroup === 'baby' || urlAgeGroup === 'baby-boy' || urlAgeGroup === 'baby-girl') {
       setAgeSection('baby')
       if (urlAgeGroup === 'baby-boy') setBabyGender('boy')
       else if (urlAgeGroup === 'baby-girl') setBabyGender('girl')
       else setBabyGender('all')
-    } else if (urlGender === 'boy' || urlAgeGroup === 'boys' || urlAgeGroup === 'toddler-boys' || urlAgeGroup.startsWith('boys-')) {
+    } else if (urlAgeGroup === 'toddler-boys') {
+      setAgeSection('toddler-boys')
+    } else if (urlAgeGroup === 'toddler-girls') {
+      setAgeSection('toddler-girls')
+    } else if (urlGender === 'boy' || urlAgeGroup === 'boys' || urlAgeGroup.startsWith('boys-')) {
       setAgeSection('boys')
-    } else if (urlGender === 'girl' || urlAgeGroup === 'girls' || urlAgeGroup === 'toddler-girls' || urlAgeGroup.startsWith('girls-')) {
+    } else if (urlGender === 'girl' || urlAgeGroup === 'girls' || urlAgeGroup.startsWith('girls-')) {
       setAgeSection('girls')
     } else {
       setAgeSection('all')
     }
+
     setBabyMonth('')
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [urlCategory, urlAgeGroup, urlGender, urlBadge, urlQ])
+  }, [urlAgeGroup, urlBadge, urlCategory, urlGender, urlQ])
 
   useEffect(() => {
-    catsApi.list().then(data => setCats(data))
+    catsApi.list().then(setCats)
     catsApi.ageGroups().then(setAgeGroups)
-    catsApi.total().then(d => setTotalAll(d.total))
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    catsApi.total().then(data => setTotalAll(data.total))
   }, [])
 
-  const boysGroups  = ageGroups.filter(a => a.slug.startsWith('boys-'))
-  const girlsGroups = ageGroups.filter(a => a.slug.startsWith('girls-'))
-  const babyBoyGrp  = ageGroups.find(a => a.slug === 'baby-boy')
-  const babyGirlGrp = ageGroups.find(a => a.slug === 'baby-girl')
-
-  const BABY_MONTHS = ['3M','6M','9M','12M','18M','24M']
+  const boysGroups = ageGroups.filter(group => group.slug.startsWith('boys-'))
+  const girlsGroups = ageGroups.filter(group => group.slug.startsWith('girls-'))
+  const toddlerBoyGroups = boysGroups.filter(group => isToddlerSlug(group.slug))
+  const toddlerGirlGroups = girlsGroups.filter(group => isToddlerSlug(group.slug))
+  const babyBoyGroup = ageGroups.find(group => group.slug === 'baby-boy')
+  const babyGirlGroup = ageGroups.find(group => group.slug === 'baby-girl')
+  const babyMonths = ['3M', '6M', '9M', '12M', '18M', '24M']
 
   function selectGenderSection(section) {
     setAgeSection(section)
     setBabyGender('all')
     setBabyMonth('')
+
     if (section === 'all') {
       update({ ageGroup: 'all', gender: 'all' })
-    } else if (section === 'boys') {
-      update({ gender: 'boy', ageGroup: 'boys' })
     } else if (section === 'girls') {
-      update({ gender: 'girl', ageGroup: 'girls' })
+      update({ ageGroup: 'girls', gender: 'girl' })
+    } else if (section === 'boys') {
+      update({ ageGroup: 'boys', gender: 'boy' })
+    } else if (section === 'toddler-girls') {
+      update({ ageGroup: 'toddler-girls', gender: 'girl' })
+    } else if (section === 'toddler-boys') {
+      update({ ageGroup: 'toddler-boys', gender: 'boy' })
     } else if (section === 'baby') {
       update({ ageGroup: 'baby', gender: 'all' })
     }
   }
 
-  function selectBabyGender(bg) {
-    setBabyGender(bg)
+  function selectBabyGender(value) {
+    setBabyGender(value)
     setBabyMonth('')
-    if (bg === 'all') {
+
+    if (value === 'all') {
       update({ ageGroup: 'baby', gender: 'all', sizeFilter: '' })
-    } else if (bg === 'boy') {
+    } else if (value === 'boy') {
       update({ ageGroup: 'baby-boy', gender: 'boy', sizeFilter: '' })
     } else {
       update({ ageGroup: 'baby-girl', gender: 'girl', sizeFilter: '' })
     }
   }
 
-  function selectBabyMonth(m) {
-    const next = babyMonth === m ? '' : m
-    setBabyMonth(next)
-    update({ sizeFilter: next })
+  function selectBabyMonth(month) {
+    const nextValue = babyMonth === month ? '' : month
+    setBabyMonth(nextValue)
+    update({ sizeFilter: nextValue })
   }
 
   function selectAgeGroup(slug) {
@@ -142,21 +163,23 @@ export default function Shop() {
     !!filters.sizeFilter,
   ].filter(Boolean).length
 
-  function renderSubAgeGroups(groups) {
+  function renderSubAgeGroups(groups, label = 'All ages') {
     return (
-      <div style={{ marginLeft: 12 }}>
+      <div className="sidebar-subgroups">
         <button
           className={`sidebar-option${filters.ageGroup === 'all' ? ' active' : ''}`}
           onClick={() => selectAgeGroup('all')}
-        >All ages</button>
-        {groups.map(a => (
+        >
+          {label}
+        </button>
+        {groups.map(group => (
           <button
-            key={a.slug}
-            className={`sidebar-option${filters.ageGroup === a.slug ? ' active' : ''}`}
-            onClick={() => selectAgeGroup(a.slug)}
+            key={group.slug}
+            className={`sidebar-option${filters.ageGroup === group.slug ? ' active' : ''}`}
+            onClick={() => selectAgeGroup(group.slug)}
           >
-            {a.label}
-            <span className="sidebar-count">{a.product_count}</span>
+            {group.label}
+            <span className="sidebar-count">{group.product_count}</span>
           </button>
         ))}
       </div>
@@ -164,9 +187,10 @@ export default function Shop() {
   }
 
   return (
-    <div className="shop-layout">
-      <button className="sidebar-mobile-toggle" onClick={() => setSidebarOpen(o => !o)}>
-        🎛 Filters{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
+    <>
+      <div className="shop-layout">
+      <button className="sidebar-mobile-toggle" onClick={() => setSidebarOpen(open => !open)}>
+        Filters{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
         <span className="sidebar-chevron">{sidebarOpen ? '▲' : '▼'}</span>
       </button>
 
@@ -175,13 +199,12 @@ export default function Shop() {
       <aside className={`sidebar${sidebarOpen ? ' sidebar--open' : ''}`}>
         <div className="sidebar-mobile-header">
           <span style={{ fontWeight: 700 }}>Filters</span>
-          <button className="sidebar-mobile-close" onClick={() => setSidebarOpen(false)}>✕ Close</button>
+          <button className="sidebar-mobile-close" onClick={() => setSidebarOpen(false)}>Close</button>
         </div>
 
-        {/* ── Gender & Age — FIRST with icon cards matching navbar ── */}
         <h3>Gender &amp; Age</h3>
         <div className="sidebar-gender-cards">
-          {GENDER_AGE_CARDS.map(card => (
+          {SHOP_AGE_CARDS.map(card => (
             <button
               key={card.key}
               className={`sidebar-gender-card${ageSection === card.key ? ' sidebar-gender-card--active' : ''}`}
@@ -190,70 +213,87 @@ export default function Shop() {
               <div
                 className="sidebar-gender-card__avatar"
                 style={{
-                  background: card.bg,
-                  borderColor: ageSection === card.key ? card.border : card.border,
-                  boxShadow: ageSection === card.key ? `0 0 0 2px ${card.border}` : 'none',
+                  background: card.avatar.bg,
+                  borderColor: card.avatar.border,
+                  boxShadow: ageSection === card.key ? `0 0 0 2px ${card.avatar.border}` : 'none',
                 }}
               >
-                <span className="sidebar-gender-card__emoji">{card.emoji}</span>
+                <span className="sidebar-gender-card__emoji">{card.avatar.emoji}</span>
               </div>
               <span className="sidebar-gender-card__label">{card.label}</span>
             </button>
           ))}
         </div>
 
-        {/* Boys: age sub-selection */}
+        <button
+          className={`sidebar-option sidebar-option--all${ageSection === 'all' ? ' active' : ''}`}
+          onClick={() => selectGenderSection('all')}
+        >
+          View all ages
+          <span className="sidebar-count">{totalAll}</span>
+        </button>
+
         {ageSection === 'boys' && (
           <>
             <div className="sidebar-sub-label">Age range</div>
-            {renderSubAgeGroups(boysGroups)}
+            {renderSubAgeGroups(boysGroups, 'All boys')}
           </>
         )}
 
-        {/* Girls: age sub-selection */}
         {ageSection === 'girls' && (
           <>
             <div className="sidebar-sub-label">Age range</div>
-            {renderSubAgeGroups(girlsGroups)}
+            {renderSubAgeGroups(girlsGroups, 'All girls')}
           </>
         )}
 
-        {/* Baby: gender then month */}
+        {ageSection === 'toddler-boys' && (
+          <>
+            <div className="sidebar-sub-label">Toddler sizes</div>
+            {renderSubAgeGroups(toddlerBoyGroups, 'All toddler boys')}
+          </>
+        )}
+
+        {ageSection === 'toddler-girls' && (
+          <>
+            <div className="sidebar-sub-label">Toddler sizes</div>
+            {renderSubAgeGroups(toddlerGirlGroups, 'All toddler girls')}
+          </>
+        )}
+
         {ageSection === 'baby' && (
           <>
             <div className="sidebar-sub-label">Baby gender</div>
-            {BABY_GENDER_OPTIONS.map(opt => (
+            {BABY_GENDER_OPTIONS.map(option => (
               <button
-                key={opt.value}
-                className={`sidebar-option${babyGender === opt.value ? ' active' : ''}`}
-                onClick={() => selectBabyGender(opt.value)}
+                key={option.value}
+                className={`sidebar-option${babyGender === option.value ? ' active' : ''}`}
+                onClick={() => selectBabyGender(option.value)}
               >
-                {opt.label}
-                {opt.value === 'boy'  && babyBoyGrp  && <span className="sidebar-count">{babyBoyGrp.product_count}</span>}
-                {opt.value === 'girl' && babyGirlGrp && <span className="sidebar-count">{babyGirlGrp.product_count}</span>}
-                {opt.value === 'all'  && babyBoyGrp  && babyGirlGrp && (
-                  <span className="sidebar-count">{+babyBoyGrp.product_count + +babyGirlGrp.product_count}</span>
+                {option.label}
+                {option.value === 'boy' && babyBoyGroup && <span className="sidebar-count">{babyBoyGroup.product_count}</span>}
+                {option.value === 'girl' && babyGirlGroup && <span className="sidebar-count">{babyGirlGroup.product_count}</span>}
+                {option.value === 'all' && babyBoyGroup && babyGirlGroup && (
+                  <span className="sidebar-count">{Number(babyBoyGroup.product_count) + Number(babyGirlGroup.product_count)}</span>
                 )}
               </button>
             ))}
+
             {babyGender !== 'all' && (
               <>
                 <div className="sidebar-sub-label" style={{ marginTop: 10 }}>Size (months)</div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, paddingLeft: 4 }}>
-                  {BABY_MONTHS.map(m => (
+                <div className="sidebar-months">
+                  {babyMonths.map(month => (
                     <button
-                      key={m}
-                      onClick={e => { e.stopPropagation(); selectBabyMonth(m) }}
-                      style={{
-                        padding: '4px 9px',
-                        borderRadius: 'var(--radius-md)',
-                        border: `1.5px solid ${babyMonth === m ? 'var(--color-brand)' : 'var(--color-border-md)'}`,
-                        background: babyMonth === m ? 'var(--color-brand)' : 'none',
-                        color: babyMonth === m ? '#fff' : 'var(--color-text-muted)',
-                        fontSize: 11, fontWeight: 700, cursor: 'pointer',
-                        fontFamily: 'var(--font-body)', transition: 'all 0.15s',
+                      key={month}
+                      className={`sidebar-month${babyMonth === month ? ' sidebar-month--active' : ''}`}
+                      onClick={event => {
+                        event.stopPropagation()
+                        selectBabyMonth(month)
                       }}
-                    >{m}</button>
+                    >
+                      {month}
+                    </button>
                   ))}
                 </div>
               </>
@@ -261,7 +301,6 @@ export default function Shop() {
           </>
         )}
 
-        {/* ── Category ── */}
         <h3 style={{ marginTop: 20 }}>Category</h3>
         <button
           className={`sidebar-option${filters.category === 'all' ? ' active' : ''}`}
@@ -270,74 +309,98 @@ export default function Shop() {
           All
           <span className="sidebar-count">{totalAll}</span>
         </button>
-        {cats.map(c => (
+        {cats.map(category => (
           <button
-            key={c.slug}
-            className={`sidebar-option${filters.category === c.slug ? ' active' : ''}`}
-            onClick={() => update({ category: c.slug })}
+            key={category.slug}
+            className={`sidebar-option${filters.category === category.slug ? ' active' : ''}`}
+            onClick={() => update({ category: category.slug })}
           >
-            {c.icon} {c.label}
-            <span className="sidebar-count">{c.product_count}</span>
+            {category.icon} {category.label}
+            <span className="sidebar-count">{category.product_count}</span>
           </button>
         ))}
 
-        {/* ── Max Price ── */}
         <h3>Max price: <strong>${filters.maxPrice}</strong></h3>
         <input
-          type="range" min="8" max="70" step="1"
+          type="range"
+          min="8"
+          max="70"
+          step="1"
           value={filters.maxPrice}
-          onChange={e => update({ maxPrice: +e.target.value })}
+          onChange={event => update({ maxPrice: Number(event.target.value) })}
           style={{ width: '100%', accentColor: 'var(--color-brand)', margin: '8px 0' }}
         />
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--color-text-muted)', fontWeight: 600 }}>
-          <span>$8</span><span>$70</span>
+        <div className="sidebar-price-range">
+          <span>$8</span>
+          <span>$70</span>
         </div>
 
-        {/* ── Availability ── */}
         <h3>Availability</h3>
-        <button className={`sidebar-option${filters.badge === 'sale' ? ' active' : ''}`} onClick={() => update({ badge: filters.badge === 'sale' ? '' : 'sale' })}>🏷 On sale</button>
-        <button className={`sidebar-option${filters.badge === 'new'  ? ' active' : ''}`} onClick={() => update({ badge: filters.badge === 'new'  ? '' : 'new'  })}>✨ New in</button>
+        <button
+          className={`sidebar-option${filters.badge === 'sale' ? ' active' : ''}`}
+          onClick={() => update({ badge: filters.badge === 'sale' ? '' : 'sale' })}
+        >
+          On sale
+        </button>
+        <button
+          className={`sidebar-option${filters.badge === 'new' ? ' active' : ''}`}
+          onClick={() => update({ badge: filters.badge === 'new' ? '' : 'new' })}
+        >
+          New in
+        </button>
 
         {activeFilterCount > 0 && (
           <button
             className="sidebar-clear"
             onClick={() => {
-              update({ category: 'all', ageGroup: 'all', gender: 'all', badge: '', maxPrice: 70, q: '', page: 1, sizeFilter: '' })
+              update({
+                category: 'all',
+                ageGroup: 'all',
+                gender: 'all',
+                badge: '',
+                maxPrice: 70,
+                q: '',
+                page: 1,
+                sizeFilter: '',
+              })
               setAgeSection('all')
               setBabyGender('all')
               setBabyMonth('')
             }}
-          >Clear all filters</button>
+          >
+            Clear all filters
+          </button>
         )}
       </aside>
 
-      {/* ── Main content ── */}
       <main className="shop-main">
         <div className="shop-toolbar">
           <span className="result-count">
             <strong>{total}</strong> items
             {filters.q && <span style={{ fontWeight: 400 }}> for "{filters.q}"</span>}
           </span>
-          <select className="sort-select" value={filters.sort} onChange={e => update({ sort: e.target.value })}>
-            {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          <select className="sort-select" value={filters.sort} onChange={event => update({ sort: event.target.value })}>
+            {SORT_OPTIONS.map(option => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
           </select>
         </div>
 
         {error && (
           <div style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)', padding: '1rem', borderRadius: 'var(--radius-md)', marginBottom: '1rem' }}>
-            ⚠ {error}
+            Warning: {error}
           </div>
         )}
 
         {loading ? (
           <div className="product-grid">
-            {Array.from({ length: 20 }).map((_, i) => (
-              <div key={i} className="product-card skeleton" style={{ height: 340 }} />
+            {Array.from({ length: 20 }).map((_, index) => (
+              <div key={index} className="product-card skeleton" style={{ height: 340 }} />
             ))}
           </div>
         ) : products.length === 0 ? (
           <div className="empty-state">
-            <div style={{ fontSize: 48, marginBottom: '1rem' }}>🔍</div>
+            <div style={{ fontSize: 48, marginBottom: '1rem' }}>Search</div>
             <h3>No products found</h3>
             <p>Try adjusting your filters or search term.</p>
             <button
@@ -349,21 +412,32 @@ export default function Shop() {
                 setBabyGender('all')
                 setBabyMonth('')
               }}
-            >Clear all filters</button>
+            >
+              Clear all filters
+            </button>
           </div>
         ) : (
           <div className="product-grid">
-            {products.map(p => <ProductCard key={p.id} product={p} />)}
+            {products.map(product => <ProductCard key={product.id} product={product} />)}
           </div>
         )}
 
-        {totalPages > 1 && (
+      </main>
+      </div>
+
+      {totalPages > 1 && (
+        <div className="shop-pagination-wrap">
           <div className="pagination">
             <button
               className="page-btn page-btn--nav"
               disabled={filters.page <= 1}
-              onClick={() => { setPage(filters.page - 1); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
-            >← Previous</button>
+              onClick={() => {
+                setPage(filters.page - 1)
+                window.scrollTo({ top: 0, behavior: 'smooth' })
+              }}
+            >
+              Previous
+            </button>
             <div className="pagination__info">
               <span className="pagination__current">Page {filters.page}</span>
               <span className="pagination__sep">of</span>
@@ -374,11 +448,16 @@ export default function Shop() {
             <button
               className="page-btn page-btn--nav"
               disabled={filters.page >= totalPages}
-              onClick={() => { setPage(filters.page + 1); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
-            >Next →</button>
+              onClick={() => {
+                setPage(filters.page + 1)
+                window.scrollTo({ top: 0, behavior: 'smooth' })
+              }}
+            >
+              Next
+            </button>
           </div>
-        )}
-      </main>
-    </div>
+        </div>
+      )}
+    </>
   )
 }
