@@ -1,26 +1,33 @@
-// client/src/pages/Product.jsx
 import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useProduct } from '../hooks/useProducts.js'
 import { useCart } from '../store/index.js'
 import ProductCard from '../components/ProductCard.jsx'
+import { t, useLang } from '../store/lang.js'
+import { useMoney } from '../lib/money.js'
 
 export default function Product() {
-  const { id }     = useParams()
+  const { id } = useParams()
+  const lang = useLang(state => state.lang)
+  const { formatMoney } = useMoney()
   const { product: p, related, loading, error } = useProduct(id)
-  const add        = useCart(s => s.add)
-  const [added, setAdded]       = useState(false)
-  const [selSize, setSelSize]   = useState(null)
-  const [imgErr, setImgErr]     = useState(false)
+  const add = useCart(state => state.add)
+  const [added, setAdded] = useState(false)
+  const [selSize, setSelSize] = useState(null)
+  const [imgErr, setImgErr] = useState(false)
 
-  if (loading) return <div className="product-detail-loading">Loading…</div>
-  if (error || !p) return <div className="product-detail-loading">Product not found.</div>
+  if (loading) return <div className="product-detail-loading">{t(lang, 'loading')}</div>
+  if (error || !p) return <div className="product-detail-loading">{t(lang, 'productNotFound')}</div>
 
   const discount = p.old_price ? Math.round((1 - p.price / p.old_price) * 100) : null
 
   function handleAdd() {
-    if (!selSize && p.sizes?.length) return alert('Please select a size')
-    add(p)
+    if (!selSize && p.sizes?.length) {
+      alert(t(lang, 'pleaseSelectSize'))
+      return
+    }
+
+    add({ ...p, selectedSize: selSize })
     setAdded(true)
     setTimeout(() => setAdded(false), 2000)
   }
@@ -28,87 +35,92 @@ export default function Product() {
   return (
     <>
       <div className="product-detail">
-        {/* Breadcrumb */}
         <div className="breadcrumb">
-          <Link to="/">Home</Link> / <Link to="/shop">Shop</Link> /
+          <Link to="/">{t(lang, 'home')}</Link> / <Link to="/shop">{t(lang, 'shop')}</Link> /
           <Link to={`/shop?category=${p.category}`}>{p.category_label}</Link> /
           <span>{p.name}</span>
         </div>
 
         <div className="product-detail__grid">
-          {/* Image */}
-          <div className="product-detail__img" style={{background: p.fallback_bg}}>
+          <div className="product-detail__img" style={{ background: p.fallback_bg }}>
             {p.badge && (
-              <span className={`badge badge--${p.badge}`} style={{fontSize:13,padding:'5px 14px'}}>
-                {p.badge === 'new' ? 'New in' : `−${discount}% Sale`}
+              <span className={`badge badge--${p.badge}`} style={{ fontSize: 13, padding: '5px 14px' }}>
+                {p.badge === 'new' ? t(lang, 'newIn') : `-${discount}% ${t(lang, 'sale')}`}
               </span>
             )}
             {imgErr ? (
-              <span style={{fontSize:100}}>👕</span>
+              <span style={{ fontSize: 100 }}>{t(lang, 'productNotFound')}</span>
             ) : (
-              <img src={p.image_url} alt={p.name}
+              <img
+                src={p.image_url}
+                alt={p.name}
                 onError={() => setImgErr(true)}
-                style={{width:'100%',height:'100%',objectFit:'cover',position:'absolute',inset:0}} />
+                style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }}
+              />
             )}
           </div>
 
-          {/* Info */}
           <div className="product-detail__info">
             <div className="product-detail__category">{p.category_label} · {p.age_range}</div>
             <h1 className="product-detail__name">{p.name}</h1>
 
             <div className="product-detail__rating">
-              {'★'.repeat(Math.round(p.rating))}{'☆'.repeat(5-Math.round(p.rating))}
-              <span>{p.rating} ({p.reviews} reviews)</span>
+              {'★'.repeat(Math.round(p.rating))}{'☆'.repeat(5 - Math.round(p.rating))}
+              <span>{p.rating} ({p.reviews} {t(lang, 'reviews')})</span>
             </div>
 
             <div className="product-detail__price">
-              ${p.price}
-              {p.old_price && <span className="price__old">${p.old_price}</span>}
-              {discount && <span className="price__discount">−{discount}%</span>}
+              {formatMoney(p.price)}
+              {p.old_price && <span className="price__old">{formatMoney(p.old_price)}</span>}
+              {discount && <span className="price__discount">-{discount}%</span>}
             </div>
 
-            {/* Size selector */}
             {p.sizes?.length > 0 && (
               <div className="product-detail__sizes">
                 <div className="product-detail__sizes-label">
-                  Size <span>{selSize || 'Select a size'}</span>
+                  {t(lang, 'size')} <span>{selSize || t(lang, 'selectSize')}</span>
                 </div>
                 <div className="size-selector">
-                  {p.sizes.map(s => (
-                    <button key={s}
-                      className={`size-btn${selSize === s ? ' active' : ''}`}
-                      onClick={() => setSelSize(s)}>{s}</button>
+                  {p.sizes.map(size => (
+                    <button
+                      key={size}
+                      className={`size-btn${selSize === size ? ' active' : ''}`}
+                      onClick={() => setSelSize(size)}
+                    >
+                      {size}
+                    </button>
                   ))}
                 </div>
               </div>
             )}
 
-            <button className={`btn btn--primary product-detail__add${added ? ' added' : ''}`}
-              onClick={handleAdd} style={{width:'100%',justifyContent:'center',marginTop:'1.5rem'}}>
-              {added ? '✓ Added to bag!' : '+ Add to bag'}
+            <button
+              className={`btn btn--primary product-detail__add${added ? ' added' : ''}`}
+              onClick={handleAdd}
+              style={{ width: '100%', justifyContent: 'center', marginTop: '1.5rem' }}
+            >
+              {added ? t(lang, 'addedToBag') : `+ ${t(lang, 'addToBag')}`}
             </button>
 
             <div className="product-detail__meta-list">
-              <div>🚚 Free delivery on orders over $50</div>
-              <div>↩️ Free returns within 30 days</div>
-              <div>🌱 Made with GOTS certified cotton</div>
+              <div>{t(lang, 'freeDelivery50')}</div>
+              <div>{t(lang, 'freeReturns30')}</div>
+              <div>{t(lang, 'madeWithCotton')}</div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Related */}
       {related.length > 0 && (
         <section className="section section--gray">
           <div className="section__header">
-            <h2 className="section__title">You might also like</h2>
+            <h2 className="section__title">{t(lang, 'youMightAlsoLike')}</h2>
             <Link to={`/shop?category=${p.category}`} className="section__link">
-              See all {p.category_label} →
+              {t(lang, 'seeAllCategory')} {p.category_label} →
             </Link>
           </div>
           <div className="product-grid">
-            {related.slice(0,4).map(r => <ProductCard key={r.id} product={r} />)}
+            {related.slice(0, 4).map(product => <ProductCard key={product.id} product={product} />)}
           </div>
         </section>
       )}

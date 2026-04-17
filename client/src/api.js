@@ -25,14 +25,14 @@ async function request(path, options = {}) {
 }
 
 export const products = {
-  list(params = {}) {
+  list(params = {}, options = {}) {
     const qs = new URLSearchParams(
       Object.fromEntries(Object.entries(params).filter(([, v]) => v != null && v !== ''))
     ).toString()
-    return request(`/products${qs ? `?${qs}` : ''}`)
+    return request(`/products${qs ? `?${qs}` : ''}`, options)
   },
-  get(id)         { return request(`/products/${id}`) },
-  related(id)     { return request(`/products/${id}/related`) },
+  get(id, options = {})     { return request(`/products/${id}`, options) },
+  related(id, options = {}) { return request(`/products/${id}/related`, options) },
 }
 
 export const categories = {
@@ -59,10 +59,19 @@ export const mixMatch = {
 }
 
 export const cart = {
-  get()              { return request('/cart') },
-  add(productId, qty = 1) {
-    return request('/cart/add', { method: 'POST', body: JSON.stringify({ productId, qty }) })
+  get() { return request('/cart') },
+  add(productId, qty = 1, size = null) {
+    return request('/cart/add', { method: 'POST', body: JSON.stringify({ productId, qty, size }) })
+  },
+  sync(items) {
+    return request('/cart/sync', { method: 'POST', body: JSON.stringify({ items }) })
+  },
+  setQuantity(productId, qty, size = null) {
+    return request(`/cart/product/${productId}`, { method: 'PATCH', body: JSON.stringify({ qty, size }) })
   },
   remove(itemId) { return request(`/cart/${itemId}`, { method: 'DELETE' }) },
-  removeByProduct(productId) { return request(`/cart/product/${productId}`, { method: 'DELETE' }) },
+  removeByProduct(productId, size = null) {
+    const qs = new URLSearchParams(size ? { size } : {}).toString()
+    return request(`/cart/product/${productId}${qs ? `?${qs}` : ''}`, { method: 'DELETE' })
+  },
 }

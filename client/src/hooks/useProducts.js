@@ -1,21 +1,10 @@
 // client/src/hooks/useProducts.js
 import { useState, useEffect, useCallback } from 'react'
 import { products as productsApi } from '../api.js'
+import { DEFAULT_PRODUCT_FILTERS, buildProductParams } from '../lib/productFilters.js'
 
 export function useProducts(initialFilters = {}) {
-  const [filters, setFilters] = useState({
-    category:   'all',
-    ageGroup:   'all',
-    gender:     'all',
-    maxPrice:   70,
-    badge:      '',
-    q:          '',
-    sizeFilter: '',
-    sort:       'featured',
-    page:       1,
-    limit:      20,
-    ...initialFilters,
-  })
+  const [filters, setFilters] = useState({ ...DEFAULT_PRODUCT_FILTERS, ...initialFilters })
 
   const [state, setState] = useState({
     products: [],
@@ -25,31 +14,24 @@ export function useProducts(initialFilters = {}) {
     error: null,
   })
 
-  const fetchProducts = useCallback(async (f) => {
+  const fetchProducts = useCallback(async (f, signal) => {
     setState(s => ({ ...s, loading: true, error: null }))
     try {
-      const params = {
-        ...(f.category && f.category !== 'all' ? { category: f.category } : {}),
-        ...(f.ageGroup && f.ageGroup !== 'all' ? { ageGroup: f.ageGroup } : {}),
-        ...(f.gender && f.gender !== 'all' ? { gender: f.gender } : {}),
-        maxPrice: f.maxPrice,
-        ...(f.badge ? { badge: f.badge } : {}),
-        ...(f.q ? { q: f.q } : {}),
-        ...(f.sizeFilter ? { sizeFilter: f.sizeFilter } : {}),
-        sort: f.sort,
-        page: f.page,
-        limit: f.limit,
-      }
-      const data = await productsApi.list(params)
+      const data = await productsApi.list(buildProductParams(f), { signal })
       setState({ products: data.products, total: data.total, totalPages: data.totalPages, loading: false, error: null })
     } catch (err) {
+      if (err.name === 'AbortError') return
       setState(s => ({ ...s, loading: false, error: err.message }))
     }
   }, [])
 
   useEffect(() => {
-    const debounce = setTimeout(() => fetchProducts(filters), filters.q ? 300 : 0)
-    return () => clearTimeout(debounce)
+    const controller = new AbortController()
+    const debounce = setTimeout(() => fetchProducts(filters, controller.signal), filters.q ? 300 : 0)
+    return () => {
+      clearTimeout(debounce)
+      controller.abort()
+    }
   }, [filters, fetchProducts])
 
   function update(patch) {
@@ -68,13 +50,18 @@ export function useProduct(id) {
 
   useEffect(() => {
     if (!id) return
+    const controller = new AbortController()
     setState({ product: null, related: [], loading: true, error: null })
     Promise.all([
-      productsApi.get(id),
-      productsApi.related(id),
+      productsApi.get(id, { signal: controller.signal }),
+      productsApi.related(id, { signal: controller.signal }),
     ])
       .then(([product, related]) => setState({ product, related, loading: false, error: null }))
-      .catch(err => setState(s => ({ ...s, loading: false, error: err.message })))
+      .catch(err => {
+        if (err.name === 'AbortError') return
+        setState(s => ({ ...s, loading: false, error: err.message }))
+      })
+    return () => controller.abort()
   }, [id])
 
   return state

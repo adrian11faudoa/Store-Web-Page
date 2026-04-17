@@ -206,6 +206,11 @@ export default function Navbar() {
     navigate(`/shop?${params}`)
   }
 
+  function openCartDrawer() {
+    window.dispatchEvent(new CustomEvent('sk:open-cart'))
+    setCartOpen(true)
+  }
+
   const navCats = [
     { key: 'girl', sub: t(lang, 'sizes418'), onClick: () => navTo('ageGroup=girls&gender=girl') },
     { key: 'boy', sub: t(lang, 'sizes418'), onClick: () => navTo('ageGroup=boys&gender=boy') },
@@ -293,7 +298,7 @@ export default function Navbar() {
                 </svg>
               </button>
             )}
-            <button className="sk-icon-btn sk-icon-btn--cart" onClick={() => setCartOpen(true)} aria-label={t(lang, 'bag')} title={t(lang, 'bag')}>
+            <button className="sk-icon-btn sk-icon-btn--cart" onClick={openCartDrawer} aria-label={t(lang, 'bag')} title={t(lang, 'bag')}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
                 <line x1="3" y1="6" x2="21" y2="6" />
@@ -319,7 +324,7 @@ export default function Navbar() {
                   </button>
                 )
               })}
-              <button className="sk-catcard sk-catcard--offers" onClick={() => navTo('sort=price_asc')}>
+              <button className="sk-catcard sk-catcard--offers" onClick={() => navTo('sort=price-asc')}>
                 <div className="sk-catcard__offers-icon">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="#E91E63" stroke="none">
                     <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z" />
@@ -373,7 +378,7 @@ export default function Navbar() {
                 <span className="nav-drawer__chevron">›</span>
               </button>
             ))}
-            <button className="nav-drawer__item nav-drawer__item--card nav-drawer__item--accent" onClick={() => { navTo('sort=price_asc'); setNavDrawer(false) }}>
+            <button className="nav-drawer__item nav-drawer__item--card nav-drawer__item--accent" onClick={() => { navTo('sort=price-asc'); setNavDrawer(false) }}>
               <span className="nav-drawer__item-label">{t(lang, 'specialOffers')}</span>
               <span className="nav-drawer__chevron">›</span>
             </button>

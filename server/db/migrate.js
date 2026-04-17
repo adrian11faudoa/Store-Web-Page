@@ -112,9 +112,39 @@ CREATE TABLE IF NOT EXISTS cart_items (
   id         SERIAL PRIMARY KEY,
   cart_id    INTEGER REFERENCES carts(id) ON DELETE CASCADE,
   product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+  size       VARCHAR(20) NOT NULL DEFAULT '',
   qty        INTEGER NOT NULL DEFAULT 1 CHECK (qty > 0),
-  UNIQUE (cart_id, product_id)
+  UNIQUE (cart_id, product_id, size)
 );
+
+ALTER TABLE cart_items ADD COLUMN IF NOT EXISTS size VARCHAR(20);
+ALTER TABLE cart_items ALTER COLUMN size SET DEFAULT '';
+UPDATE cart_items SET size = '' WHERE size IS NULL;
+ALTER TABLE cart_items ALTER COLUMN size SET NOT NULL;
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'cart_items_cart_id_product_id_key'
+  ) THEN
+    ALTER TABLE cart_items DROP CONSTRAINT cart_items_cart_id_product_id_key;
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'cart_items_cart_id_product_id_size_key'
+  ) THEN
+    ALTER TABLE cart_items
+      ADD CONSTRAINT cart_items_cart_id_product_id_size_key
+      UNIQUE (cart_id, product_id, size);
+  END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS wishlists (
   user_id    INTEGER REFERENCES users(id) ON DELETE CASCADE,

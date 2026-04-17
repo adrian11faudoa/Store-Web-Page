@@ -9,7 +9,8 @@
     "start": "node index.js",
     "seed": "node db/seed.js",
     "migrate": "node db/migrate.js",
-    "migrate:ages": "node db/migrate_age_groups.js"
+    "migrate:ages": "node db/migrate_age_groups.js",
+    "migrate:cart-sizes": "node db/migrate_cart_item_sizes.js"
   },
   "dependencies": {
     "express": "^4.19.2",

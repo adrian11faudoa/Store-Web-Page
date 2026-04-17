@@ -6,6 +6,7 @@ import Footer from './components/Footer.jsx'
 import Home from './pages/Home.jsx'
 import Shop from './pages/Shop.jsx'
 import Product from './pages/Product.jsx'
+import Checkout from './pages/Checkout.jsx'
 import SignIn from './pages/SignIn.jsx'
 import { useCart, useAuth } from './store/index.js'
 
@@ -41,6 +42,7 @@ export default function App() {
         <Route path="/"            element={<Home />} />
         <Route path="/shop"        element={<Shop />} />
         <Route path="/product/:id" element={<Product />} />
+        <Route path="/checkout"    element={<Checkout />} />
         <Route path="/signin"      element={<SignIn />} />
       </Routes>
       <Footer />

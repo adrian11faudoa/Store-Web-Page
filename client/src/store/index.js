@@ -1,8 +1,6 @@
-// client/src/store/index.js
 import { create } from 'zustand'
 import { cart as cartApi, auth as authApi } from '../api.js'
 
-// ── Cookie helpers ────────────────────────────────────────────────────────────
 function setCookie(name, value, days) {
   const expires = days
     ? `; expires=${new Date(Date.now() + days * 864e5).toUTCString()}`
@@ -11,82 +9,204 @@ function setCookie(name, value, days) {
 }
 
 function getCookie(name) {
-  const v = document.cookie.match(`(^|;)\\s*${name}\\s*=\\s*([^;]+)`)
-  return v ? decodeURIComponent(v[2]) : null
+  const value = document.cookie.match(`(^|;)\\s*${name}\\s*=\\s*([^;]+)`)
+  return value ? decodeURIComponent(value[2]) : null
 }
 
 function deleteCookie(name) {
   document.cookie = `${name}=; Max-Age=0; path=/; SameSite=Lax`
 }
 
+function isLoggedIn() {
+  return !!localStorage.getItem('tf_token')
+}
+
+function normalizeCartItem(item) {
+  return {
+    ...item,
+    product_id: Number(item.product_id ?? item.productId),
+    qty: Number(item.qty) || 0,
+    size: item.size || null,
+  }
+}
+
 function getCartCookie() {
   const raw = getCookie('tf_cart')
   if (!raw) return []
-  try { return JSON.parse(raw) } catch { return [] }
+
+  try {
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? parsed.map(normalizeCartItem).filter(item => item.qty > 0) : []
+  } catch {
+    return []
+  }
 }
 
-function saveCartCookie(items, isLoggedIn) {
-  if (items.length === 0) { deleteCookie('tf_cart'); return }
-  const value = JSON.stringify(items)
-  if (isLoggedIn) {
-    // No expiry for logged-in users
+function saveCartCookie(items, loggedIn) {
+  if (items.length === 0) {
+    deleteCookie('tf_cart')
+    return
+  }
+
+  const value = JSON.stringify(items.map(item => ({
+    ...item,
+    size: item.size || null,
+  })))
+
+  if (loggedIn) {
     setCookie('tf_cart', value, null)
   } else {
-    // 1 day for guests
     setCookie('tf_cart', value, 1)
   }
 }
 
-// ── Cart store ────────────────────────────────────────────────────────────────
+function getCartItemKey(productId, size = null) {
+  return `${productId}::${size || ''}`
+}
+
+function hydrateCart(items) {
+  const normalized = items.map(normalizeCartItem)
+  saveCartCookie(normalized, isLoggedIn())
+  return normalized
+}
+
+async function runCartMutation(set, action, rollbackItems, keepOptimistic = false) {
+  set({ loading: true })
+  try {
+    const data = await action()
+    set({ items: hydrateCart(data.items || []), loading: false })
+  } catch {
+    if (!keepOptimistic && rollbackItems) {
+      saveCartCookie(rollbackItems, isLoggedIn())
+      set({ items: rollbackItems, loading: false })
+      return
+    }
+    set({ loading: false })
+  }
+}
+
 export const useCart = create((set, get) => ({
   items: getCartCookie(),
   loading: false,
 
   async fetch() {
+    const cookieItems = getCartCookie()
+    set({ loading: true })
+
     try {
-      const data = await cartApi.get()
-      const items = data.items || []
-      set({ items })
-      const isLoggedIn = !!localStorage.getItem('tf_token')
-      saveCartCookie(items, isLoggedIn)
-    } catch {}
+      let data = await cartApi.get()
+      let items = data.items || []
+
+      if (cookieItems.length > 0) {
+        const serverKeys = new Set(items.map(item => getCartItemKey(item.product_id, item.size)))
+        const hasMissingCookieItems = cookieItems.some(
+          item => !serverKeys.has(getCartItemKey(item.product_id, item.size))
+        )
+
+        if (items.length === 0 || hasMissingCookieItems) {
+          data = await cartApi.sync(cookieItems)
+          items = data.items || []
+        }
+      }
+
+      set({ items: hydrateCart(items), loading: false })
+    } catch {
+      set({ items: cookieItems, loading: false })
+      saveCartCookie(cookieItems, isLoggedIn())
+    }
   },
 
   async add(product) {
-    const isLoggedIn = !!localStorage.getItem('tf_token')
-    set(s => {
-      const existing = s.items.find(i => i.product_id === product.id)
-      let items
-      if (existing) {
-        items = s.items.map(i => i.product_id === product.id ? { ...i, qty: i.qty + 1 } : i)
-      } else {
-        items = [...s.items, {
-          product_id: product.id,
-          name: product.name,
-          price: product.price,
-          image_url: product.image_url,
-          fallback_bg: product.fallback_bg,
-          qty: 1
-        }]
-      }
-      saveCartCookie(items, isLoggedIn)
+    const size = product.selectedSize || null
+    const previousItems = get().items
+
+    set(state => {
+      const existing = state.items.find(item => (
+        getCartItemKey(item.product_id, item.size) === getCartItemKey(product.id, size)
+      ))
+
+      const items = existing
+        ? state.items.map(item => (
+            getCartItemKey(item.product_id, item.size) === getCartItemKey(product.id, size)
+              ? { ...item, qty: item.qty + 1 }
+              : item
+          ))
+        : [
+            ...state.items,
+            {
+              product_id: product.id,
+              name: product.name,
+              price: product.price,
+              image_url: product.image_url,
+              fallback_bg: product.fallback_bg,
+              qty: 1,
+              size,
+            },
+          ]
+
+      saveCartCookie(items, isLoggedIn())
       return { items }
     })
-    try { await cartApi.add(product.id) } catch {}
+
+    await runCartMutation(set, () => cartApi.add(product.id, 1, size), previousItems, true)
   },
 
-  async remove(productId) {
-    const isLoggedIn = !!localStorage.getItem('tf_token')
+  async setQuantity(productId, qty, size = null) {
+    const previousItems = get().items
+    const nextQty = Math.max(0, Number(qty) || 0)
 
-    // Optimistic: remove by product_id
-    set(s => {
-      const items = s.items.filter(i => i.product_id !== productId && i.id !== productId)
-      saveCartCookie(items, isLoggedIn)
+    set(state => {
+      const items = nextQty === 0
+        ? state.items.filter(item => (
+            getCartItemKey(item.product_id, item.size) !== getCartItemKey(productId, size)
+          ))
+        : state.items.map(item => (
+            getCartItemKey(item.product_id, item.size) === getCartItemKey(productId, size)
+              ? { ...item, qty: nextQty }
+              : item
+          ))
+
+      saveCartCookie(items, isLoggedIn())
       return { items }
     })
 
-    // Always remove by product_id — works for both guest (cookie) and logged-in users
-    try { await cartApi.removeByProduct(productId) } catch {}
+    await runCartMutation(set, () => cartApi.setQuantity(productId, nextQty, size), previousItems, true)
+  },
+
+  async remove(productId, size = null) {
+    return get().setQuantity(productId, 0, size)
+  },
+
+  async removeItem(itemId, fallbackProductId = null, fallbackSize = null) {
+    const previousItems = get().items
+    const items = previousItems.filter(item => {
+      if (itemId != null && item.id != null) return item.id !== itemId
+      return getCartItemKey(item.product_id, item.size) !== getCartItemKey(fallbackProductId, fallbackSize)
+    })
+
+    saveCartCookie(items, isLoggedIn())
+    set({ items, loading: true })
+
+    if (itemId == null) {
+      try {
+        await cartApi.removeByProduct(fallbackProductId, fallbackSize)
+      } catch {}
+      set({ loading: false })
+      return
+    }
+
+    await runCartMutation(
+      set,
+      async () => {
+        try {
+          return await cartApi.remove(itemId)
+        } catch {
+          return cartApi.removeByProduct(fallbackProductId, fallbackSize)
+        }
+      },
+      previousItems,
+      true
+    )
   },
 
   clearCart() {
@@ -95,8 +215,22 @@ export const useCart = create((set, get) => ({
   },
 }))
 
-// ── Auth store ────────────────────────────────────────────────────────────────
-export const useAuth = create((set) => ({
+async function syncCartAfterAuth() {
+  const cookieItems = getCartCookie()
+
+  if (cookieItems.length > 0) {
+    const data = await cartApi.sync(cookieItems)
+    const items = data.items || []
+    useCart.setState({ items: hydrateCart(items) })
+    return
+  }
+
+  const data = await cartApi.get()
+  const items = data.items || []
+  useCart.setState({ items: hydrateCart(items) })
+}
+
+export const useAuth = create(set => ({
   user: JSON.parse(localStorage.getItem('tf_user') || 'null'),
   loading: false,
   error: null,
@@ -108,58 +242,45 @@ export const useAuth = create((set) => ({
       localStorage.setItem('tf_token', token)
       localStorage.setItem('tf_user', JSON.stringify(user))
       set({ user, loading: false })
-      // Fetch server cart and merge
+
       try {
-        const data = await import('../api.js').then(m => m.cart.get())
-        const items = data.items || []
-        if (items.length > 0) {
-          useCart.setState({ items })
-          saveCartCookie(items, true)
-        }
+        await syncCartAfterAuth()
       } catch {}
     } catch (err) {
       set({ error: err.message, loading: false })
-      throw err // re-throw so AuthModal can handle unverified case
+      throw err
     }
   },
 
   async register(email, password, name) {
     set({ loading: true, error: null })
     try {
-      // Server returns { pending: true } — account created but not yet verified
-      // The AuthModal handles the transition to verify-email view
       await authApi.register({ email, password, name })
       set({ loading: false })
     } catch (err) {
       set({ error: err.message, loading: false })
-      throw err // re-throw so AuthModal can catch
+      throw err
     }
   },
 
-  // Called after Google OAuth redirect — stores token + user from URL payload
   setGoogleUser(token, user) {
     localStorage.setItem('tf_token', token)
     localStorage.setItem('tf_user', JSON.stringify(user))
     set({ user, error: null, loading: false })
-    // Fetch server cart for this user and merge into local state
-    import('../api.js').then(m => m.cart.get()).then(data => {
-      const items = data.items || []
-      if (items.length > 0) {
-        useCart.setState({ items })
-        saveCartCookie(items, true)
-      }
-    }).catch(() => {})
+
+    syncCartAfterAuth().catch(() => {})
   },
 
   logout() {
     localStorage.removeItem('tf_token')
     localStorage.removeItem('tf_user')
-    // Clear the persistent (no-expiry) cart and switch to guest cookie (1 day)
+
     const currentItems = useCart.getState().items
     deleteCookie('tf_cart')
     if (currentItems.length > 0) {
-      saveCartCookie(currentItems, false) // re-save with 1-day expiry
+      saveCartCookie(currentItems, false)
     }
+
     set({ user: null, error: null })
   },
 }))
