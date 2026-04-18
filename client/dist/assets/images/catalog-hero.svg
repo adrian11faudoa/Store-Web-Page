@@ -1,0 +1,13 @@
+<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" rx="40" fill="#FFF8EC"/>
+  <circle cx="620" cy="140" r="84" fill="#F5C56B"/>
+  <circle cx="170" cy="110" r="60" fill="#D2E8E1"/>
+  <rect x="120" y="190" width="560" height="280" rx="32" fill="#17282F"/>
+  <rect x="160" y="225" width="160" height="210" rx="24" fill="#F6F1E7"/>
+  <rect x="340" y="225" width="140" height="210" rx="24" fill="#E7C6A8"/>
+  <rect x="500" y="225" width="140" height="210" rx="24" fill="#A9C0D2"/>
+  <path d="M215 270C242 270 264 292 264 319V402H166V319C166 292 188 270 215 270Z" fill="#17282F"/>
+  <path d="M410 270C437 270 459 292 459 319V402H361V319C361 292 383 270 410 270Z" fill="#17282F"/>
+  <path d="M570 270C597 270 619 292 619 319V402H521V319C521 292 543 270 570 270Z" fill="#17282F"/>
+  <text x="120" y="530" fill="#17282F" font-family="Arial, sans-serif" font-size="42" font-weight="700">Sahara Kids</text>
+</svg>
