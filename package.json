@@ -1,18 +1,29 @@
 {
-  "name": "tinyfits",
-  "version": "1.0.0",
+  "name": "store-platform",
+  "version": "2.0.0",
   "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "concurrently \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
-    "build": "npm run build --prefix client",
-    "start": "node server/index.js",
-    "seed": "node server/src/db/seed.js",
-    "migrate": "node server/src/db/migrate.js",
-    "compose:up": "docker-compose up --build",
-    "compose:down": "docker-compose down"
+    "dev": "concurrently \"npm run dev --workspace @store/backend\" \"npm run dev --workspace @store/frontend\"",
+    "dev:frontend": "npm run dev --workspace @store/frontend",
+    "dev:backend": "npm run dev --workspace @store/backend",
+    "build": "npm run build --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "db:migrate": "npm run prisma:migrate --workspace @store/backend",
+    "db:deploy": "npm run prisma:deploy --workspace @store/backend",
+    "db:seed": "npm run prisma:seed --workspace @store/backend",
+    "compose:up": "docker compose up --build",
+    "compose:down": "docker compose down"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2",
-    "gh-pages": "^6.3.0"
+    "@eslint/js": "^9.25.1",
+    "concurrently": "^9.1.2",
+    "eslint": "^9.25.1",
+    "globals": "^15.15.0"
   }
 }

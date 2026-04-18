@@ -1,6 +1,9 @@
 node_modules/
 server/.env
 .env
+.env.development
+.env.staging
+.env.production
 *.log
 client.zip
 client_fixed.zip

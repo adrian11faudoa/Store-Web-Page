@@ -1,0 +1,143 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  admin
+  user
+}
+
+enum AuthProvider {
+  local
+  google
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  name          String
+  passwordHash  String?
+  role          UserRole       @default(user)
+  avatarUrl     String?
+  emailVerified Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  authAccounts  AuthAccount[]
+  refreshTokens RefreshToken[]
+  carts         Cart[]
+}
+
+model AuthAccount {
+  id                String       @id @default(uuid())
+  userId            String
+  provider          AuthProvider
+  providerAccountId String
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenId   String    @unique
+  tokenHash String
+  userAgent String?
+  ipAddress String?
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@index([tokenId])
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  slug        String    @unique
+  name        String
+  description String?
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  products    Product[]
+}
+
+model Product {
+  id           String           @id @default(uuid())
+  slug         String           @unique
+  name         String
+  description  String
+  badge        String?
+  gender       String
+  ageGroup     String
+  price        Decimal          @db.Decimal(10, 2)
+  rating       Decimal          @default(4.5) @db.Decimal(3, 2)
+  releaseDate  DateTime
+  imageUrl     String?
+  paletteStart String           @default("#f5ead8")
+  paletteEnd   String           @default("#ffffff")
+  isFeatured   Boolean          @default(false)
+  isActive     Boolean          @default(true)
+  categoryId   String
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  category     Category         @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  variants     ProductVariant[]
+
+  @@index([categoryId])
+  @@index([createdAt(sort: Desc)])
+  @@index([price])
+  @@index([isFeatured, isActive])
+}
+
+model ProductVariant {
+  id        String     @id @default(uuid())
+  productId String
+  size      String
+  sku       String     @unique
+  stock     Int        @default(0)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  product   Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  cartItems CartItem[]
+
+  @@unique([productId, size])
+  @@index([productId])
+}
+
+model Cart {
+  id          String     @id @default(uuid())
+  userId      String?
+  guestCartId String?    @unique
+  expiresAt   DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  user        User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items       CartItem[]
+
+  @@index([userId])
+}
+
+model CartItem {
+  id        String         @id @default(uuid())
+  cartId    String
+  variantId String
+  quantity  Int            @default(1)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  cart      Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, variantId])
+  @@index([variantId])
+}
