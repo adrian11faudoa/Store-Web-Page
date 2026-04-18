@@ -1,50 +1,124 @@
-Store Proyect: Sahara Kids
+# Sahara Kids Storefront
 
+Sahara Kids is a production-ready frontend storefront rebuilt from a basic demo into a cleaner, portfolio-ready React application. The project now uses a local JSON data layer, dynamic product rendering, a persistent shopping cart, responsive layouts, and GitHub Pages-friendly deployment settings.
 
-Reference:
+## Features
 
-https://www.childrensplace.com/us/home
+- Dynamic catalog rendered from [`client/public/data/products.json`](./client/public/data/products.json)
+- Product search, category filtering, gender filtering, age-group filtering, and sorting
+- Product detail pages with size selection and quantity controls
+- Cart drawer with add, remove, quantity updates, totals, and `localStorage` persistence
+- Empty-state handling for the cart and no-results searches
+- Mobile-first responsive layout with dark mode support
+- Semantic HTML, accessible form labels, descriptive alt text, and keyboard-safe interactions
+- Relative build paths and hash-based routing for GitHub Pages deployment
 
+## Tech Stack
 
+- React 18
+- Vite 5
+- React Router
+- Vanilla CSS
+- JSON for mock product data
+- `localStorage` for cart persistence
 
-Debbunging:
-    In the cart, when press the x to delete an item from the list it does not remove it, solve it,
-    also make it a cookie when add thing to the cart, so if some one enter the page and add some article and then leaves delete the cart after a day,
-    but if sing in keep it until they delete it
+## Project Structure
 
-    Dont add a product to the cart if a size or age is not selected first
+```text
+client/
+  public/
+    assets/
+      images/
+        catalog-hero.svg
+        product-placeholder.svg
+    data/
+      products.json
+  src/
+    assets/
+      css/
+        app.css
+      js/
+        api/
+          products.js
+        utils/
+          cart.js
+          format.js
+          products.js
+    components/
+      CartDrawer.jsx
+      CartLineItem.jsx
+      Footer.jsx
+      Header.jsx
+      ProductCard.jsx
+      ProductFilters.jsx
+    hooks/
+      useCart.js
+      useProducts.js
+      useTheme.js
+    pages/
+      Checkout.jsx
+      Home.jsx
+      Product.jsx
+      Shop.jsx
+    App.jsx
+    main.jsx
+```
 
-    Make the posibility to sign in with google account or a social media account, like facebook or instagram
+## Screenshots
 
-    Also when sign in, and press the button again instead of loggin out directly show a menu for the user, with a button to change psw, close session,
-    and if change password is selected they have to enter the current psw, new psw and confirm psw
+Place final screenshots here when publishing the project:
 
-    Also in the sing in menu, give the option if someone forgot their psw can change it by sending a 6 character code generated randomly to their email, and the code having a 10min of life until expires
+- `docs/screenshots/homepage.png`
+- `docs/screenshots/catalog.png`
+- `docs/screenshots/cart-drawer.png`
 
-    Also is a problem, when sign in and then sing out the spaces of email and psw should be blank,now is leaving the values they typed
+## Installation
 
-    When createing an account add a confirm password after the password
+```bash
+npm install
+npm run dev
+```
 
-    In the category section the all section shows 0, and i want to show the number of all items in the store
+To run only the frontend:
 
-    Remove the boys, girls and baby buttons on the top menu
+```bash
+npm run dev --prefix client
+```
 
-    Also in the side bar where is the category and age sections, add a option to search for boys, girls, baby (boys, girls) articles, so specify in the articles to whitch gender they are, not only the dresses for girls and tops for boys, but if a top is for a boy or a girl, so can be sort
+## Production Build
 
-    Also change the age group so you first select if its a boy, girl or baby, then for boys and girls the ages are from 2 year to 16, and for babys select if boys or girls and months 3M, 6M, 9M, 12M, 18M, 24M
+```bash
+npm run build --prefix client
+```
 
-Make available to select size without enter the full page of the product
+The production files are generated in [`client/dist`](./client/dist).
 
-Sign in menu does not fit the screen, change to fit
+## GitHub Pages Deployment
 
-after sign out make the spaces of email and password blank, right now is keeping the values if someone enter with their email and passwrod
+This project is already configured for GitHub Pages:
 
-the filter in the gender & age section of the side bar when selected baby and some gender like baby boys or girls and tring to search for talla (meses) it does do nothing, solve it
+- Vite uses relative asset paths with `base: './'`
+- Routing uses `HashRouter`, so deep links work on static hosting
 
-solve the sorting of the products so they always get sorted in a way, and if change the filter the product on top that apply stays on top, also make sure the filters work based on the products
+Deployment steps:
 
-make a requirement to confirm email when creating an account, make a message to send new users welcoming them and also to confirm their email with a code, they cant sign in until the code is confirmed
+1. Run `npm run build --prefix client`
+2. Push the contents of `client/dist`
+3. In GitHub, enable Pages for the branch/folder you publish
+4. Use the generated `client/dist/index.html` as the deployed entry point
 
-make the reset password template mail when forgot the password, for a google account, and process to do it for a outlook account
+If you deploy with `gh-pages`, publish the `client/dist` folder.
 
-dont open a new menu to select the size of the article,
+## Live Demo
+
+Add your GitHub Pages URL here after deployment:
+
+- `https://your-username.github.io/your-repo-name/`
+
+## Quality Notes
+
+- Replaced hardcoded storefront rendering with a reusable data layer
+- Removed the old dependency on the backend product API for the frontend demo
+- Reduced visual and structural duplication across the app
+- Replaced oversized styling sprawl with a smaller, organized CSS system
+- Verified the production build with `npm run build --prefix client`

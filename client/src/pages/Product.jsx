@@ -1,129 +1,109 @@
-import { useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { useProduct } from '../hooks/useProducts.js'
-import { useCart } from '../store/index.js'
+import { Link, useParams } from 'react-router-dom'
+import { useMemo, useState } from 'react'
 import ProductCard from '../components/ProductCard.jsx'
-import { t, useLang } from '../store/lang.js'
-import { useMoney } from '../lib/money.js'
+import { formatCurrency, formatLabel } from '../assets/js/utils/format.js'
 
-export default function Product() {
-  const { id } = useParams()
-  const lang = useLang(state => state.lang)
-  const { formatMoney } = useMoney()
-  const { product: p, related, loading, error } = useProduct(id)
-  const add = useCart(state => state.add)
-  const [added, setAdded] = useState(false)
-  const [selSize, setSelSize] = useState(null)
-  const [imgErr, setImgErr] = useState(false)
+const PRODUCT_IMAGE = `${import.meta.env.BASE_URL}assets/images/product-placeholder.svg`
 
-  if (loading) return <div className="product-detail-loading">{t(lang, 'loading')}</div>
-  if (error || !p) return <div className="product-detail-loading">{t(lang, 'productNotFound')}</div>
+export default function Product({ cart, findProduct, getRelated }) {
+  const { productId } = useParams()
+  const product = findProduct(productId)
+  const [selectedSize, setSelectedSize] = useState(product?.sizes[0] || '')
+  const [quantity, setQuantity] = useState(1)
+  const [message, setMessage] = useState('')
+  const relatedProducts = useMemo(() => getRelated(product), [getRelated, product])
 
-  const discount = p.old_price ? Math.round((1 - p.price / p.old_price) * 100) : null
+  if (!product) {
+    return (
+      <section className="section">
+        <div className="container empty-state">
+          <h1>Product not found</h1>
+          <p>The requested product could not be found in the local catalog.</p>
+          <Link className="button" to="/shop">Return to shop</Link>
+        </div>
+      </section>
+    )
+  }
 
-  function handleAdd() {
-    if (!selSize && p.sizes?.length) {
-      alert(t(lang, 'pleaseSelectSize'))
-      return
-    }
-
-    add({ ...p, selectedSize: selSize })
-    setAdded(true)
-    setTimeout(() => setAdded(false), 2000)
+  function handleAddToCart() {
+    cart.addItem(product, selectedSize, quantity)
+    setMessage('Product added to cart')
   }
 
   return (
     <>
-      <div className="product-detail">
-        <div className="breadcrumb">
-          <Link to="/">{t(lang, 'home')}</Link> / <Link to="/shop">{t(lang, 'shop')}</Link> /
-          <Link to={`/shop?category=${p.category}`}>{p.category_label}</Link> /
-          <span>{p.name}</span>
-        </div>
-
-        <div className="product-detail__grid">
-          <div className="product-detail__img" style={{ background: p.fallback_bg }}>
-            {p.badge && (
-              <span className={`badge badge--${p.badge}`} style={{ fontSize: 13, padding: '5px 14px' }}>
-                {p.badge === 'new' ? t(lang, 'newIn') : `-${discount}% ${t(lang, 'sale')}`}
-              </span>
-            )}
-            {imgErr ? (
-              <span style={{ fontSize: 100 }}>{t(lang, 'productNotFound')}</span>
-            ) : (
-              <img
-                src={p.image_url}
-                alt={p.name}
-                onError={() => setImgErr(true)}
-                style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }}
-              />
-            )}
+      <section className="section">
+        <div className="container product-layout">
+          <div
+            className="product-hero"
+            style={{ background: `linear-gradient(135deg, ${product.palette[0]}, ${product.palette[1]})` }}
+          >
+            <img src={PRODUCT_IMAGE} alt={product.name} loading="eager" width="560" height="420" />
           </div>
 
-          <div className="product-detail__info">
-            <div className="product-detail__category">{p.category_label} · {p.age_range}</div>
-            <h1 className="product-detail__name">{p.name}</h1>
-
-            <div className="product-detail__rating">
-              {'★'.repeat(Math.round(p.rating))}{'☆'.repeat(5 - Math.round(p.rating))}
-              <span>{p.rating} ({p.reviews} {t(lang, 'reviews')})</span>
+          <div className="product-panel">
+            <p className="eyebrow">{formatLabel(product.category)}</p>
+            <h1>{product.name}</h1>
+            <p className="product-panel__copy">{product.description}</p>
+            <div className="product-panel__facts">
+              <span>{formatLabel(product.gender)}</span>
+              <span>{formatLabel(product.ageGroup)}</span>
+              <span>{product.rating.toFixed(1)} rating</span>
             </div>
+            <div className="product-panel__price">{formatCurrency(product.price)}</div>
 
-            <div className="product-detail__price">
-              {formatMoney(p.price)}
-              {p.old_price && <span className="price__old">{formatMoney(p.old_price)}</span>}
-              {discount && <span className="price__discount">-{discount}%</span>}
-            </div>
-
-            {p.sizes?.length > 0 && (
-              <div className="product-detail__sizes">
-                <div className="product-detail__sizes-label">
-                  {t(lang, 'size')} <span>{selSize || t(lang, 'selectSize')}</span>
-                </div>
-                <div className="size-selector">
-                  {p.sizes.map(size => (
-                    <button
-                      key={size}
-                      className={`size-btn${selSize === size ? ' active' : ''}`}
-                      onClick={() => setSelSize(size)}
-                    >
-                      {size}
-                    </button>
-                  ))}
-                </div>
+            <fieldset className="product-panel__sizes">
+              <legend>Size</legend>
+              <div className="product-card__sizes">
+                {product.sizes.map(option => (
+                  <button
+                    key={option}
+                    type="button"
+                    className={option === selectedSize ? 'size-chip is-active' : 'size-chip'}
+                    onClick={() => setSelectedSize(option)}
+                  >
+                    {option}
+                  </button>
+                ))}
               </div>
-            )}
+            </fieldset>
 
-            <button
-              className={`btn btn--primary product-detail__add${added ? ' added' : ''}`}
-              onClick={handleAdd}
-              style={{ width: '100%', justifyContent: 'center', marginTop: '1.5rem' }}
-            >
-              {added ? t(lang, 'addedToBag') : `+ ${t(lang, 'addToBag')}`}
-            </button>
-
-            <div className="product-detail__meta-list">
-              <div>{t(lang, 'freeDelivery50')}</div>
-              <div>{t(lang, 'freeReturns30')}</div>
-              <div>{t(lang, 'madeWithCotton')}</div>
+            <div className="product-panel__actions">
+              <label>
+                Quantity
+                <input
+                  type="number"
+                  min="1"
+                  max="10"
+                  value={quantity}
+                  onChange={event => setQuantity(Number(event.target.value) || 1)}
+                />
+              </label>
+              <button type="button" className="button" onClick={handleAddToCart}>
+                Add to cart
+              </button>
             </div>
+            <p className="product-card__status" aria-live="polite">{message}</p>
+            <Link className="text-link" to="/checkout">Go to checkout</Link>
           </div>
         </div>
-      </div>
+      </section>
 
-      {related.length > 0 && (
-        <section className="section section--gray">
-          <div className="section__header">
-            <h2 className="section__title">{t(lang, 'youMightAlsoLike')}</h2>
-            <Link to={`/shop?category=${p.category}`} className="section__link">
-              {t(lang, 'seeAllCategory')} {p.category_label} →
-            </Link>
+      <section className="section section--muted">
+        <div className="container">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">More to explore</p>
+              <h2>Related picks</h2>
+            </div>
           </div>
           <div className="product-grid">
-            {related.slice(0, 4).map(product => <ProductCard key={product.id} product={product} />)}
+            {relatedProducts.map(item => (
+              <ProductCard key={item.id} product={item} onAddToCart={cart.addItem} />
+            ))}
           </div>
-        </section>
-      )}
+        </div>
+      </section>
     </>
   )
 }

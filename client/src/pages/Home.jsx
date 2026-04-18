@@ -1,119 +1,92 @@
 import { Link } from 'react-router-dom'
-import { Splide, SplideSlide } from '@splidejs/react-splide'
-import '@splidejs/splide/dist/css/splide.min.css'
-import { useProducts } from '../hooks/useProducts.js'
 import ProductCard from '../components/ProductCard.jsx'
-import MixMatch from '../components/MixMatch.jsx'
-import { t, useLang } from '../store/lang.js'
 
-export default function Home() {
-  const lang = useLang(state => state.lang)
-  const { products, loading } = useProducts({ limit: 8, sort: 'newest' })
+const HERO_IMAGE = `${import.meta.env.BASE_URL}assets/images/catalog-hero.svg`
 
-  const ageCards = [
-    { label: t(lang, 'baby'), sub: t(lang, 'sizes024m'), emoji: '🍼', age: 'baby', bg: '#FAEEDA' },
-    { label: t(lang, 'boys'), sub: '2-16', emoji: '👦', age: 'boys', bg: '#EEEDFE', gender: 'boy' },
-    { label: t(lang, 'girls'), sub: '2-16', emoji: '👧', age: 'girls', bg: '#E1F5EE', gender: 'girl' },
-  ]
+const categoryHighlights = [
+  { title: 'Play-ready sets', description: 'Soft coordinates that make busy mornings easier.', query: 'set' },
+  { title: 'Denim staples', description: 'Durable layers designed for school days and weekends.', query: 'denim' },
+  { title: 'Occasion outfits', description: 'Polished looks for parties, portraits, and milestones.', query: 'dress' },
+]
 
-  const banners = [
-    { tag: t(lang, 'newCollection'), title: t(lang, 'springPastels'), bg: '#EEEDFE', color: '#26215C', emoji: '🌸', cta: t(lang, 'shopNow'), to: '/shop?badge=new', btnBg: '#3C3489' },
-    { tag: t(lang, 'upTo40'), title: t(lang, 'summerSale'), bg: '#E1F5EE', color: '#085041', emoji: '☀️', cta: t(lang, 'viewSale'), to: '/shop?badge=sale', btnBg: '#0F6E56' },
-    { tag: t(lang, 'footwearDrop'), title: t(lang, 'shoesBuilt'), bg: '#FAECE7', color: '#4A1B0C', emoji: '👟', cta: t(lang, 'shopFootwear'), to: '/shop?category=footwear', btnBg: '#D85A30' },
-  ]
-
-  const trustItems = [
-    { icon: '🚚', title: t(lang, 'trustDelivery'), sub: t(lang, 'trustDeliverySub') },
-    { icon: '↩', title: t(lang, 'trustReturns'), sub: t(lang, 'trustReturnsSub') },
-    { icon: '🌱', title: t(lang, 'trustSustainable'), sub: t(lang, 'trustSustainableSub') },
-    { icon: '📦', title: t(lang, 'trustTracked'), sub: t(lang, 'trustTrackedSub') },
-  ]
-
+export default function Home({ featuredProducts, cart, loading, error, openCart }) {
   return (
     <>
-      <section className="hero hero-section">
-        <div className="hero__text">
-          <div className="hero__eyebrow">{t(lang, 'springSummer')}</div>
-          <h1 className="hero__title">{t(lang, 'heroTitle')}</h1>
-          <p className="hero__sub">{t(lang, 'heroSub')}</p>
-          <div className="hero__actions">
-            <Link to="/shop" className="btn btn--primary">{t(lang, 'shopNewArrivals')} →</Link>
-            <Link to="/shop?badge=sale" className="btn btn--outline">{t(lang, 'viewSale')}</Link>
+      <section className="hero">
+        <div className="container hero__grid">
+          <div className="hero__content">
+            <p className="eyebrow">Portfolio-ready storefront</p>
+            <h1>Children&apos;s fashion presented like a modern product team would ship it.</h1>
+            <p className="hero__copy">
+              Dynamic catalog data, polished filtering, accessible interactions,
+              persistent cart behavior, and GitHub Pages-ready deployment.
+            </p>
+            <div className="hero__actions">
+              <Link className="button" to="/shop">Browse catalog</Link>
+              <button type="button" className="button button--ghost" onClick={openCart}>
+                Open cart ({cart.itemCount})
+              </button>
+            </div>
+            <dl className="hero__stats">
+              <div><dt>12</dt><dd>Curated products</dd></div>
+              <div><dt>4</dt><dd>Core categories</dd></div>
+              <div><dt>100%</dt><dd>Client-side deployable</dd></div>
+            </dl>
+          </div>
+          <div className="hero__media">
+            <img src={HERO_IMAGE} alt="Illustrated kids storefront display" width="560" height="420" />
           </div>
         </div>
-        <div className="hero__visual">
-          <div className="hero__card-stack">
-            <div className="hero__card">🧥</div>
-            <div className="hero__card">👗</div>
-            <div className="hero__card">👟</div>
-          </div>
-          <div className="hero__badge">
-            <div className="hero__badge-icon">✓</div>
+      </section>
+
+      <section className="section">
+        <div className="container">
+          <div className="section-heading">
             <div>
-              <strong>{t(lang, 'freeReturns')}</strong><br />
-              <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--color-text-muted)' }}>{t(lang, 'noQuestionsAsked')}</span>
+              <p className="eyebrow">Why this rebuild works</p>
+              <h2>Cleaner structure, stronger UX, easier maintenance</h2>
             </div>
           </div>
+          <div className="highlight-grid">
+            {categoryHighlights.map(item => (
+              <article key={item.title} className="highlight-card">
+                <h3>{item.title}</h3>
+                <p>{item.description}</p>
+                <Link to={`/shop?q=${item.query}`}>Explore</Link>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 
-      <div className="age-strip">
-        {ageCards.map(card => (
-          <Link key={card.age} to={card.gender ? `/shop?ageGroup=${card.age}&gender=${card.gender}` : `/shop?ageGroup=${card.age}`} className="age-card" style={{ background: card.bg }}>
-            <span className="age-card__emoji">{card.emoji}</span>
-            <span className="age-card__label">{card.label}</span>
-            <span className="age-card__sub">{card.sub}</span>
-          </Link>
-        ))}
-      </div>
+      <section className="section section--muted">
+        <div className="container">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">Featured products</p>
+              <h2>Built from JSON data, not hardcoded markup</h2>
+            </div>
+            <Link className="text-link" to="/shop">See full catalog</Link>
+          </div>
 
-      <div className="section">
-        <Splide options={{ type: 'loop', autoplay: true, interval: 4500, arrows: true, pagination: true, speed: 600 }}>
-          {banners.map(banner => (
-            <SplideSlide key={banner.tag}>
-              <div className="banner-slide" style={{ background: banner.bg, color: banner.color }}>
-                <div className="banner-slide__text">
-                  <div className="banner-slide__tag">{banner.tag}</div>
-                  <div className="banner-slide__title" style={{ whiteSpace: 'pre-line' }}>{banner.title}</div>
-                  <Link to={banner.to} className="btn" style={{ background: banner.btnBg, color: '#fff', fontSize: 13, padding: '10px 22px' }}>
-                    {banner.cta} →
-                  </Link>
-                </div>
-                <div className="banner-slide__emoji">{banner.emoji}</div>
-              </div>
-            </SplideSlide>
-          ))}
-        </Splide>
-      </div>
-
-      <section className="section section--gray">
-        <div className="section__header">
-          <h2 className="section__title">{t(lang, 'newThisWeek')}</h2>
-          <Link to="/shop" className="section__link">{t(lang, 'seeAll')} →</Link>
+          {loading ? (
+            <div className="empty-state">
+              <p>Loading featured products...</p>
+            </div>
+          ) : error ? (
+            <div className="empty-state">
+              <h3>Catalog unavailable</h3>
+              <p>{error}</p>
+            </div>
+          ) : (
+            <div className="product-grid">
+              {featuredProducts.map(product => (
+                <ProductCard key={product.id} product={product} onAddToCart={cart.addItem} />
+              ))}
+            </div>
+          )}
         </div>
-        {loading ? (
-          <div className="loading-grid">
-            {Array.from({ length: 8 }).map((_, index) => <div key={index} className="product-card skeleton" />)}
-          </div>
-        ) : (
-          <div className="product-grid">
-            {products.map(product => <ProductCard key={product.id} product={product} />)}
-          </div>
-        )}
       </section>
-
-      <div className="section">
-        <MixMatch />
-      </div>
-
-      <div className="trust-strip">
-        {trustItems.map(item => (
-          <div key={item.title} className="trust-item">
-            <div className="trust-item__icon">{item.icon}</div>
-            <div className="trust-item__text"><strong>{item.title}</strong><span>{item.sub}</span></div>
-          </div>
-        ))}
-      </div>
     </>
   )
 }

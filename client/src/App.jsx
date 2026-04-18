@@ -1,51 +1,61 @@
-// client/src/App.jsx
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { useEffect } from 'react'
-import Navbar from './components/Navbar.jsx'
+import { Route, Routes } from 'react-router-dom'
+import { useMemo, useState } from 'react'
+import Header from './components/Header.jsx'
 import Footer from './components/Footer.jsx'
+import CartDrawer from './components/CartDrawer.jsx'
 import Home from './pages/Home.jsx'
 import Shop from './pages/Shop.jsx'
 import Product from './pages/Product.jsx'
 import Checkout from './pages/Checkout.jsx'
-import SignIn from './pages/SignIn.jsx'
-import { useCart, useAuth } from './store/index.js'
+import { useProducts } from './hooks/useProducts.js'
+import { useCart } from './hooks/useCart.js'
+import { useTheme } from './hooks/useTheme.js'
+import { getFeaturedProducts, getProductById, getRelatedProducts } from './assets/js/utils/products.js'
 
 export default function App() {
-  const fetchCart     = useCart(s => s.fetch)
-  const setGoogleUser = useAuth(s => s.setGoogleUser)
+  const { products, loading, error } = useProducts()
+  const cart = useCart(products)
+  const [isCartOpen, setIsCartOpen] = useState(false)
+  const { theme, toggleTheme } = useTheme()
 
-  useEffect(() => {
-    // Handle Google OAuth redirect — server sends ?auth=google&data=<encoded-payload>
-    const params = new URLSearchParams(window.location.search)
-    if (params.get('auth') === 'google') {
-      try {
-        const raw = params.get('data')
-        if (raw) {
-          const { token, user } = JSON.parse(decodeURIComponent(raw))
-          setGoogleUser(token, user)
-        }
-      } catch (e) {
-        console.error('Google auth parse error', e)
-      }
-      // Remove auth params from URL so refresh doesn't re-trigger
-      window.history.replaceState({}, '', window.location.pathname)
-    }
-  }, [setGoogleUser])
+  const featuredProducts = useMemo(() => getFeaturedProducts(products, 4), [products])
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { fetchCart() }, [])
+  const sharedProps = {
+    loading,
+    error,
+    products,
+    featuredProducts,
+    cart,
+    openCart: () => setIsCartOpen(true),
+  }
 
   return (
-    <BrowserRouter>
-      <Navbar />
-      <Routes>
-        <Route path="/"            element={<Home />} />
-        <Route path="/shop"        element={<Shop />} />
-        <Route path="/product/:id" element={<Product />} />
-        <Route path="/checkout"    element={<Checkout />} />
-        <Route path="/signin"      element={<SignIn />} />
-      </Routes>
+    <div className="app-shell">
+      <Header
+        cartCount={cart.itemCount}
+        onOpenCart={() => setIsCartOpen(true)}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+      />
+      <main id="main-content">
+        <Routes>
+          <Route path="/" element={<Home {...sharedProps} />} />
+          <Route path="/shop" element={<Shop {...sharedProps} />} />
+          <Route
+            path="/product/:productId"
+            element={
+              <Product
+                {...sharedProps}
+                findProduct={productId => getProductById(products, productId)}
+                getRelated={product => getRelatedProducts(products, product, 3)}
+              />
+            }
+          />
+          <Route path="/checkout" element={<Checkout cart={cart} />} />
+        </Routes>
+      </main>
       <Footer />
-    </BrowserRouter>
+      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} cart={cart} />
+    </div>
   )
 }
