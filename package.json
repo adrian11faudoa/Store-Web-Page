@@ -6,8 +6,10 @@
     "dev": "concurrently \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
     "build": "npm run build --prefix client",
     "start": "node server/index.js",
-    "seed": "node server/db/seed.js",
-    "migrate": "node server/db/migrate.js"
+    "seed": "node server/src/db/seed.js",
+    "migrate": "node server/src/db/migrate.js",
+    "compose:up": "docker-compose up --build",
+    "compose:down": "docker-compose down"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
