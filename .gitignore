@@ -1,0 +1,10 @@
+node_modules/
+client/dist/
+server/.env
+.env
+*.log
+client.zip
+client_fixed.zip
+server_fixed.zip
+server.zip
+store.zip
