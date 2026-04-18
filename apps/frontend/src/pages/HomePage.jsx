@@ -1,9 +1,12 @@
+import { useMemo } from 'react'
 import { useAppStore } from '../store/useAppStore.js'
 import { ProductCard } from '../components/ProductCard.jsx'
 
 export function HomePage() {
-  const products = useAppStore(state => state.catalog.products.slice(0, 3))
-  const addToCart = useAppStore(state => state.addToCart)
+  const store = useAppStore()
+  const products = store.catalog.products
+  const addToCart = store.addToCart
+  const featuredProducts = useMemo(() => products.slice(0, 3), [products])
 
   return (
     <section className="hero-grid">
@@ -16,7 +19,7 @@ export function HomePage() {
         </p>
       </div>
       <div className="product-grid">
-        {products.map(product => (
+        {featuredProducts.map(product => (
           <ProductCard key={product.id} product={product} onAddToCart={variantId => addToCart(variantId)} />
         ))}
       </div>

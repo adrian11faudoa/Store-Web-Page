@@ -1,8 +1,9 @@
 import { useAppStore } from '../store/useAppStore.js'
 
 export function useCatalogFilters() {
-  const filters = useAppStore(state => state.catalog.filters)
-  const loadCatalog = useAppStore(state => state.loadCatalog)
+  const store = useAppStore()
+  const filters = store.catalog.filters
+  const loadCatalog = store.loadCatalog
 
   return {
     filters,

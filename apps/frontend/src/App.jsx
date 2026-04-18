@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { NavLink, Route, Routes } from 'react-router-dom'
 import { HomePage } from './pages/HomePage.jsx'
 import { CatalogPage } from './pages/CatalogPage.jsx'
@@ -7,18 +7,27 @@ import { CheckoutPage } from './pages/CheckoutPage.jsx'
 import { SignInPage } from './pages/SignInPage.jsx'
 import { AuthCallbackPage } from './pages/AuthCallbackPage.jsx'
 import { CartSidebar } from './components/CartSidebar.jsx'
+import { ErrorBoundary } from './components/ErrorBoundary.jsx'
 import { useAppStore } from './store/useAppStore.js'
 
 export default function App() {
-  const bootstrap = useAppStore(state => state.bootstrap)
-  const cartOpen = useAppStore(state => state.ui.cartOpen)
-  const setCartOpen = useAppStore(state => state.setCartOpen)
-  const pendingRequests = useAppStore(state => state.ui.pendingRequests)
-  const currentUser = useAppStore(state => state.auth.user)
-  const cartItems = useAppStore(state => state.cart.cart?.items || [])
-  const lastError = useAppStore(state => state.ui.lastError)
+  const bootstrappedRef = useRef(false)
+  const store = useAppStore()
+  const bootstrap = store.bootstrap
+  const cartOpen = store.ui.cartOpen
+  const setCartOpen = store.setCartOpen
+  const pendingRequests = store.ui.pendingRequests
+  const currentUser = store.auth.user
+  const cart = store.cart.cart
+  const lastError = store.ui.lastError
+  const cartItems = useMemo(() => (Array.isArray(cart?.items) ? cart.items : []), [cart])
 
   useEffect(() => {
+    if (bootstrappedRef.current) {
+      return
+    }
+
+    bootstrappedRef.current = true
     bootstrap()
   }, [bootstrap])
 
@@ -42,18 +51,20 @@ export default function App() {
       {pendingRequests > 0 ? <div className="status-banner">Syncing live data...</div> : null}
       {lastError ? <div className="error-banner">{lastError}</div> : null}
 
-      <main className="page-shell">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/catalog" element={<CatalogPage />} />
-          <Route path="/catalog/:slug" element={<ProductPage />} />
-          <Route path="/checkout" element={<CheckoutPage />} />
-          <Route path="/signin" element={<SignInPage />} />
-          <Route path="/auth/callback" element={<AuthCallbackPage />} />
-        </Routes>
-      </main>
+      <ErrorBoundary>
+        <main className="page-shell">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/catalog" element={<CatalogPage />} />
+            <Route path="/catalog/:slug" element={<ProductPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/signin" element={<SignInPage />} />
+            <Route path="/auth/callback" element={<AuthCallbackPage />} />
+          </Routes>
+        </main>
 
-      <CartSidebar isOpen={cartOpen} onClose={() => setCartOpen(false)} />
+        <CartSidebar isOpen={cartOpen} onClose={() => setCartOpen(false)} />
+      </ErrorBoundary>
     </div>
   )
 }

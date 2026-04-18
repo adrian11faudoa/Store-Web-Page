@@ -1,6 +1,10 @@
+import { config as loadEnv } from 'dotenv'
+import { resolve } from 'node:path'
 import { PrismaClient, UserRole } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import { slugify } from '@store/utils'
+
+loadEnv({ path: resolve(process.cwd(), '.env') })
 
 const prisma = new PrismaClient()
 

@@ -4,10 +4,11 @@ import { useAppStore } from '../store/useAppStore.js'
 
 export function SignInPage() {
   const navigate = useNavigate()
-  const login = useAppStore(state => state.login)
-  const register = useAppStore(state => state.register)
-  const logout = useAppStore(state => state.logout)
-  const currentUser = useAppStore(state => state.auth.user)
+  const store = useAppStore()
+  const login = store.login
+  const register = store.register
+  const logout = store.logout
+  const currentUser = store.auth.user
   const [form, setForm] = useState({ name: '', email: '', password: '' })
 
   if (currentUser) {

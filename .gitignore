@@ -4,6 +4,8 @@ server/.env
 .env.development
 .env.staging
 .env.production
+apps/backend/.env
+apps/frontend/.env.local
 *.log
 client.zip
 client_fixed.zip

@@ -85,10 +85,41 @@ export const useAppStore = create((set, get) => ({
   },
 
   async bootstrap() {
-    const { runTracked, loadCatalog, loadCategories, loadCart, loadSession } = get()
+    const { runTracked } = get()
     await runTracked(async () => {
       await authService.ensureCsrf()
-      await Promise.all([loadSession(), loadCategories(), loadCatalog(), loadCart()])
+
+      const [categoriesResponse, productsResponse, cartResponse] = await Promise.all([
+        catalogService.listCategories(),
+        catalogService.listProducts(get().catalog.filters),
+        cartService.getCart(),
+      ])
+
+      let sessionUser = null
+
+      try {
+        const sessionResponse = await authService.getSession()
+        sessionUser = sessionResponse.user
+      } catch {
+        sessionUser = null
+      }
+
+      set(state => ({
+        auth: {
+          ...state.auth,
+          user: sessionUser,
+        },
+        catalog: {
+          ...state.catalog,
+          categories: categoriesResponse.items,
+          products: productsResponse.items,
+          pagination: productsResponse.pagination,
+        },
+        cart: {
+          ...state.cart,
+          cart: cartResponse.cart,
+        },
+      }))
     })
   },
 

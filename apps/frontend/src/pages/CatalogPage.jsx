@@ -3,11 +3,12 @@ import { useAppStore } from '../store/useAppStore.js'
 import { ProductCard } from '../components/ProductCard.jsx'
 
 export function CatalogPage() {
+  const store = useAppStore()
   const { filters, updateFilters } = useCatalogFilters()
-  const categories = useAppStore(state => state.catalog.categories)
-  const products = useAppStore(state => state.catalog.products)
-  const pagination = useAppStore(state => state.catalog.pagination)
-  const addToCart = useAppStore(state => state.addToCart)
+  const categories = store.catalog.categories
+  const products = store.catalog.products
+  const pagination = store.catalog.pagination
+  const addToCart = store.addToCart
 
   return (
     <section className="section-stack">

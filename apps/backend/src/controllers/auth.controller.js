@@ -36,6 +36,10 @@ export async function logout(req, res) {
 }
 
 export async function me(req, res) {
+  if (!req.auth?.sub) {
+    return sendSuccess(res, { user: null })
+  }
+
   const user = await authService.getCurrentUser(req.auth.sub)
   return sendSuccess(res, { user })
 }

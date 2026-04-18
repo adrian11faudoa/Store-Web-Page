@@ -3,9 +3,11 @@ import { formatCurrency } from '@store/utils'
 import { useAppStore } from '../store/useAppStore.js'
 
 export function CartSidebar({ isOpen, onClose }) {
-  const cart = useAppStore(state => state.cart.cart)
-  const updateCartItem = useAppStore(state => state.updateCartItem)
-  const subtotal = (cart.items || []).reduce((sum, item) => sum + item.lineTotal, 0)
+  const store = useAppStore()
+  const cart = store.cart.cart
+  const updateCartItem = store.updateCartItem
+  const items = Array.isArray(cart?.items) ? cart.items : []
+  const subtotal = items.reduce((sum, item) => sum + item.lineTotal, 0)
 
   return (
     <aside className={`cart-sidebar ${isOpen ? 'open' : ''}`}>
@@ -14,11 +16,12 @@ export function CartSidebar({ isOpen, onClose }) {
         <button className="button ghost" type="button" onClick={onClose}>Close</button>
       </div>
       <div className="cart-content">
-        {(cart.items || []).map(item => (
+        {items.length === 0 ? <p>Your cart is empty.</p> : null}
+        {items.map(item => (
           <div className="cart-item" key={item.id}>
             <div>
-              <strong>{item.product.name}</strong>
-              <p>{item.variant.size}</p>
+              <strong>{item.product?.name || 'Unknown product'}</strong>
+              <p>{item.variant?.size || 'Default'}</p>
             </div>
             <div className="cart-actions">
               <span>{formatCurrency(item.lineTotal)}</span>

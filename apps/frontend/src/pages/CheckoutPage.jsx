@@ -2,8 +2,9 @@ import { formatCurrency } from '@store/utils'
 import { useAppStore } from '../store/useAppStore.js'
 
 export function CheckoutPage() {
-  const cart = useAppStore(state => state.cart.cart)
-  const subtotal = (cart.items || []).reduce((sum, item) => sum + item.lineTotal, 0)
+  const cart = useAppStore().cart.cart
+  const items = Array.isArray(cart?.items) ? cart.items : []
+  const subtotal = items.reduce((sum, item) => sum + item.lineTotal, 0)
 
   return (
     <section className="checkout-grid">
@@ -17,9 +18,9 @@ export function CheckoutPage() {
       </div>
       <div className="panel">
         <h2>Order summary</h2>
-        {(cart.items || []).map(item => (
+        {items.map(item => (
           <div className="summary-row" key={item.id}>
-            <span>{item.product.name} · {item.variant.size} · {item.quantity}</span>
+            <span>{item.product.name} - {item.variant.size} - {item.quantity}</span>
             <strong>{formatCurrency(item.lineTotal)}</strong>
           </div>
         ))}

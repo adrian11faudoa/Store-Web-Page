@@ -5,13 +5,14 @@ import { useAppStore } from '../store/useAppStore.js'
 
 export function ProductPage() {
   const { slug } = useParams()
-  const product = useAppStore(state => state.catalog.selectedProduct)
-  const loadProduct = useAppStore(state => state.loadProduct)
-  const addToCart = useAppStore(state => state.addToCart)
+  const store = useAppStore()
+  const product = store.catalog.selectedProduct
+  const loadProduct = store.loadProduct
+  const addToCart = store.addToCart
   const [selectedVariant, setSelectedVariant] = useState('')
 
   useEffect(() => {
-    loadProduct(slug)
+    void loadProduct(slug)
   }, [loadProduct, slug])
 
   useEffect(() => {
@@ -38,11 +39,11 @@ export function ProductPage() {
         <select className="input" value={selectedVariant} onChange={event => setSelectedVariant(event.target.value)}>
           {product.variants.map(variant => (
             <option key={variant.id} value={variant.id}>
-              {variant.size} · {variant.stock > 0 ? `${variant.stock} in stock` : 'Out of stock'}
+              {variant.size} - {variant.stock > 0 ? `${variant.stock} in stock` : 'Out of stock'}
             </option>
           ))}
         </select>
-        <button className="button" type="button" onClick={() => addToCart(selectedVariant)}>
+        <button className="button" type="button" onClick={() => addToCart(selectedVariant)} disabled={!selectedVariant}>
           Add to cart
         </button>
       </div>

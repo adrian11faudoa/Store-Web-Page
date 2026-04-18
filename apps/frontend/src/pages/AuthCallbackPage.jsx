@@ -4,7 +4,7 @@ import { useAppStore } from '../store/useAppStore.js'
 
 export function AuthCallbackPage() {
   const navigate = useNavigate()
-  const loadSession = useAppStore(state => state.loadSession)
+  const loadSession = useAppStore().loadSession
 
   useEffect(() => {
     loadSession().finally(() => navigate('/'))
