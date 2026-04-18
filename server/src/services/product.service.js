@@ -7,7 +7,7 @@ const ORDER_MAP = {
   'price-desc': 'p.price DESC, p.id DESC',
   rating: 'p.rating DESC, p.reviews DESC, p.id DESC',
   name: 'p.name ASC, p.id DESC',
-  newest: 'p.created_at DESC, p.id DESC',
+  newest: 'p.release_date DESC, p.id DESC',
 }
 
 function buildFilters(filters) {
@@ -59,11 +59,15 @@ export async function listProducts(filters) {
     `SELECT
         p.id,
         p.name,
+        p.description,
         p.price,
         p.old_price,
         p.badge,
         p.image_url,
         p.fallback_bg,
+        p.palette,
+        p.tags,
+        p.release_date,
         p.sizes,
         p.rating,
         p.reviews,

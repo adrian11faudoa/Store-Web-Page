@@ -2,13 +2,12 @@ import { Link, useParams } from 'react-router-dom'
 import { useMemo, useState } from 'react'
 import ProductCard from '../components/ProductCard.jsx'
 import { formatCurrency, formatLabel } from '../assets/js/utils/format.js'
-
-const PRODUCT_IMAGE = `${import.meta.env.BASE_URL}assets/images/product-placeholder.svg`
+import { getProductImageFallback } from '../assets/js/utils/products.js'
 
 export default function Product({ cart, findProduct, getRelated }) {
   const { productId } = useParams()
   const product = findProduct(productId)
-  const [selectedSize, setSelectedSize] = useState(product?.sizes[0] || '')
+  const [selectedSize, setSelectedSize] = useState(product?.sizes.length > 1 ? '' : (product?.sizes[0] || ''))
   const [quantity, setQuantity] = useState(1)
   const [message, setMessage] = useState('')
   const relatedProducts = useMemo(() => getRelated(product), [getRelated, product])
@@ -18,27 +17,31 @@ export default function Product({ cart, findProduct, getRelated }) {
       <section className="section">
         <div className="container empty-state">
           <h1>Product not found</h1>
-          <p>The requested product could not be found in the local catalog.</p>
+          <p>That style may have skipped out to the playground. Try another favorite.</p>
           <Link className="button" to="/shop">Return to shop</Link>
         </div>
       </section>
     )
   }
 
+  const imageSrc = product.image_url || getProductImageFallback(product)
+
   function handleAddToCart() {
+    if (product.sizes.length > 1 && !selectedSize) {
+      setMessage('Please select a size first')
+      return
+    }
+
     cart.addItem(product, selectedSize, quantity)
-    setMessage('Product added to cart')
+    setMessage('Added to cart ✓')
   }
 
   return (
     <>
       <section className="section">
         <div className="container product-layout">
-          <div
-            className="product-hero"
-            style={{ background: `linear-gradient(135deg, ${product.palette[0]}, ${product.palette[1]})` }}
-          >
-            <img src={PRODUCT_IMAGE} alt={product.name} loading="eager" width="560" height="420" />
+          <div className="product-hero">
+            <img src={imageSrc} alt={product.name} loading="eager" width="560" height="420" />
           </div>
 
           <div className="product-panel">
@@ -50,7 +53,10 @@ export default function Product({ cart, findProduct, getRelated }) {
               <span>{formatLabel(product.ageGroup)}</span>
               <span>{product.rating.toFixed(1)} rating</span>
             </div>
-            <div className="product-panel__price">{formatCurrency(product.price)}</div>
+            <div className="product-panel__price">
+              <strong>{formatCurrency(product.price)}</strong>
+              {product.old_price > product.price && <s>{formatCurrency(product.old_price)}</s>}
+            </div>
 
             <fieldset className="product-panel__sizes">
               <legend>Size</legend>
@@ -83,7 +89,7 @@ export default function Product({ cart, findProduct, getRelated }) {
                 Add to cart
               </button>
             </div>
-            <p className="product-card__status" aria-live="polite">{message}</p>
+            <p className={message.includes('select') ? 'product-card__status is-error' : 'product-card__status'} aria-live="polite">{message}</p>
             <Link className="text-link" to="/checkout">Go to checkout</Link>
           </div>
         </div>
@@ -93,7 +99,7 @@ export default function Product({ cart, findProduct, getRelated }) {
         <div className="container">
           <div className="section-heading">
             <div>
-              <p className="eyebrow">More to explore</p>
+              <p className="eyebrow">More to love</p>
               <h2>Related picks</h2>
             </div>
           </div>

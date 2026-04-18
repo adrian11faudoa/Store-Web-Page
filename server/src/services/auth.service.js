@@ -3,6 +3,7 @@ import { createHash } from 'crypto'
 import { query, withTransaction } from '../db/pool.js'
 import { ApiError } from '../lib/errors.js'
 import { createAccessToken, createRefreshToken, verifyRefreshToken } from '../lib/tokens.js'
+import { sendPasswordResetEmail } from '../../utils/mailer.js'
 
 function hashToken(value) {
   return createHash('sha256').update(value).digest('hex')
@@ -32,6 +33,16 @@ function issueTokens(user) {
   const accessToken = createAccessToken(user)
   const { tokenId, token: refreshToken } = createRefreshToken(user)
   return { accessToken, refreshToken, tokenId }
+}
+
+export async function getUserById(id) {
+  const result = await query(
+    'SELECT id, email, name, role, email_verified FROM users WHERE id = $1 LIMIT 1',
+    [id]
+  )
+
+  if (!result.rows.length) throw new ApiError(404, 'User not found')
+  return sanitizeUser(result.rows[0])
 }
 
 export async function registerUser({ email, password, name, userAgent, ipAddress }) {
@@ -67,11 +78,57 @@ export async function loginUser({ email, password, userAgent, ipAddress }) {
     const user = result.rows[0]
     const validPassword = await bcrypt.compare(password, user.password_hash || '')
     if (!validPassword) throw new ApiError(401, 'Invalid credentials')
+    if (!user.email_verified) throw new ApiError(403, 'Please verify your email before signing in')
 
     const tokens = issueTokens(user)
     await persistRefreshToken(client, { userId: user.id, tokenId: tokens.tokenId, refreshToken: tokens.refreshToken, userAgent, ipAddress })
 
     return { user: sanitizeUser(user), accessToken: tokens.accessToken, refreshToken: tokens.refreshToken }
+  })
+}
+
+export async function requestPasswordReset({ email }) {
+  const result = await query('SELECT id FROM users WHERE email = $1', [email.toLowerCase()])
+  if (!result.rows.length) return
+
+  const code = Math.random().toString(36).slice(2, 8).toUpperCase()
+  const codeHash = createHash('sha256').update(code).digest('hex')
+  const userId = result.rows[0].id
+
+  await query(
+    `INSERT INTO password_reset_codes (user_id, code_hash, expires_at)
+     VALUES ($1, $2, NOW() + interval '10 minutes')`,
+    [userId, codeHash]
+  )
+
+  await sendPasswordResetEmail({ to: email, code })
+}
+
+export async function resetPasswordWithCode({ email, code, newPassword }) {
+  const codeHash = createHash('sha256').update(code.toUpperCase()).digest('hex')
+
+  const result = await query(
+    `SELECT prc.id, prc.user_id
+     FROM password_reset_codes prc
+     JOIN users u ON u.id = prc.user_id
+     WHERE u.email = $1
+       AND prc.code_hash = $2
+       AND prc.expires_at > NOW()
+       AND prc.used_at IS NULL
+     ORDER BY prc.created_at DESC
+     LIMIT 1`,
+    [email.toLowerCase(), codeHash]
+  )
+
+  if (!result.rows.length) throw new ApiError(400, 'Invalid or expired code')
+
+  const { id: resetId, user_id: userId } = result.rows[0]
+  const passwordHash = await bcrypt.hash(newPassword, 12)
+
+  await withTransaction(async client => {
+    await client.query('UPDATE users SET password_hash = $1 WHERE id = $2', [passwordHash, userId])
+    await client.query('UPDATE password_reset_codes SET used_at = NOW() WHERE id = $1', [resetId])
+    await client.query('UPDATE refresh_tokens SET revoked_at = NOW() WHERE user_id = $1 AND revoked_at IS NULL', [userId])
   })
 }
 

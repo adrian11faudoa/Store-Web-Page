@@ -4,16 +4,16 @@ export function fetchCart() {
   return apiRequest('/cart')
 }
 
-export function addCartItem(productId, quantity = 1) {
+export function addCartItem(productId, quantity = 1, size = '') {
   return apiRequest('/cart/items', {
     method: 'POST',
-    body: JSON.stringify({ productId, quantity }),
+    body: JSON.stringify({ productId, quantity, size }),
   })
 }
 
-export function updateCartItem(productId, quantity) {
+export function updateCartItem(productId, quantity, size = '') {
   return apiRequest(`/cart/items/${productId}`, {
     method: 'PATCH',
-    body: JSON.stringify({ quantity }),
+    body: JSON.stringify({ quantity, size }),
   })
 }

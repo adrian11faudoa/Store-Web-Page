@@ -7,14 +7,15 @@
       "gender": "girls",
       "ageGroup": "7-10 years",
       "price": 38,
+      "old_price": 46,
       "rating": 4.8,
-      "badge": "featured",
+      "badge": "sale",
       "featured": true,
       "releaseDate": "2026-03-15",
       "sizes": ["7Y", "8Y", "9Y", "10Y"],
-      "palette": ["#F6D7B0", "#D8E4F2"],
-      "description": "A coordinated denim layer with a soft jersey base for school-to-weekend comfort.",
-      "tags": ["denim", "set", "layered"]
+      "palette": ["#FFD0C7", "#A8E6CF"],
+      "description": "A sunshine-hued denim jacket with matching shorts and a soft jersey tee for easy all-day outfits.",
+      "tags": ["denim", "set", "summer", "girls"]
     },
     {
       "id": "coastline-play-dress",
@@ -28,9 +29,9 @@
       "featured": true,
       "releaseDate": "2026-04-04",
       "sizes": ["4Y", "5Y", "6Y"],
-      "palette": ["#F4C1B3", "#FFF1D6"],
-      "description": "An easy everyday dress with structured seams and a playful summer palette.",
-      "tags": ["dress", "spring", "occasion"]
+      "palette": ["#FFDEE2", "#FFE66D"],
+      "description": "A twirl-ready dress in cheerful stripes with breezy sleeves and a comfy cotton lining.",
+      "tags": ["dress", "spring", "party"]
     },
     {
       "id": "harbor-utility-jacket",
@@ -44,9 +45,9 @@
       "featured": true,
       "releaseDate": "2026-02-20",
       "sizes": ["8Y", "10Y", "12Y"],
-      "palette": ["#B8C5B2", "#DDE5D8"],
-      "description": "A lightweight utility jacket with polished hardware and a neat everyday silhouette.",
-      "tags": ["jacket", "layer", "school"]
+      "palette": ["#74B9FF", "#CDE7FF"],
+      "description": "A lightweight field jacket with roomy pockets and an easy zip front for play-anywhere layering.",
+      "tags": ["jacket", "school", "layer"]
     },
     {
       "id": "little-scout-joggers",
@@ -60,8 +61,8 @@
       "featured": false,
       "releaseDate": "2026-01-14",
       "sizes": ["4Y", "5Y", "6Y"],
-      "palette": ["#C4D5E9", "#EDF3FA"],
-      "description": "Comfort-first joggers with smart tapering and durable fabric for active days.",
+      "palette": ["#B6D8FF", "#EAF5FF"],
+      "description": "Soft stretch joggers with reinforced knees and a pull-on waist built for climbing, running, and recess.",
       "tags": ["joggers", "play", "bottoms"]
     },
     {
@@ -76,8 +77,8 @@
       "featured": true,
       "releaseDate": "2026-03-28",
       "sizes": ["6M", "12M", "18M", "24M"],
-      "palette": ["#F9D4DA", "#F7F0DE"],
-      "description": "A soft romper-and-headband set designed for comfort, photos, and easy changes.",
+      "palette": ["#FFD8E4", "#FFF1D8"],
+      "description": "A flower-soft romper set with a matching headband and snap closures for extra-easy outfit changes.",
       "tags": ["baby", "romper", "gift"]
     },
     {
@@ -92,8 +93,8 @@
       "featured": false,
       "releaseDate": "2026-01-30",
       "sizes": ["6M", "12M", "18M", "24M"],
-      "palette": ["#C9D6C1", "#EAEFE2"],
-      "description": "Soft-brushed overalls with adjustable straps and a roomy fit for all-day movement.",
+      "palette": ["#A8E6CF", "#E8FFF5"],
+      "description": "Cloud-soft overalls with adjustable straps and roomy legs for first steps and stroller naps alike.",
       "tags": ["baby", "overall", "layer"]
     },
     {
@@ -103,13 +104,14 @@
       "gender": "girls",
       "ageGroup": "10-14 years",
       "price": 42,
+      "old_price": 52,
       "rating": 4.7,
-      "badge": "",
+      "badge": "sale",
       "featured": false,
       "releaseDate": "2026-02-11",
       "sizes": ["10Y", "12Y", "14Y"],
-      "palette": ["#D6D0ED", "#EFEAF8"],
-      "description": "A textured cardigan built for layering over dresses, tees, and formal looks.",
+      "palette": ["#E2D7FF", "#FFF4FD"],
+      "description": "A cozy rib-knit cardigan with pearl-look buttons that dresses up jeans, skirts, and party sets.",
       "tags": ["cardigan", "layer", "knit"]
     },
     {
@@ -124,8 +126,8 @@
       "featured": false,
       "releaseDate": "2026-03-02",
       "sizes": ["7Y", "8Y", "9Y", "10Y"],
-      "palette": ["#D4C9B8", "#F0E8DB"],
-      "description": "Structured shorts with modern pockets and a fit designed for play and travel.",
+      "palette": ["#CDE4C7", "#F5F8E8"],
+      "description": "Easy cargo shorts with deep pockets, a soft waistband, and enough durability for nonstop exploring.",
       "tags": ["shorts", "cargo", "summer"]
     },
     {
@@ -140,8 +142,8 @@
       "featured": true,
       "releaseDate": "2026-04-10",
       "sizes": ["2Y", "3Y", "4Y"],
-      "palette": ["#F7DCC8", "#E6EED9"],
-      "description": "A polished top-and-skirt pairing that feels dressed up without losing comfort.",
+      "palette": ["#FFE7BE", "#FFD1E4"],
+      "description": "A special-occasion blouse and skirt duo with plenty of stretch for dancing, snacks, and photos.",
       "tags": ["party", "set", "girls"]
     },
     {
@@ -156,8 +158,8 @@
       "featured": false,
       "releaseDate": "2026-02-05",
       "sizes": ["10Y", "12Y", "14Y"],
-      "palette": ["#B9CDD8", "#EAF1F4"],
-      "description": "A clean ribbed tee that works as a base layer or a standalone everyday essential.",
+      "palette": ["#9CD1FF", "#E8F6FF"],
+      "description": "A soft ribbed tee with a neat fit and a hint of stretch for school days and weekend hangs.",
       "tags": ["tee", "basic", "tops"]
     },
     {
@@ -172,8 +174,8 @@
       "featured": false,
       "releaseDate": "2026-03-18",
       "sizes": ["7Y", "8Y", "9Y", "10Y"],
-      "palette": ["#F1D7E8", "#FAF1F7"],
-      "description": "A layered tulle skirt with a soft lining and enough structure for events or portraits.",
+      "palette": ["#FFD6EE", "#FFF6FB"],
+      "description": "Layers of airy tulle over a super-soft lining make this skirt perfect for parties and everyday sparkle.",
       "tags": ["skirt", "occasion", "girls"]
     },
     {
@@ -188,9 +190,138 @@
       "featured": false,
       "releaseDate": "2026-04-08",
       "sizes": ["3M", "6M", "9M", "12M"],
-      "palette": ["#D7E8F2", "#F8FCFE"],
-      "description": "A two-piece knit set with a breathable hand feel for warmer-season layering.",
+      "palette": ["#BFE6FF", "#F3FBFF"],
+      "description": "A breezy knit top and bloomer set that keeps little ones cool and cuddly on sunny afternoons.",
       "tags": ["baby", "knit", "set"]
+    },
+    {
+      "id": "coral-sun-tee",
+      "name": "Coral Sun Tee",
+      "category": "tops",
+      "gender": "girls",
+      "ageGroup": "2-4 years",
+      "price": 18,
+      "rating": 4.6,
+      "badge": "featured",
+      "featured": true,
+      "releaseDate": "2026-04-12",
+      "sizes": ["2Y", "3Y", "4Y"],
+      "palette": ["#FFAAA5", "#FFF1F0"],
+      "description": "A cheerful puff-sleeve tee with sunny embroidery and a buttery-soft feel kids want to wear every day.",
+      "tags": ["tee", "girls", "everyday"]
+    },
+    {
+      "id": "minty-morning-leggings",
+      "name": "Minty Morning Leggings",
+      "category": "bottoms",
+      "gender": "girls",
+      "ageGroup": "4-6 years",
+      "price": 20,
+      "rating": 4.7,
+      "badge": "",
+      "featured": false,
+      "releaseDate": "2026-03-11",
+      "sizes": ["4Y", "5Y", "6Y"],
+      "palette": ["#A8E6CF", "#F1FFF8"],
+      "description": "Super-stretch leggings with a smooth waistband and playful all-over print for busy little movers.",
+      "tags": ["leggings", "soft", "play"]
+    },
+    {
+      "id": "rocket-stripe-hoodie",
+      "name": "Rocket Stripe Hoodie",
+      "category": "outerwear",
+      "gender": "boys",
+      "ageGroup": "7-10 years",
+      "price": 36,
+      "rating": 4.9,
+      "badge": "best seller",
+      "featured": true,
+      "releaseDate": "2026-04-01",
+      "sizes": ["7Y", "8Y", "9Y", "10Y"],
+      "palette": ["#74B9FF", "#4ECDC4"],
+      "description": "A sporty zip hoodie with bold stripes, fleece-soft lining, and a fit made for everyday adventures.",
+      "tags": ["hoodie", "boys", "sports"]
+    },
+    {
+      "id": "sunbeam-skater-dress",
+      "name": "Sunbeam Skater Dress",
+      "category": "dresses",
+      "gender": "girls",
+      "ageGroup": "10-14 years",
+      "price": 41,
+      "old_price": 49,
+      "rating": 4.8,
+      "badge": "sale",
+      "featured": false,
+      "releaseDate": "2026-03-25",
+      "sizes": ["10Y", "12Y", "14Y"],
+      "palette": ["#FFE66D", "#FFD3B6"],
+      "description": "A bright skater silhouette with a soft stretch bodice and floaty skirt for parties and polished days out.",
+      "tags": ["dress", "party", "twirl"]
+    },
+    {
+      "id": "snuggle-cloud-bodysuit",
+      "name": "Snuggle Cloud Bodysuit",
+      "category": "tops",
+      "gender": "baby girls",
+      "ageGroup": "3-12 months",
+      "price": 16,
+      "rating": 4.9,
+      "badge": "featured",
+      "featured": true,
+      "releaseDate": "2026-04-13",
+      "sizes": ["3M", "6M", "9M", "12M"],
+      "palette": ["#FFDCE8", "#FFFFFF"],
+      "description": "A dreamy ribbed bodysuit with envelope shoulders and snap legs to make everyday changes wonderfully easy.",
+      "tags": ["bodysuit", "baby", "soft"]
+    },
+    {
+      "id": "little-comet-set",
+      "name": "Little Comet Set",
+      "category": "sets",
+      "gender": "boys",
+      "ageGroup": "2-4 years",
+      "price": 31,
+      "rating": 4.6,
+      "badge": "new",
+      "featured": false,
+      "releaseDate": "2026-04-09",
+      "sizes": ["2Y", "3Y", "4Y"],
+      "palette": ["#8FD3FF", "#FFE66D"],
+      "description": "A tee-and-shorts combo with bright rocket graphics and soft cotton made for all-day play.",
+      "tags": ["set", "rocket", "play"]
+    },
+    {
+      "id": "puddle-jump-raincoat",
+      "name": "Puddle Jump Raincoat",
+      "category": "outerwear",
+      "gender": "unisex",
+      "ageGroup": "4-6 years",
+      "price": 39,
+      "rating": 4.7,
+      "badge": "featured",
+      "featured": true,
+      "releaseDate": "2026-03-29",
+      "sizes": ["4Y", "5Y", "6Y"],
+      "palette": ["#4ECDC4", "#FFE66D"],
+      "description": "A splash-proof raincoat with a happy pop of color, roomy hood, and soft lining for drizzly-day adventures.",
+      "tags": ["raincoat", "unisex", "outerwear"]
+    },
+    {
+      "id": "cubby-bear-pants",
+      "name": "Cubby Bear Pants",
+      "category": "bottoms",
+      "gender": "baby boys",
+      "ageGroup": "3-12 months",
+      "price": 17,
+      "rating": 4.5,
+      "badge": "",
+      "featured": false,
+      "releaseDate": "2026-02-22",
+      "sizes": ["3M", "6M", "9M", "12M"],
+      "palette": ["#C7E7C1", "#FFF6E5"],
+      "description": "Pull-on baby pants with a bear-face pocket and a stretchy waistband that stays comfy through naps and cuddles.",
+      "tags": ["baby", "pants", "cozy"]
     }
   ]
 }

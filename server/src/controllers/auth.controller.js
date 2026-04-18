@@ -31,6 +31,17 @@ export async function login(req, res) {
   res.json({ data: { user: result.user, accessToken: result.accessToken } })
 }
 
+export async function forgotPassword(req, res) {
+  await authService.requestPasswordReset({ email: req.validated.body.email })
+  res.json({ data: { message: 'If an account exists, a code has been sent.' } })
+}
+
+export async function resetPassword(req, res) {
+  const { email, code, newPassword } = req.validated.body
+  await authService.resetPasswordWithCode({ email, code, newPassword })
+  res.json({ data: { message: 'Password updated successfully.' } })
+}
+
 export async function refresh(req, res) {
   const result = await authService.rotateRefreshToken({
     refreshToken: req.cookies[appConfig.cookie.refreshToken],
@@ -50,11 +61,6 @@ export async function logout(req, res) {
 }
 
 export async function getCurrentUser(req, res) {
-  res.json({
-    data: {
-      id: Number(req.auth.sub),
-      email: req.auth.email,
-      role: req.auth.role,
-    },
-  })
+  const user = await authService.getUserById(Number(req.auth.sub))
+  res.json({ data: user })
 }

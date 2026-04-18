@@ -13,8 +13,8 @@ export async function getCart(req, res) {
 }
 
 export async function addCartItem(req, res) {
-  const { productId, quantity } = req.validated.body
-  const items = await cartService.addCartItem({ ...getCartContext(req), productId, quantity })
+  const { productId, quantity, size } = req.validated.body
+  const items = await cartService.addCartItem({ ...getCartContext(req), productId, quantity, size })
   res.status(201).json({ data: items })
 }
 
@@ -23,6 +23,7 @@ export async function updateCartItem(req, res) {
     ...getCartContext(req),
     productId: req.validated.params.productId,
     quantity: req.validated.body.quantity,
+    size: req.validated.body.size,
   })
   res.json({ data: items })
 }

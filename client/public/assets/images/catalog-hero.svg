@@ -1,13 +1,26 @@
-<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="800" height="600" rx="40" fill="#FFF8EC"/>
-  <circle cx="620" cy="140" r="84" fill="#F5C56B"/>
-  <circle cx="170" cy="110" r="60" fill="#D2E8E1"/>
-  <rect x="120" y="190" width="560" height="280" rx="32" fill="#17282F"/>
-  <rect x="160" y="225" width="160" height="210" rx="24" fill="#F6F1E7"/>
-  <rect x="340" y="225" width="140" height="210" rx="24" fill="#E7C6A8"/>
-  <rect x="500" y="225" width="140" height="210" rx="24" fill="#A9C0D2"/>
-  <path d="M215 270C242 270 264 292 264 319V402H166V319C166 292 188 270 215 270Z" fill="#17282F"/>
-  <path d="M410 270C437 270 459 292 459 319V402H361V319C361 292 383 270 410 270Z" fill="#17282F"/>
-  <path d="M570 270C597 270 619 292 619 319V402H521V319C521 292 543 270 570 270Z" fill="#17282F"/>
-  <text x="120" y="530" fill="#17282F" font-family="Arial, sans-serif" font-size="42" font-weight="700">Sahara Kids</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 420" fill="none">
+  <rect width="560" height="420" rx="32" fill="#FFF8F0"/>
+  <rect y="260" width="560" height="160" fill="#FFEFD9"/>
+  <circle cx="435" cy="82" r="42" fill="#FFE66D"/>
+  <path d="M40 300C88 264 130 260 182 292C234 324 280 326 334 292C388 258 442 256 520 302V420H40V300Z" fill="#A8E6CF"/>
+  <path d="M40 316C92 282 140 280 196 310C252 340 306 340 362 306C418 272 468 274 520 308V420H40V316Z" fill="#4ECDC4" opacity=".58"/>
+  <path d="M86 120H470" stroke="#8C5D3B" stroke-width="6" stroke-linecap="round"/>
+  <path d="M140 120V145" stroke="#8C5D3B" stroke-width="3" stroke-linecap="round"/>
+  <path d="M220 120V152" stroke="#8C5D3B" stroke-width="3" stroke-linecap="round"/>
+  <path d="M300 120V146" stroke="#8C5D3B" stroke-width="3" stroke-linecap="round"/>
+  <path d="M388 120V150" stroke="#8C5D3B" stroke-width="3" stroke-linecap="round"/>
+  <path d="M140 150C126 150 114 160 114 174V226C114 236 122 244 132 244H148C158 244 166 236 166 226V174C166 160 154 150 140 150Z" fill="#FF6B6B"/>
+  <path d="M122 170H158" stroke="#FFF8F0" stroke-width="5" stroke-linecap="round"/>
+  <path d="M210 158H230C244 158 256 170 256 184V230H184V184C184 170 196 158 210 158Z" fill="#74B9FF"/>
+  <path d="M184 230H256" stroke="#FFF8F0" stroke-width="5" stroke-linecap="round"/>
+  <path d="M300 148C284 148 270 160 270 176V228C270 240 280 250 292 250H308C320 250 330 240 330 228V176C330 160 316 148 300 148Z" fill="#FFE66D"/>
+  <path d="M292 160H308" stroke="#FFF8F0" stroke-width="5" stroke-linecap="round"/>
+  <path d="M372 156H404C420 156 434 170 434 186V232H342V186C342 170 356 156 372 156Z" fill="#4ECDC4"/>
+  <path d="M342 232C354 214 370 206 388 206C406 206 422 214 434 232" stroke="#FFF8F0" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="118" cy="82" r="18" fill="#FFFFFF" opacity=".72"/>
+  <circle cx="146" cy="66" r="13" fill="#FFFFFF" opacity=".72"/>
+  <circle cx="170" cy="82" r="18" fill="#FFFFFF" opacity=".72"/>
+  <circle cx="216" cy="74" r="4" fill="#FF6B6B"/>
+  <circle cx="228" cy="60" r="3" fill="#4ECDC4"/>
+  <circle cx="245" cy="72" r="4" fill="#FFE66D"/>
 </svg>

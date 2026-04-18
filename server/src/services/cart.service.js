@@ -40,7 +40,8 @@ export async function listCartItems({ userId, sessionId }) {
         p.name,
         p.price,
         p.image_url,
-        p.fallback_bg
+        p.fallback_bg,
+        p.palette
       FROM carts c
       JOIN cart_items ci ON ci.cart_id = c.id
       JOIN products p ON p.id = ci.product_id
@@ -52,34 +53,37 @@ export async function listCartItems({ userId, sessionId }) {
   return result.rows
 }
 
-export async function addCartItem({ userId, sessionId, productId, quantity }) {
+export async function addCartItem({ userId, sessionId, productId, quantity, size = '' }) {
   return withTransaction(async client => {
     const cartId = await getOrCreateCart(client, { userId, sessionId })
     await client.query(
       `INSERT INTO cart_items (cart_id, product_id, qty, size)
-       VALUES ($1, $2, $3, '')
+       VALUES ($1, $2, $3, $4)
        ON CONFLICT (cart_id, product_id, size)
        DO UPDATE SET qty = cart_items.qty + EXCLUDED.qty`,
-      [cartId, productId, quantity]
+      [cartId, productId, quantity, size]
     )
 
     return listCartItems({ userId, sessionId })
   })
 }
 
-export async function updateCartItem({ userId, sessionId, productId, quantity }) {
+export async function updateCartItem({ userId, sessionId, productId, quantity, size = '' }) {
   return withTransaction(async client => {
     const cartId = await getOrCreateCart(client, { userId, sessionId })
 
     if (quantity === 0) {
-      await client.query('DELETE FROM cart_items WHERE cart_id = $1 AND product_id = $2', [cartId, productId])
+      await client.query(
+        'DELETE FROM cart_items WHERE cart_id = $1 AND product_id = $2 AND size = $3',
+        [cartId, productId, size]
+      )
     } else {
       await client.query(
         `INSERT INTO cart_items (cart_id, product_id, qty, size)
-         VALUES ($1, $2, $3, '')
+         VALUES ($1, $2, $3, $4)
          ON CONFLICT (cart_id, product_id, size)
          DO UPDATE SET qty = EXCLUDED.qty`,
-        [cartId, productId, quantity]
+        [cartId, productId, quantity, size]
       )
     }
 
