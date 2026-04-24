@@ -3,6 +3,14 @@ import { useParams } from 'react-router-dom'
 import { formatCurrency } from '@store/utils'
 import { useAppStore } from '../store/useAppStore.js'
 
+function titleCase(value) {
+  return String(value || '')
+    .split(/[-\s]+/)
+    .filter(Boolean)
+    .map(part => part[0].toUpperCase() + part.slice(1))
+    .join(' ')
+}
+
 export function ProductPage() {
   const { slug } = useParams()
   const store = useAppStore()
@@ -22,34 +30,56 @@ export function ProductPage() {
   }, [product])
 
   if (!product) {
-    return <section className="section-stack"><p>Loading product...</p></section>
+    return (
+      <section className="section">
+        <div className="container empty-state">
+          <h2>Loading product...</h2>
+        </div>
+      </section>
+    )
   }
 
   return (
-    <section className="product-detail">
-      {product.imageUrl ? (
-        <img className="product-detail-art" src={product.imageUrl} alt={product.name} />
-      ) : (
-        <div
-          className="product-detail-art"
-          style={{ background: `linear-gradient(135deg, ${product.palette[0]}, ${product.palette[1]})` }}
-        />
-      )}
-      <div className="section-stack">
-        <p className="eyebrow">{product.category.name}</p>
-        <h1>{product.name}</h1>
-        <p>{product.description}</p>
-        <strong>{formatCurrency(product.price)}</strong>
-        <select className="input" value={selectedVariant} onChange={event => setSelectedVariant(event.target.value)}>
-          {product.variants.map(variant => (
-            <option key={variant.id} value={variant.id}>
-              {variant.size} - {variant.stock > 0 ? `${variant.stock} in stock` : 'Out of stock'}
-            </option>
-          ))}
-        </select>
-        <button className="button" type="button" onClick={() => addToCart(selectedVariant)} disabled={!selectedVariant}>
-          Add to cart
-        </button>
+    <section className="section">
+      <div className="container product-layout">
+        <div className="product-hero">
+          <img src={product.imageUrl} alt={product.name} className="product-detail-art" />
+        </div>
+
+        <div className="product-panel">
+          <p className="eyebrow">{product.category.name}</p>
+          <h1>{product.name}</h1>
+          <p className="product-panel__copy">{product.description}</p>
+          <div className="product-panel__facts">
+            <span>{titleCase(product.gender)}</span>
+            <span>{product.ageGroup}</span>
+            {(product.seasons || []).map(season => <span key={season}>{titleCase(season)}</span>)}
+          </div>
+          <div className="product-panel__price">
+            <strong>{formatCurrency(product.price)}</strong>
+            {product.sourcePriceMxn ? <s>{product.sourcePriceMxn} MXN</s> : null}
+          </div>
+          <fieldset className="product-panel__sizes">
+            <legend>Choose a size</legend>
+            <div className="product-card__sizes">
+              {product.variants.map(variant => (
+                <button
+                  key={variant.id}
+                  type="button"
+                  className={variant.id === selectedVariant ? 'size-chip is-active' : 'size-chip'}
+                  onClick={() => setSelectedVariant(variant.id)}
+                >
+                  {variant.size}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+          <div className="product-panel__actions">
+            <button className="button" type="button" onClick={() => addToCart(selectedVariant)} disabled={!selectedVariant}>
+              Add to cart
+            </button>
+          </div>
+        </div>
       </div>
     </section>
   )

@@ -15,7 +15,7 @@ export const authService = {
     return apiClient.post('/auth/login', payload)
   },
   logout() {
-    return apiClient.post('/auth/logout', {})
+    return apiClient.post('/auth/logout')
   },
   getSession() {
     return apiClient.get('/auth/me')

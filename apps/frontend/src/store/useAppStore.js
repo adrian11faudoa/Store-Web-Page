@@ -10,11 +10,11 @@ export const useAppStore = create((set, get) => ({
   catalog: {
     categories: [],
     products: [],
-    pagination: { page: 1, limit: 12, total: 0, totalPages: 1 },
+    pagination: { page: 1, limit: 48, total: 0, totalPages: 1 },
     selectedProduct: null,
     filters: {
       page: 1,
-      limit: 12,
+      limit: 48,
       category: '',
       q: '',
       sortBy: 'createdAt',

@@ -32,6 +32,14 @@ function buildTokens(user) {
   return { accessToken, refreshToken: token, tokenId }
 }
 
+function verifyRefreshTokenSafely(refreshToken) {
+  try {
+    return verifyRefreshToken(refreshToken)
+  } catch {
+    throw new AppError(401, 'Refresh token is invalid')
+  }
+}
+
 export async function register(data, metadata) {
   const existing = await findUserByEmail(data.email)
 
@@ -84,7 +92,7 @@ export async function refreshSession(refreshToken, metadata) {
     throw new AppError(401, 'Refresh token is required')
   }
 
-  const payload = verifyRefreshToken(refreshToken)
+  const payload = verifyRefreshTokenSafely(refreshToken)
   const session = await findRefreshSession(payload.jti, hashToken(refreshToken))
 
   if (!session) {
@@ -107,8 +115,16 @@ export async function logout(refreshToken) {
     return
   }
 
-  const payload = verifyRefreshToken(refreshToken)
-  await revokeRefreshSession(payload.jti, hashToken(refreshToken))
+  try {
+    const payload = verifyRefreshTokenSafely(refreshToken)
+    await revokeRefreshSession(payload.jti, hashToken(refreshToken))
+  } catch (error) {
+    if (error instanceof AppError && error.statusCode === 401) {
+      return
+    }
+
+    throw error
+  }
 }
 
 export async function getCurrentUser(userId) {

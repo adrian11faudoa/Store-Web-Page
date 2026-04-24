@@ -1,10 +1,23 @@
 import { config as loadEnv } from 'dotenv'
 import { resolve } from 'node:path'
+import { existsSync } from 'node:fs'
 import { PrismaClient, UserRole } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import { loadCatalogFromCsv } from './catalog-import.js'
 
-loadEnv({ path: resolve(process.cwd(), '.env') })
+const candidatePaths = [
+  resolve(process.cwd(), '.env'),
+  resolve(process.cwd(), '.env.development'),
+  resolve(process.cwd(), '..', '..', '.env'),
+  resolve(process.cwd(), '..', '..', '.env.development'),
+]
+
+for (const path of candidatePaths) {
+  if (existsSync(path)) {
+    loadEnv({ path, override: true })
+    break
+  }
+}
 
 const prisma = new PrismaClient()
 

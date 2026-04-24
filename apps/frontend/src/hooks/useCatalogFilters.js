@@ -1,5 +1,11 @@
 import { useAppStore } from '../store/useAppStore.js'
 
+function resolveCatalogUpdates(updates) {
+  return Object.prototype.hasOwnProperty.call(updates, 'page')
+    ? updates
+    : { ...updates, page: 1 }
+}
+
 export function useCatalogFilters() {
   const store = useAppStore()
   const filters = store.catalog.filters
@@ -7,6 +13,6 @@ export function useCatalogFilters() {
 
   return {
     filters,
-    updateFilters: updates => loadCatalog({ ...updates, page: 1 }),
+    updateFilters: updates => loadCatalog(resolveCatalogUpdates(updates)),
   }
 }
