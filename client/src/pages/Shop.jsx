@@ -5,6 +5,7 @@ import ProductFilters from '../components/ProductFilters.jsx'
 import ProductSkeleton from '../components/ProductSkeleton.jsx'
 import { DEFAULT_FILTERS, filterProducts, getCatalogMeta } from '../assets/js/utils/products.js'
 import { formatLabel } from '../assets/js/utils/format.js'
+import { useLocale } from '../locale/LocaleProvider.jsx'
 
 function readFilters(searchParams) {
   return {
@@ -18,6 +19,7 @@ function readFilters(searchParams) {
 }
 
 export default function Shop({ products, loading, error, cart }) {
+  const { language, t } = useLocale()
   const [searchParams, setSearchParams] = useSearchParams()
   const [filtersOpen, setFiltersOpen] = useState(false)
   const filters = readFilters(searchParams)
@@ -39,11 +41,20 @@ export default function Shop({ products, loading, error, cart }) {
     setFiltersOpen(false)
   }
 
+  const ageLabel = value => {
+    if (language === 'es') {
+      return value
+        .replace('months', 'meses')
+        .replace('years', 'anos')
+    }
+    return value
+  }
+
   const activeFilters = [
-    filters.category !== 'all' && { key: 'category', label: `Category: ${formatLabel(filters.category)}` },
-    filters.gender !== 'all' && { key: 'gender', label: `Gender: ${formatLabel(filters.gender)}` },
-    filters.ageGroup !== 'all' && { key: 'ageGroup', label: `Age: ${filters.ageGroup}` },
-    filters.badge && { key: 'badge', label: `Badge: ${formatLabel(filters.badge)}` },
+    filters.category !== 'all' && { key: 'category', label: t('shopCategory', { value: formatLabel(filters.category) }) },
+    filters.gender !== 'all' && { key: 'gender', label: t('shopGender', { value: formatLabel(filters.gender) }) },
+    filters.ageGroup !== 'all' && { key: 'ageGroup', label: t('shopAge', { value: ageLabel(filters.ageGroup) }) },
+    filters.badge && { key: 'badge', label: t('shopBadge', { value: formatLabel(filters.badge) }) },
     filters.query && { key: 'query', label: `"${filters.query}"` },
   ].filter(Boolean)
 
@@ -52,12 +63,12 @@ export default function Shop({ products, loading, error, cart }) {
       <div className="container">
         <div className="mobile-filter-bar">
           <button type="button" className="button button--ghost" onClick={() => setFiltersOpen(true)}>
-            🔧 Filters {activeFilters.length > 0 && `(${activeFilters.length})`}
+            {t('filtersOpen')} {activeFilters.length > 0 && `(${activeFilters.length})`}
           </button>
-          <p className="catalog-count">{filteredProducts.length} products</p>
+          <p className="catalog-count">{t('shopProductsCount', { count: filteredProducts.length })}</p>
         </div>
 
-        {filtersOpen && <button type="button" className="mobile-filter-backdrop" onClick={() => setFiltersOpen(false)} aria-label="Close filters" />}
+        {filtersOpen && <button type="button" className="mobile-filter-backdrop" onClick={() => setFiltersOpen(false)} aria-label={t('filtersClose')} />}
 
         <div className="catalog-layout">
           <div className={filtersOpen ? 'catalog-layout__sidebar is-open' : 'catalog-layout__sidebar'}>
@@ -73,10 +84,10 @@ export default function Shop({ products, loading, error, cart }) {
           <div className="catalog-layout__content">
             <div className="section-heading">
               <div>
-                <p className="eyebrow">Fresh picks for every playdate</p>
-                <h1>Shop playful pieces for babies, toddlers, and big kids</h1>
+                <p className="eyebrow">{t('shopEyebrow')}</p>
+                <h1>{t('shopTitle')}</h1>
               </div>
-              <p className="catalog-count">{filteredProducts.length} products</p>
+              <p className="catalog-count">{t('shopProductsCount', { count: filteredProducts.length })}</p>
             </div>
 
             {activeFilters.length > 0 && (
@@ -87,7 +98,7 @@ export default function Shop({ products, loading, error, cart }) {
                     <button
                       type="button"
                       onClick={() => updateFilter(filter.key, filter.key === 'query' ? '' : 'all')}
-                      aria-label={`Remove ${filter.label} filter`}
+                      aria-label={t('remove')}
                     >
                       ×
                     </button>
@@ -100,16 +111,16 @@ export default function Shop({ products, loading, error, cart }) {
               <ProductSkeleton />
             ) : error ? (
               <div className="empty-state">
-                <h2>Unable to load products</h2>
+                <h2>{t('shopUnable')}</h2>
                 <p>{error}</p>
               </div>
             ) : filteredProducts.length === 0 ? (
               <div className="empty-state">
                 <div className="empty-state__illustration">🧺</div>
-                <h2>Nothing here yet</h2>
-                <p>Try adjusting your filters or search with a broader keyword.</p>
+                <h2>{t('shopNothing')}</h2>
+                <p>{t('shopAdjust')}</p>
                 <button type="button" className="button" onClick={resetFilters}>
-                  Clear all filters
+                  {t('shopClearAll')}
                 </button>
               </div>
             ) : (

@@ -3,55 +3,55 @@ import ProductCard from '../components/ProductCard.jsx'
 import TrustStrip from '../components/TrustStrip.jsx'
 import WaveDivider from '../components/WaveDivider.jsx'
 import ProductSkeleton from '../components/ProductSkeleton.jsx'
+import { useLocale } from '../locale/LocaleProvider.jsx'
 
 const HERO_IMAGE = `${import.meta.env.BASE_URL}assets/images/catalog-hero.svg`
 
-const categoryHighlights = [
-  {
-    title: 'Baby essentials',
-    emoji: '🍼',
-    description: 'Soft rompers, knit sets, and overalls for 0–24 months.',
-    query: 'baby',
-    color: 'var(--brand-baby)',
-  },
-  {
-    title: 'Girls\' favourites',
-    emoji: '🌸',
-    description: 'Dresses, sets, and skirts in vibrant prints for every occasion.',
-    query: 'girls',
-    color: 'var(--brand-soft)',
-  },
-  {
-    title: 'Boys\' picks',
-    emoji: '🚀',
-    description: 'Jackets, cargo shorts, tees — built for non-stop play.',
-    query: 'boys',
-    color: 'var(--brand-cool)',
-  },
-]
-
 export default function Home({ featuredProducts, cart, loading, error, openCart }) {
+  const { currency, t } = useLocale()
+  const threshold = currency === 'MXN' ? '$2,400 MXN' : '$120 USD'
+  const categoryHighlights = [
+    {
+      title: t('homeHighlightsBabyTitle'),
+      emoji: '🍼',
+      description: t('homeHighlightsBabyDesc'),
+      query: 'baby',
+      color: 'var(--brand-baby)',
+    },
+    {
+      title: t('homeHighlightsGirlsTitle'),
+      emoji: '🌸',
+      description: t('homeHighlightsGirlsDesc'),
+      query: 'girls',
+      color: 'var(--brand-soft)',
+    },
+    {
+      title: t('homeHighlightsBoysTitle'),
+      emoji: '🚀',
+      description: t('homeHighlightsBoysDesc'),
+      query: 'boys',
+      color: 'var(--brand-cool)',
+    },
+  ]
+
   return (
     <>
       <section className="hero">
         <div className="container hero__grid">
           <div className="hero__content">
-            <p className="eyebrow">New arrivals just landed ✨</p>
-            <h1>Dress them for every adventure</h1>
-            <p className="hero__copy">
-              Soft fabrics, playful colours, and styles that keep up with kids.
-              Free shipping on orders over $120.
-            </p>
+            <p className="eyebrow">{t('homeEyebrow')}</p>
+            <h1>{t('homeTitle')}</h1>
+            <p className="hero__copy">{t('homeBody', { amount: threshold })}</p>
             <div className="hero__actions">
-              <Link className="button" to="/shop">Shop now</Link>
+              <Link className="button" to="/shop">{t('homeShopNow')}</Link>
               <button type="button" className="button button--ghost" onClick={openCart}>
-                View cart ({cart.itemCount})
+                {t('homeViewCart')} ({cart.itemCount})
               </button>
             </div>
             <dl className="hero__stats">
-              <div><dt>200+</dt><dd>Styles available</dd></div>
-              <div><dt>Free</dt><dd>Shipping over $120</dd></div>
-              <div><dt>4.8★</dt><dd>Average rating</dd></div>
+              <div><dt>200+</dt><dd>{t('homeStyles')}</dd></div>
+              <div><dt>{t('shippingFree')}</dt><dd>{t('homeShipping', { amount: threshold })}</dd></div>
+              <div><dt>4.8★</dt><dd>{t('homeAverageRating')}</dd></div>
             </dl>
           </div>
           <div className="hero__media">
@@ -67,8 +67,8 @@ export default function Home({ featuredProducts, cart, loading, error, openCart 
         <div className="container">
           <div className="section-heading">
             <div>
-              <p className="eyebrow">Shop by little personality</p>
-              <h2>Find favourites for every stage</h2>
+              <p className="eyebrow">{t('homePersonalityEyebrow')}</p>
+              <h2>{t('homePersonalityTitle')}</h2>
             </div>
           </div>
           <div className="highlight-grid">
@@ -82,7 +82,7 @@ export default function Home({ featuredProducts, cart, loading, error, openCart 
                 <h3>{item.title}</h3>
                 <p>{item.description}</p>
                 <Link to={`/shop?q=${item.query}`} className="highlight-card__link">
-                  Shop now →
+                  {t('homeShopNow')} →
                 </Link>
               </article>
             ))}
@@ -96,17 +96,17 @@ export default function Home({ featuredProducts, cart, loading, error, openCart 
         <div className="container">
           <div className="section-heading">
             <div>
-              <p className="eyebrow">This week&apos;s picks</p>
-              <h2>Kids love these right now</h2>
+              <p className="eyebrow">{t('homeFeaturedEyebrow')}</p>
+              <h2>{t('homeFeaturedTitle')}</h2>
             </div>
-            <Link className="text-link" to="/shop">See full catalog</Link>
+            <Link className="text-link" to="/shop">{t('homeSeeCatalog')}</Link>
           </div>
 
           {loading ? (
             <ProductSkeleton count={4} />
           ) : error ? (
             <div className="empty-state">
-              <h3>Our rack is taking a quick break</h3>
+              <h3>{t('homeRackBreak')}</h3>
               <p>{error}</p>
             </div>
           ) : (

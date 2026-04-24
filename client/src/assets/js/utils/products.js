@@ -9,24 +9,25 @@ export const DEFAULT_FILTERS = {
 
 export const AGE_GROUP_FILTERS = {
   all: ['all'],
-  '0–24 months': ['3-12 months', '6-24 months'],
-  '2–4 years': ['2-4 years'],
-  '4–6 years': ['4-6 years'],
-  '7–10 years': ['7-10 years'],
-  '10–14 years': ['8-12 years', '10-14 years'],
+  '0-24 months': ['3-12 months', '6-24 months'],
+  '2-4 years': ['2-4 years'],
+  '4-6 years': ['4-6 years'],
+  '7-10 years': ['7-10 years'],
+  '10-14 years': ['8-12 years', '10-14 years'],
 }
 
 export function getProductImageFallback(product) {
   const CATEGORY_EMOJIS = {
-    tops: '👕',
-    bottoms: '👖',
-    dresses: '👗',
-    outerwear: '🧥',
-    sets: '🎁',
+    tops: 'T',
+    bottoms: 'B',
+    dresses: 'D',
+    outerwear: 'O',
+    sets: 'S',
   }
 
-  const emoji = CATEGORY_EMOJIS[product.category] || '👕'
-  const [bg1, bg2] = product.palette
+  const categoryKey = (product.category || product.tipoPrenda || '').toLowerCase()
+  const emoji = CATEGORY_EMOJIS[categoryKey] || 'P'
+  const [bg1, bg2] = product.palette?.length ? product.palette : ['#FF8E9E', '#FFFFFF']
 
   return `data:image/svg+xml,${encodeURIComponent(`
     <svg xmlns="http://www.w3.org/2000/svg" width="320" height="400" viewBox="0 0 320 400">

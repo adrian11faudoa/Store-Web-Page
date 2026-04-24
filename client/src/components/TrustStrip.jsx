@@ -1,11 +1,15 @@
-const badges = [
-  { icon: '🚚', label: 'Free shipping', sub: 'On orders over $120' },
-  { icon: '↩️', label: 'Easy returns', sub: '30-day free returns' },
-  { icon: '🛡️', label: 'Safe checkout', sub: 'SSL-secured payments' },
-  { icon: '🌱', label: 'Eco packaging', sub: '100% recycled boxes' },
-]
+import { useLocale } from '../locale/LocaleProvider.jsx'
 
 export default function TrustStrip() {
+  const { currency, t } = useLocale()
+  const threshold = currency === 'MXN' ? '$2,400 MXN' : '$120 USD'
+  const badges = [
+    { icon: '🚚', label: t('trustFreeShipping'), sub: t('trustFreeShippingSub', { amount: threshold }) },
+    { icon: '↩️', label: t('trustEasyReturns'), sub: t('trustEasyReturnsSub') },
+    { icon: '🛡️', label: t('trustSafeCheckout'), sub: t('trustSafeCheckoutSub') },
+    { icon: '🌱', label: t('trustEcoPackaging'), sub: t('trustEcoPackagingSub') },
+  ]
+
   return (
     <div className="trust-strip">
       <div className="container">

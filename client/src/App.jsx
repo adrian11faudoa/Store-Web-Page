@@ -4,11 +4,13 @@ import Header from './components/Header.jsx'
 import Footer from './components/Footer.jsx'
 import CartDrawer from './components/CartDrawer.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
-import AuthModal from './components/AuthModal.jsx'
+import ProtectedRoute from './components/ProtectedRoute.jsx'
 import Home from './pages/Home.jsx'
 import Shop from './pages/Shop.jsx'
 import Product from './pages/Product.jsx'
 import Checkout from './pages/Checkout.jsx'
+import AdminProducts from './pages/AdminProducts.jsx'
+import Login from './pages/Login.jsx'
 import { useTheme } from './hooks/useTheme.js'
 import { getFeaturedProducts, getProductById, getRelatedProducts } from './assets/js/utils/products.js'
 import { useAppStore } from './store/useAppStore.js'
@@ -44,7 +46,6 @@ function OAuthSuccess() {
 
 export default function App() {
   const [isCartOpen, setIsCartOpen] = useState(false)
-  const [isAuthOpen, setIsAuthOpen] = useState(false)
   const { theme, toggleTheme } = useTheme()
   const products = useAppStore(state => state.products)
   const productsMeta = useAppStore(state => state.productsMeta)
@@ -95,7 +96,6 @@ export default function App() {
       <Header
         cartCount={cart.itemCount}
         onOpenCart={() => setIsCartOpen(true)}
-        onOpenAuth={() => setIsAuthOpen(true)}
         theme={theme}
         onToggleTheme={toggleTheme}
       />
@@ -115,13 +115,16 @@ export default function App() {
               )}
             />
             <Route path="/checkout" element={<Checkout cart={cart} />} />
+            <Route path="/login" element={<Login />} />
+            <Route element={<ProtectedRoute requireAdmin />}>
+              <Route path="/admin/products" element={<AdminProducts {...sharedProps} reloadProducts={loadProducts} />} />
+            </Route>
             <Route path="/oauth/success" element={<OAuthSuccess />} />
           </Routes>
         </ErrorBoundary>
       </main>
       <Footer />
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} cart={cart} />
-      {isAuthOpen && <AuthModal onClose={() => setIsAuthOpen(false)} />}
     </div>
   )
 }

@@ -1,5 +1,6 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
+import { useLocale } from '../locale/LocaleProvider.jsx'
 import { useAppStore } from '../store/useAppStore.js'
 
 function SparkleIcon() {
@@ -18,12 +19,14 @@ function BagIcon() {
   )
 }
 
-export default function Header({ cartCount, onOpenCart, onOpenAuth, theme, onToggleTheme }) {
+export default function Header({ cartCount, onOpenCart, theme, onToggleTheme }) {
   const [search, setSearch] = useState('')
-  const [showUserMenu, setShowUserMenu] = useState(false)
   const navigate = useNavigate()
   const user = useAppStore(state => state.user)
   const logout = useAppStore(state => state.logout)
+  const { currency, language, setCurrency, setLanguage, t } = useLocale()
+  const isAuthenticated = Boolean(user)
+  const role = user?.role || 'user'
 
   function handleSubmit(event) {
     event.preventDefault()
@@ -34,7 +37,7 @@ export default function Header({ cartCount, onOpenCart, onOpenAuth, theme, onTog
 
   async function handleLogout() {
     await logout()
-    setShowUserMenu(false)
+    navigate('/', { replace: true })
   }
 
   return (
@@ -52,9 +55,10 @@ export default function Header({ cartCount, onOpenCart, onOpenAuth, theme, onTog
         </Link>
 
         <nav className="main-nav" aria-label="Primary">
-          <NavLink to="/">🏠 Home</NavLink>
-          <NavLink to="/shop">👕 Shop</NavLink>
-          <NavLink to="/checkout">🛒 Checkout</NavLink>
+          <NavLink to="/">{t('home')}</NavLink>
+          <NavLink to="/shop">{t('shop')}</NavLink>
+          {role === 'admin' && <NavLink to="/admin/products">{t('admin')}</NavLink>}
+          <NavLink to="/checkout">{t('checkout')}</NavLink>
         </nav>
 
         <form className="header-search" onSubmit={handleSubmit} role="search">
@@ -66,42 +70,42 @@ export default function Header({ cartCount, onOpenCart, onOpenAuth, theme, onTog
             value={search}
             onChange={event => setSearch(event.target.value)}
           />
-          <button type="submit" className="button button--ghost">Search</button>
+          <button type="submit" className="button button--ghost">{t('search')}</button>
         </form>
 
         <div className="header-actions">
+          <label className="locale-select">
+            <span>{t('language')}</span>
+            <select value={language} onChange={event => setLanguage(event.target.value)}>
+              <option value="en">{t('english')}</option>
+              <option value="es">{t('spanish')}</option>
+            </select>
+          </label>
+          <label className="locale-select">
+            <span>{t('currency')}</span>
+            <select value={currency} onChange={event => setCurrency(event.target.value)}>
+              <option value="USD">{t('usd')}</option>
+              <option value="MXN">{t('mxn')}</option>
+            </select>
+          </label>
           <button type="button" className="icon-button" onClick={onToggleTheme} aria-label="Toggle theme">
-            {theme === 'dark' ? '☀️' : '🌙'}
+            {theme === 'dark' ? 'Light' : 'Dark'}
           </button>
 
-          {user ? (
-            <div className="user-menu-wrapper">
-              <button
-                type="button"
-                className="user-avatar-btn"
-                onClick={() => setShowUserMenu(menu => !menu)}
-                aria-label="Account menu"
-              >
-                {user.name.slice(0, 2).toUpperCase()}
-              </button>
-              {showUserMenu && (
-                <div className="user-menu">
-                  <p className="user-menu__name">{user.name}</p>
-                  <p className="user-menu__email">{user.email}</p>
-                  <hr />
-                  <button type="button" onClick={handleLogout}>Sign out</button>
-                </div>
-              )}
+          {isAuthenticated ? (
+            <div className="user-menu">
+              <p className="user-menu__name">{user?.name || 'Signed in'}</p>
+              <p className="user-menu__email">{role === 'admin' ? 'Administrator' : 'Store user'}</p>
+              <hr />
+              <button type="button" onClick={handleLogout}>{t('signout')}</button>
             </div>
           ) : (
-            <button type="button" className="button button--ghost" onClick={onOpenAuth}>
-              Sign in
-            </button>
+            <button type="button" className="button button--ghost" onClick={() => navigate('/login')}>{t('signin')}</button>
           )}
 
           <button type="button" className="icon-button icon-button--cart" onClick={onOpenCart}>
             <BagIcon />
-            <span aria-live="polite">{cartCount}</span>
+            <span aria-live="polite">{t('cart')} ({cartCount})</span>
           </button>
         </div>
       </div>

@@ -1,8 +1,7 @@
-export function formatCurrency(value) {
-  // TODO: localise currency and locale based on shopper region.
-  return new Intl.NumberFormat('en-US', {
+export function formatCurrency(value, { locale = 'en-US', currency = 'USD' } = {}) {
+  return new Intl.NumberFormat(locale, {
     style: 'currency',
-    currency: 'USD',
+    currency,
     maximumFractionDigits: 2,
   }).format(value)
 }

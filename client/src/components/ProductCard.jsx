@@ -2,26 +2,28 @@ import { Link } from 'react-router-dom'
 import { useState } from 'react'
 import { formatCurrency, formatLabel } from '../assets/js/utils/format.js'
 import { getProductImageFallback } from '../assets/js/utils/products.js'
+import { useLocale } from '../locale/LocaleProvider.jsx'
 
 function getBadgeClassName(badge) {
   return badge.toLowerCase().replace(/\s+/g, '-')
 }
 
 export default function ProductCard({ product, onAddToCart }) {
+  const { currency, locale, t } = useLocale()
   const [size, setSize] = useState(product.sizes.length > 1 ? '' : (product.sizes[0] || ''))
   const [message, setMessage] = useState('')
   const [wished, setWished] = useState(false)
-  const imageSrc = product.image_url || getProductImageFallback(product)
+  const imageSrc = product.imagenes?.[0] || product.image_url || getProductImageFallback(product)
   const badge = product.old_price > product.price ? 'sale' : product.badge
 
   function handleAddToCart() {
     if (product.sizes.length > 1 && !size) {
-      setMessage('Please select a size first')
+      setMessage(t('productSelectSize'))
       return
     }
 
     onAddToCart(product, size)
-    setMessage('Added to cart ✓')
+    setMessage(t('productAdded'))
     window.setTimeout(() => setMessage(''), 2000)
   }
 
@@ -40,7 +42,7 @@ export default function ProductCard({ product, onAddToCart }) {
           }}
           aria-label={wished ? 'Remove from wishlist' : 'Add to wishlist'}
         >
-          {wished ? '❤️' : '🤍'}
+          {wished ? '♥' : '♡'}
         </button>
         <img src={imageSrc} alt={product.name} loading="lazy" width="320" height="400" />
         {badge && <span className={`pill pill--${getBadgeClassName(badge)}`}>{badge}</span>}
@@ -50,14 +52,14 @@ export default function ProductCard({ product, onAddToCart }) {
       </svg>
       <div className="product-card__body">
         <div className="product-card__meta">
-          <span>{formatLabel(product.category)}</span>
+          <span>{formatLabel(product.tipoPrenda || product.category)}</span>
           <span>{product.rating.toFixed(1)} / 5</span>
         </div>
-        <h3>{product.name}</h3>
+        <h3>{product.nombre || product.name}</h3>
         <p>{product.description}</p>
         <div className="product-card__meta">
-          <span>{formatLabel(product.gender)}</span>
-          <span>{formatLabel(product.ageGroup)}</span>
+          <span>{formatLabel(product.genero || product.gender)}</span>
+          <span>{formatLabel(product.temporada)}</span>
         </div>
         <div className="product-card__sizes" aria-label="Available sizes">
           {product.sizes.map(option => (
@@ -73,21 +75,21 @@ export default function ProductCard({ product, onAddToCart }) {
         </div>
         <div className="product-card__footer">
           <div className="product-card__pricing">
-            <strong className="product-card__price">{formatCurrency(product.price)}</strong>
+            <strong className="product-card__price">{formatCurrency(product.price, { locale, currency })}</strong>
             {product.old_price > product.price && (
-              <s className="product-card__old-price">{formatCurrency(product.old_price)}</s>
+              <s className="product-card__old-price">{formatCurrency(product.old_price, { locale, currency })}</s>
             )}
           </div>
           <div className="product-card__actions">
             <Link className="button button--ghost" to={`/product/${product.id}`}>
-              Details
+              {t('productDetails')}
             </Link>
             <button type="button" className="button" onClick={handleAddToCart}>
-              Add
+              {t('productAdd')}
             </button>
           </div>
         </div>
-        <p className={message.includes('select') ? 'product-card__status is-error' : 'product-card__status'} aria-live="polite">{message}</p>
+        <p className={message.includes(t('productSelectSize')) ? 'product-card__status is-error' : 'product-card__status'} aria-live="polite">{message}</p>
       </div>
     </article>
   )
