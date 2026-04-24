@@ -80,7 +80,10 @@ model Product {
   badge        String?
   gender       String
   ageGroup     String
+  ageTags      String[]         @default([])
+  seasons      String[]         @default([])
   price        Decimal          @db.Decimal(10, 2)
+  sourcePriceMxn Decimal?       @db.Decimal(10, 2)
   rating       Decimal          @default(4.5) @db.Decimal(3, 2)
   releaseDate  DateTime
   imageUrl     String?

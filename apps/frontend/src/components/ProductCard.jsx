@@ -6,10 +6,14 @@ export function ProductCard({ product, onAddToCart }) {
 
   return (
     <article className="card">
-      <div
-        className="product-art"
-        style={{ background: `linear-gradient(135deg, ${product.palette?.[0] || '#f5ead8'}, ${product.palette?.[1] || '#ffffff'})` }}
-      />
+      {product.imageUrl ? (
+        <img className="product-art" src={product.imageUrl} alt={product.name} loading="lazy" />
+      ) : (
+        <div
+          className="product-art"
+          style={{ background: `linear-gradient(135deg, ${product.palette?.[0] || '#f5ead8'}, ${product.palette?.[1] || '#ffffff'})` }}
+        />
+      )}
       <div className="card-body">
         <p className="eyebrow">{product.category?.name || 'Catalog item'}</p>
         <div className="card-row">

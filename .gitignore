@@ -1,14 +1,18 @@
 node_modules/
-server/.env
+
+# Environment files
 .env
-.env.development
-.env.staging
-.env.production
-apps/backend/.env
-apps/frontend/.env.local
+.env.*
+**/.env
+**/.env.*
+!.env*.example
+!**/.env*.example
+
+# Logs
 *.log
-client.zip
-client_fixed.zip
-server_fixed.zip
-server.zip
-store.zip
+
+# Local archives and scratch files
+*.zip
+text.txt
+text.csv
+

@@ -107,6 +107,9 @@ select {
 .product-detail-art {
   min-height: 220px;
   border-radius: 24px 24px 0 0;
+  width: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .product-detail-art {

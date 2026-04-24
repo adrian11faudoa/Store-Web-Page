@@ -8,7 +8,7 @@
     "start": "node src/server.js",
     "build": "node -e \"console.log('Backend build step complete')\"",
     "lint": "eslint src prisma --ext .js",
-    "test": "node src/app.test.js",
+    "test": "node --test",
     "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev --name init",

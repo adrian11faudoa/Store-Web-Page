@@ -27,10 +27,14 @@ export function ProductPage() {
 
   return (
     <section className="product-detail">
-      <div
-        className="product-detail-art"
-        style={{ background: `linear-gradient(135deg, ${product.palette[0]}, ${product.palette[1]})` }}
-      />
+      {product.imageUrl ? (
+        <img className="product-detail-art" src={product.imageUrl} alt={product.name} />
+      ) : (
+        <div
+          className="product-detail-art"
+          style={{ background: `linear-gradient(135deg, ${product.palette[0]}, ${product.palette[1]})` }}
+        />
+      )}
       <div className="section-stack">
         <p className="eyebrow">{product.category.name}</p>
         <h1>{product.name}</h1>
