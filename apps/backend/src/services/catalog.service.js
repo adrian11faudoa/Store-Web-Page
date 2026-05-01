@@ -1,7 +1,19 @@
 import { listCategories, listProducts, findProductBySlug } from '../repositories/catalog.repository.js'
 import { AppError } from '../utils/app-error.js'
+import { loadCatalogFromCsv } from '../../prisma/catalog-import.js'
 
-function formatProduct(product) {
+async function getCatalogImageMap() {
+  return loadCatalogFromCsv()
+    .then(catalog => new Map(catalog.map(entry => [entry.slug, entry.imageUrls || (entry.imageUrl ? [entry.imageUrl] : [])])))
+    .catch(() => new Map())
+}
+
+function formatProduct(product, imageMap) {
+  const csvImageUrls = imageMap?.get(product.slug)?.filter(Boolean) || []
+  const imageUrls = csvImageUrls.length > 0
+    ? csvImageUrls
+    : (product.imageUrl ? [product.imageUrl] : [])
+
   return {
     id: product.id,
     slug: product.slug,
@@ -17,6 +29,7 @@ function formatProduct(product) {
     rating: Number(product.rating),
     releaseDate: product.releaseDate,
     imageUrl: product.imageUrl,
+    imageUrls,
     palette: [product.paletteStart, product.paletteEnd],
     isFeatured: product.isFeatured,
     category: {
@@ -39,10 +52,10 @@ export async function getCategories() {
 }
 
 export async function getProducts(filters) {
-  const result = await listProducts(filters)
+  const [result, imageMap] = await Promise.all([listProducts(filters), getCatalogImageMap()])
 
   return {
-    items: result.items.map(formatProduct),
+    items: result.items.map(item => formatProduct(item, imageMap)),
     pagination: {
       page: filters.page,
       limit: filters.limit,
@@ -53,11 +66,11 @@ export async function getProducts(filters) {
 }
 
 export async function getProduct(slug) {
-  const product = await findProductBySlug(slug)
+  const [product, imageMap] = await Promise.all([findProductBySlug(slug), getCatalogImageMap()])
 
   if (!product || !product.isActive) {
     throw new AppError(404, 'Product not found')
   }
 
-  return formatProduct(product)
+  return formatProduct(product, imageMap)
 }

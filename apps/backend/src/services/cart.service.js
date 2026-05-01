@@ -18,6 +18,7 @@ function formatCart(cart) {
         name: item.variant.product.name,
         price: Number(item.variant.product.price),
         badge: item.variant.product.badge,
+        imageUrl: item.variant.product.imageUrl,
         palette: [item.variant.product.paletteStart, item.variant.product.paletteEnd],
       },
       lineTotal: Number(item.variant.product.price) * item.quantity,

@@ -19,6 +19,11 @@ export function ProductPage() {
   const addToCart = store.addToCart
   const { formatMoney } = useLocale()
   const [selectedVariant, setSelectedVariant] = useState('')
+  const [activeImage, setActiveImage] = useState('')
+
+  const galleryImages = Array.isArray(product?.imageUrls) && product.imageUrls.length > 0
+    ? product.imageUrls
+    : (product?.imageUrl ? [product.imageUrl] : [])
 
   useEffect(() => {
     void loadProduct(slug)
@@ -29,6 +34,12 @@ export function ProductPage() {
       setSelectedVariant(product.variants[0].id)
     }
   }, [product])
+
+  useEffect(() => {
+    if (galleryImages.length > 0) {
+      setActiveImage(galleryImages[0])
+    }
+  }, [product?.id])
 
   if (!product) {
     return (
@@ -44,7 +55,24 @@ export function ProductPage() {
     <section className="section">
       <div className="container product-layout">
         <div className="product-hero">
-          <img src={product.imageUrl} alt={product.name} className="product-detail-art" />
+          <div className="product-gallery">
+            <div className="product-gallery__thumbs" aria-label="Imagenes del producto">
+              {galleryImages.map((image, index) => (
+                <button
+                  key={`${image}-${index}`}
+                  type="button"
+                  className={image === activeImage ? 'product-gallery__thumb is-active' : 'product-gallery__thumb'}
+                  onClick={() => setActiveImage(image)}
+                  aria-label={`Ver imagen ${index + 1}`}
+                >
+                  <img src={image} alt={`${product.name} vista ${index + 1}`} />
+                </button>
+              ))}
+            </div>
+            <div className="product-gallery__stage">
+              <img src={activeImage || product.imageUrl} alt={product.name} className="product-detail-art" />
+            </div>
+          </div>
         </div>
 
         <div className="product-panel">

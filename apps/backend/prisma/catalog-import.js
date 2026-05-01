@@ -313,6 +313,23 @@ function buildBadge(seasons) {
   return null
 }
 
+function extractImageUrls(row) {
+  const imageKeys = Object.keys(row)
+    .filter(key => /^url\d+$/i.test(key.trim()))
+    .sort((left, right) => Number(left.replace(/\D/g, '')) - Number(right.replace(/\D/g, '')))
+
+  const unique = new Set()
+
+  for (const key of imageKeys) {
+    const value = String(row[key] || '').trim()
+    if (value) {
+      unique.add(value)
+    }
+  }
+
+  return [...unique]
+}
+
 function buildProductEntry(row, index, exchangeRate) {
   const id = String(row.id).trim()
   const name = String(row['Nombre de la prenda'] || '').trim()
@@ -327,6 +344,7 @@ function buildProductEntry(row, index, exchangeRate) {
   const sourcePriceMxn = parseCurrencyValue(row.Precio)
   const priceMxn = sourcePriceMxn ?? 0
   const slugBase = slugify(`${name}-${id}`)
+  const imageUrls = extractImageUrls(row)
 
   return {
     slug: slugBase,
@@ -341,7 +359,8 @@ function buildProductEntry(row, index, exchangeRate) {
     sourcePriceMxn,
     rating: 4.5,
     releaseDate: new Date(Date.UTC(2026, 0, Math.min(index + 1, 28))),
-    imageUrl: String(row.url1 || '').trim() || null,
+    imageUrl: imageUrls[0] || null,
+    imageUrls,
     palette,
     isFeatured: index < 8,
     isActive: true,

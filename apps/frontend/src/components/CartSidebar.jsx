@@ -26,7 +26,14 @@ export function CartSidebar({ isOpen, onClose }) {
           {items.length === 0 ? <p className="empty-copy">Tu carrito esta vacio.</p> : null}
           {items.map(item => (
             <div className="cart-item" key={item.id}>
-              <div className="cart-item__swatch" style={{ background: `linear-gradient(135deg, ${item.product.palette?.[0] || '#ffd0c7'}, ${item.product.palette?.[1] || '#a8e6cf'})` }} />
+              <div
+                className="cart-item__media"
+                style={{ background: `linear-gradient(135deg, ${item.product.palette?.[0] || '#ffd0c7'}, ${item.product.palette?.[1] || '#a8e6cf'})` }}
+              >
+                {item.product?.imageUrl ? (
+                  <img src={item.product.imageUrl} alt={item.product?.name || 'Producto'} loading="lazy" />
+                ) : null}
+              </div>
               <div className="cart-item__body">
                 <div className="cart-item__heading">
                   <strong>{item.product?.name || 'Producto desconocido'}</strong>
