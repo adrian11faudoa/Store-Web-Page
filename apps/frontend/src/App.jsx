@@ -8,7 +8,21 @@ import { SignInPage } from './pages/SignInPage.jsx'
 import { AuthCallbackPage } from './pages/AuthCallbackPage.jsx'
 import { CartSidebar } from './components/CartSidebar.jsx'
 import { ErrorBoundary } from './components/ErrorBoundary.jsx'
+import { LocaleProvider } from './context/localeContext.jsx'
 import { useAppStore } from './store/useAppStore.js'
+
+const UI_TEXT = {
+  tagline: 'Pequeno estilo, grandes sonrisas',
+  home: 'Inicio',
+  shop: 'Tienda',
+  checkout: 'Pago',
+  searchPlaceholder: 'Busca mamelucos, vestidos, chamarras...',
+  searchButton: 'Buscar',
+  currency: 'Moneda',
+  signIn: 'Iniciar sesion',
+  cart: 'Carrito',
+  syncing: 'Sincronizando datos...',
+}
 
 function SparkleIcon() {
   return (
@@ -30,8 +44,9 @@ export default function App() {
   const bootstrappedRef = useRef(false)
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
-  const [language, setLanguage] = useState('English')
-  const [currency, setCurrency] = useState('US Dollars')
+  const [currency, setCurrency] = useState(() => (
+    (typeof window !== 'undefined' && window.localStorage.getItem('sk_currency')) || 'USD'
+  ))
   const [theme, setTheme] = useState('light')
   const store = useAppStore()
   const bootstrap = store.bootstrap
@@ -56,6 +71,29 @@ export default function App() {
     document.documentElement.dataset.theme = theme
   }, [theme])
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('sk_currency', currency)
+    }
+  }, [currency])
+
+  const usdToMxnRate = 17
+
+  const localeValue = useMemo(() => ({
+    language: 'es',
+    currency,
+    labels: UI_TEXT,
+    formatMoney(value) {
+      const numeric = Number(value || 0)
+      const converted = currency === 'MXN' ? numeric * usdToMxnRate : numeric
+      return new Intl.NumberFormat('es-MX', {
+        style: 'currency',
+        currency,
+        maximumFractionDigits: 2,
+      }).format(converted)
+    },
+  }), [currency])
+
   function handleSearchSubmit(event) {
     event.preventDefault()
     const params = new URLSearchParams()
@@ -68,86 +106,82 @@ export default function App() {
   }
 
   return (
-    <div className="app-shell">
-      <header className="site-header">
-        <div className="container header-row">
-          <NavLink className="brand" to="/">
-            <span className="brand__icon">
-              <SparkleIcon />
-            </span>
-            <span className="brand__text">
-              <span className="brand__wordmark">Sahara Kids</span>
-              <small className="brand__tagline">Little style, big smiles</small>
-            </span>
-          </NavLink>
-
-          <nav className="main-nav" aria-label="Primary">
-            <NavLink to="/" end>Home</NavLink>
-            <NavLink to="/shop">Shop</NavLink>
-            <NavLink to="/checkout">Checkout</NavLink>
-          </nav>
-
-          <form className="header-search" onSubmit={handleSearchSubmit} role="search">
-            <input
-              type="search"
-              placeholder="Search rompers, dresses, jackets..."
-              value={search}
-              onChange={event => setSearch(event.target.value)}
-            />
-            <button className="button button--ghost" type="submit">Search</button>
-          </form>
-
-          <div className="header-actions">
-            <label className="locale-select">
-              <span>Language</span>
-              <select value={language} onChange={event => setLanguage(event.target.value)}>
-                <option>English</option>
-                <option>Spanish</option>
-              </select>
-            </label>
-            <label className="locale-select">
-              <span>Currency</span>
-              <select value={currency} onChange={event => setCurrency(event.target.value)}>
-                <option>US Dollars</option>
-              </select>
-            </label>
-            <button
-              className="icon-button"
-              type="button"
-              onClick={() => setTheme(current => current === 'dark' ? 'light' : 'dark')}
-            >
-              {theme === 'dark' ? 'Light' : 'Dark'}
-            </button>
-            <NavLink className="button button--ghost" to="/signin">
-              {currentUser ? currentUser.name : 'Sign in'}
+    <LocaleProvider value={localeValue}>
+      <div className="app-shell">
+        <header className="site-header">
+          <div className="container header-row">
+            <NavLink className="brand" to="/">
+              <span className="brand__icon">
+                <SparkleIcon />
+              </span>
+              <span className="brand__text">
+                <span className="brand__wordmark">Sahara Kids</span>
+                <small className="brand__tagline">{UI_TEXT.tagline}</small>
+              </span>
             </NavLink>
-            <button className="icon-button icon-button--cart" type="button" onClick={() => setCartOpen(!cartOpen)}>
-              <BagIcon />
-              <span>Cart ({cartItems.length})</span>
-            </button>
+
+            <nav className="main-nav" aria-label="Primary">
+              <NavLink to="/" end>{UI_TEXT.home}</NavLink>
+              <NavLink to="/shop">{UI_TEXT.shop}</NavLink>
+              <NavLink to="/checkout">{UI_TEXT.checkout}</NavLink>
+            </nav>
+
+            <form className="header-search" onSubmit={handleSearchSubmit} role="search">
+              <input
+                type="search"
+                placeholder={UI_TEXT.searchPlaceholder}
+                value={search}
+                onChange={event => setSearch(event.target.value)}
+              />
+              <button className="button button--ghost" type="submit">{UI_TEXT.searchButton}</button>
+            </form>
+
+            <div className="header-actions">
+              <label className="locale-select">
+                <span>{UI_TEXT.currency}</span>
+                <select value={currency} onChange={event => setCurrency(event.target.value)}>
+                  <option value="USD">Dolares estadounidenses</option>
+                  <option value="MXN">Pesos mexicanos</option>
+                </select>
+              </label>
+              <button
+                className="icon-button"
+                type="button"
+                onClick={() => setTheme(current => current === 'dark' ? 'light' : 'dark')}
+              >
+                {theme === 'dark' ? 'Claro' : 'Oscuro'}
+              </button>
+              <NavLink className="button button--ghost" to="/signin">
+                {currentUser ? currentUser.name : UI_TEXT.signIn}
+              </NavLink>
+              <button className="icon-button icon-button--cart" type="button" onClick={() => setCartOpen(!cartOpen)}>
+                <BagIcon />
+                <span>{UI_TEXT.cart} ({cartItems.length})</span>
+              </button>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {pendingRequests > 0 ? <div className="status-banner">Syncing live data...</div> : null}
-      {lastError ? <div className="error-banner">{lastError}</div> : null}
+        {pendingRequests > 0 ? <div className="status-banner">{UI_TEXT.syncing}</div> : null}
+        {lastError ? <div className="error-banner">{lastError}</div> : null}
 
-      <ErrorBoundary>
-        <main id="main-content">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/shop" element={<CatalogPage />} />
-            <Route path="/catalog" element={<CatalogPage />} />
-            <Route path="/shop/:slug" element={<ProductPage />} />
-            <Route path="/catalog/:slug" element={<ProductPage />} />
-            <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/signin" element={<SignInPage />} />
-            <Route path="/auth/callback" element={<AuthCallbackPage />} />
-          </Routes>
-        </main>
+        <ErrorBoundary>
+          <main id="main-content">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/shop" element={<CatalogPage />} />
+              <Route path="/catalog" element={<CatalogPage />} />
+              <Route path="/shop/:slug" element={<ProductPage />} />
+              <Route path="/catalog/:slug" element={<ProductPage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/signin" element={<SignInPage />} />
+              <Route path="/auth/callback" element={<AuthCallbackPage />} />
+            </Routes>
+          </main>
 
-        <CartSidebar isOpen={cartOpen} onClose={() => setCartOpen(false)} />
-      </ErrorBoundary>
-    </div>
+          <CartSidebar isOpen={cartOpen} onClose={() => setCartOpen(false)} />
+        </ErrorBoundary>
+      </div>
+    </LocaleProvider>
   )
 }

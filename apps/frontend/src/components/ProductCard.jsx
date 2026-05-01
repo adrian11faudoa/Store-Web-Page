@@ -1,6 +1,6 @@
-import { Link } from 'react-router-dom'
+﻿import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
-import { formatCurrency } from '@store/utils'
+import { useLocale } from '../context/localeContext.jsx'
 
 function badgeClassName(badge) {
   return String(badge || '').toLowerCase().replace(/\s+/g, '-')
@@ -15,6 +15,8 @@ function titleCase(value) {
 }
 
 export function ProductCard({ product, onAddToCart }) {
+  const navigate = useNavigate()
+  const { formatMoney } = useLocale()
   const [selectedSize, setSelectedSize] = useState(product.variants?.[0]?.size || '')
   const [wished, setWished] = useState(false)
   const [message, setMessage] = useState('')
@@ -24,26 +26,37 @@ export function ProductCard({ product, onAddToCart }) {
 
   function handleAddToCart() {
     if (!activeVariant) {
-      setMessage('Unavailable')
+      setMessage('No disponible')
       return
     }
 
     onAddToCart(activeVariant.id)
-    setMessage('Added to cart')
+    setMessage('Agregado al carrito')
     window.setTimeout(() => setMessage(''), 1800)
   }
 
   return (
-    <article className="product-card">
+    <article
+      className="product-card product-card--clickable"
+      role="link"
+      tabIndex={0}
+      onClick={() => navigate(`/shop/${product.slug}`)}
+      onKeyDown={event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          navigate(`/shop/${product.slug}`)
+        }
+      }}
+    >
       <div className="product-card__visual" style={{ background: `linear-gradient(135deg, ${product.palette[0]}, ${product.palette[1]})` }}>
         <button
           type="button"
           className={wished ? 'wishlist-btn is-wished' : 'wishlist-btn'}
           onClick={event => {
-            event.preventDefault()
+            event.stopPropagation()
             setWished(current => !current)
           }}
-          aria-label={wished ? 'Remove from wishlist' : 'Add to wishlist'}
+          aria-label={wished ? 'Quitar de favoritos' : 'Agregar a favoritos'}
         >
           {wished ? '♥' : '♡'}
         </button>
@@ -55,22 +68,24 @@ export function ProductCard({ product, onAddToCart }) {
       </svg>
       <div className="product-card__body">
         <div className="product-card__meta">
-          <span>{product.category?.name || 'Catalog'}</span>
+          <span>{product.category?.name || 'Catalogo'}</span>
           <span>{product.rating?.toFixed(1) || '4.5'} / 5</span>
         </div>
         <h3>{product.name}</h3>
-        <p>{product.description}</p>
         <div className="product-card__meta">
           <span>{titleCase(product.gender)}</span>
           <span>{titleCase(product.seasons?.[0] || product.ageGroup)}</span>
         </div>
-        <div className="product-card__sizes" aria-label="Available sizes">
+        <div className="product-card__sizes" aria-label="Tallas disponibles">
           {variants.map(variant => (
             <button
               key={variant.id}
               type="button"
               className={variant.size === selectedSize ? 'size-chip is-active' : 'size-chip'}
-              onClick={() => setSelectedSize(variant.size)}
+              onClick={event => {
+                event.stopPropagation()
+                setSelectedSize(variant.size)
+              }}
             >
               {variant.size}
             </button>
@@ -78,11 +93,19 @@ export function ProductCard({ product, onAddToCart }) {
         </div>
         <div className="product-card__footer">
           <div className="product-card__pricing">
-            <strong className="product-card__price">{formatCurrency(product.price)}</strong>
+            <strong className="product-card__price">{formatMoney(product.price)}</strong>
           </div>
           <div className="product-card__actions">
-            <Link className="button button--ghost" to={`/shop/${product.slug}`}>Details</Link>
-            <button type="button" className="button" onClick={handleAddToCart}>Add</button>
+            <button
+              type="button"
+              className="button"
+              onClick={event => {
+                event.stopPropagation()
+                handleAddToCart()
+              }}
+            >
+              Agregar al carrito
+            </button>
           </div>
         </div>
         <p className="product-card__status" aria-live="polite">{message}</p>

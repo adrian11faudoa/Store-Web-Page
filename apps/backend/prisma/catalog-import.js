@@ -158,7 +158,25 @@ export function parseCsv(text) {
 }
 
 export function convertMxnToUsd(amount, exchangeRate = DEFAULT_MXN_TO_USD_RATE) {
-  return Number((Number(amount) / exchangeRate).toFixed(2))
+  const numericAmount = parseCurrencyValue(amount)
+  return Number(((numericAmount ?? 0) / exchangeRate).toFixed(2))
+}
+
+function parseCurrencyValue(value) {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : null
+  }
+
+  const normalized = String(value || '')
+    .trim()
+    .replace(/[^0-9,.-]/g, '')
+
+  if (!normalized) {
+    return null
+  }
+
+  const numeric = Number(normalized.replace(/,/g, ''))
+  return Number.isFinite(numeric) ? numeric : null
 }
 
 function normalizeDelimitedValue(value, delimiter = '/') {
@@ -306,7 +324,8 @@ function buildProductEntry(row, index, exchangeRate) {
   const stock = Number(row.Existencia || 0)
   const category = resolveCategory(type)
   const palette = buildPalette(row['Color Primario'], row['Color Secundario'])
-  const priceMxn = Number(row.Precio || 0)
+  const sourcePriceMxn = parseCurrencyValue(row.Precio)
+  const priceMxn = sourcePriceMxn ?? 0
   const slugBase = slugify(`${name}-${id}`)
 
   return {
@@ -319,7 +338,7 @@ function buildProductEntry(row, index, exchangeRate) {
     ageTags,
     seasons,
     price: convertMxnToUsd(priceMxn, exchangeRate),
-    sourcePriceMxn: priceMxn,
+    sourcePriceMxn,
     rating: 4.5,
     releaseDate: new Date(Date.UTC(2026, 0, Math.min(index + 1, 28))),
     imageUrl: String(row.url1 || '').trim() || null,

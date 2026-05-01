@@ -17,24 +17,24 @@ export function HomePage() {
       <section className="hero">
         <div className="container hero__grid">
           <div className="hero__content">
-            <p className="eyebrow">New arrivals just landed</p>
-            <h1>Dress them for every adventure</h1>
+            <p className="eyebrow">Nuevos ingresos recien llegados</p>
+            <h1>Vistelos para cada aventura</h1>
             <p className="hero__copy">
-              Soft fabrics, playful colours, and styles that keep up with kids. Your imported catalog is now live with
-              the real articles from your inventory.
+              Telas suaves, colores alegres y estilos que siguen el ritmo de los peques. Tu catalogo importado ya esta
+              en vivo con los articulos reales de tu inventario.
             </p>
             <div className="hero__actions">
-              <Link className="button" to="/shop">Shop now</Link>
-              <Link className="button button--ghost" to="/checkout">View cart ({itemCount})</Link>
+              <Link className="button" to="/shop">Comprar ahora</Link>
+              <Link className="button button--ghost" to="/checkout">Ver carrito ({itemCount})</Link>
             </div>
             <dl className="hero__stats">
-              <div><dt>{products.length}+</dt><dd>real items live</dd></div>
-              <div><dt>Free</dt><dd>seeded catalog on local dev</dd></div>
-              <div><dt>4.8★</dt><dd>shop-ready styling</dd></div>
+              <div><dt>{products.length}+</dt><dd>articulos reales en linea</dd></div>
+              <div><dt>Gratis</dt><dd>catalogo sembrado en local</dd></div>
+              <div><dt>4.8★</dt><dd>estilo listo para tienda</dd></div>
             </dl>
           </div>
           <div className="hero__media">
-            <img src={heroImage} alt="Playful kids storefront illustration" />
+            <img src={heroImage} alt="Ilustracion de tienda infantil" />
           </div>
         </div>
       </section>
@@ -43,10 +43,10 @@ export function HomePage() {
         <div className="container">
           <div className="section-heading">
             <div>
-              <p className="eyebrow">Fresh picks for every playdate</p>
-              <h2>Featured pieces from your imported catalog</h2>
+              <p className="eyebrow">Selecciones frescas para cada dia de juego</p>
+              <h2>Piezas destacadas de tu catalogo importado</h2>
             </div>
-            <Link className="text-link" to="/shop">See full shop</Link>
+            <Link className="text-link" to="/shop">Ver tienda completa</Link>
           </div>
 
           <div className="product-grid">

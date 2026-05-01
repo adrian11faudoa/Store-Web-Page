@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom'
-import { formatCurrency } from '@store/utils'
+import { useLocale } from '../context/localeContext.jsx'
 import { useAppStore } from '../store/useAppStore.js'
 
 export function CartSidebar({ isOpen, onClose }) {
   const store = useAppStore()
+  const { formatMoney } = useLocale()
   const cart = store.cart.cart
   const updateCartItem = store.updateCartItem
   const items = Array.isArray(cart?.items) ? cart.items : []
@@ -11,27 +12,27 @@ export function CartSidebar({ isOpen, onClose }) {
 
   return (
     <div className={isOpen ? 'drawer is-open' : 'drawer'}>
-      <button type="button" className="drawer__backdrop" onClick={onClose} aria-label="Close cart" />
+      <button type="button" className="drawer__backdrop" onClick={onClose} aria-label="Cerrar carrito" />
       <aside className="drawer__panel">
         <div className="drawer__header">
           <div>
-            <strong>Cart</strong>
-            <p>{items.length} item(s)</p>
+            <strong>Carrito</strong>
+            <p>{items.length} articulo(s)</p>
           </div>
-          <button className="icon-button" type="button" onClick={onClose}>Close</button>
+          <button className="icon-button" type="button" onClick={onClose}>Cerrar</button>
         </div>
 
         <div className="cart-list">
-          {items.length === 0 ? <p className="empty-copy">Your cart is empty.</p> : null}
+          {items.length === 0 ? <p className="empty-copy">Tu carrito esta vacio.</p> : null}
           {items.map(item => (
             <div className="cart-item" key={item.id}>
               <div className="cart-item__swatch" style={{ background: `linear-gradient(135deg, ${item.product.palette?.[0] || '#ffd0c7'}, ${item.product.palette?.[1] || '#a8e6cf'})` }} />
               <div className="cart-item__body">
                 <div className="cart-item__heading">
-                  <strong>{item.product?.name || 'Unknown product'}</strong>
-                  <strong>{formatCurrency(item.lineTotal)}</strong>
+                  <strong>{item.product?.name || 'Producto desconocido'}</strong>
+                  <strong>{formatMoney(item.lineTotal)}</strong>
                 </div>
-                <p>Size {item.variant?.size || 'Default'}</p>
+                <p>Talla {item.variant?.size || 'Default'}</p>
                 <div className="cart-item__controls">
                   <button type="button" className="link-button" onClick={() => updateCartItem(item.variant.id, Math.max(0, item.quantity - 1))}>-</button>
                   <span>{item.quantity}</span>
@@ -45,10 +46,10 @@ export function CartSidebar({ isOpen, onClose }) {
         <div className="drawer__summary">
           <div>
             <span>Subtotal</span>
-            <strong>{formatCurrency(subtotal)}</strong>
+            <strong>{formatMoney(subtotal)}</strong>
           </div>
           <div className="drawer__actions">
-            <Link className="button button--ghost" to="/checkout" onClick={onClose}>Checkout</Link>
+            <Link className="button button--ghost" to="/checkout" onClick={onClose}>Pagar</Link>
           </div>
         </div>
       </aside>

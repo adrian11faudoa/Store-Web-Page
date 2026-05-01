@@ -10,5 +10,5 @@ export function AuthCallbackPage() {
     loadSession().finally(() => navigate('/'))
   }, [loadSession, navigate])
 
-  return <section className="panel auth-panel"><p>Finalizing sign-in...</p></section>
+  return <section className="panel auth-panel"><p>Finalizando inicio de sesion...</p></section>
 }

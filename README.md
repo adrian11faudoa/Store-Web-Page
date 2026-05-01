@@ -31,9 +31,22 @@ npm run test
 npm run build
 npm run db:migrate
 npm run db:seed
+npm run db:refresh
 ```
 
 `npm run dev` now runs the pending Prisma migrations and reseeds the local database from `text.csv` before starting the backend and frontend, so the catalog products are ready automatically in development.
+
+## Update Catalog From CSV
+
+When you modify `text.csv`, run:
+
+```bash
+npm run db:refresh
+```
+
+This reapplies migrations (if needed) and reseeds the database with the new CSV data.
+
+If `npm run dev` is already running, you only need to refresh the page after `db:refresh` finishes.
 
 ## Environment
 

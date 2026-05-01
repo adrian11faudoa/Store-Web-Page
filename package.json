@@ -18,6 +18,7 @@
     "db:migrate": "npm run prisma:migrate --workspace @store/backend",
     "db:deploy": "npm run prisma:deploy --workspace @store/backend",
     "db:seed": "npm run prisma:seed --workspace @store/backend",
+    "db:refresh": "npm run db:deploy && npm run db:seed",
     "compose:up": "docker compose up --build",
     "compose:down": "docker compose down"
   },

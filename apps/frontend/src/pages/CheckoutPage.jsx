@@ -1,7 +1,8 @@
-import { formatCurrency } from '@store/utils'
+import { useLocale } from '../context/localeContext.jsx'
 import { useAppStore } from '../store/useAppStore.js'
 
 export function CheckoutPage() {
+  const { formatMoney } = useLocale()
   const cart = useAppStore().cart.cart
   const items = Array.isArray(cart?.items) ? cart.items : []
   const subtotal = items.reduce((sum, item) => sum + item.lineTotal, 0)
@@ -12,27 +13,27 @@ export function CheckoutPage() {
     <section className="section">
       <div className="container checkout-layout">
         <div className="checkout-card">
-          <p className="eyebrow">Quick checkout</p>
-          <h1>Almost ready for delivery</h1>
-          <p>Review your pieces and continue building the playful storefront flow on top of your real imported catalog.</p>
+          <p className="eyebrow">Pago rapido</p>
+          <h1>Casi listo para entrega</h1>
+          <p>Revisa tus prendas y continua construyendo el flujo de tienda con tu catalogo real importado.</p>
         </div>
 
         <div className="checkout-card">
-          <h2>Order summary</h2>
+          <h2>Resumen del pedido</h2>
           <ul className="checkout-list">
             {items.map(item => (
               <li key={item.id}>
                 <span>{item.product.name} · {item.variant.size} · {item.quantity}</span>
-                <strong>{formatCurrency(item.lineTotal)}</strong>
+                <strong>{formatMoney(item.lineTotal)}</strong>
               </li>
             ))}
             <li>
-              <span>Shipping</span>
-              <strong>{formatCurrency(shipping)}</strong>
+              <span>Envio</span>
+              <strong>{formatMoney(shipping)}</strong>
             </li>
             <li>
               <span>Total</span>
-              <strong>{formatCurrency(total)}</strong>
+              <strong>{formatMoney(total)}</strong>
             </li>
           </ul>
         </div>

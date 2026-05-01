@@ -16,7 +16,7 @@ export function SignInPage() {
       <section className="panel auth-panel">
         <h1>{currentUser.name}</h1>
         <p>{currentUser.email}</p>
-        <button className="button" type="button" onClick={() => logout()}>Logout</button>
+        <button className="button" type="button" onClick={() => logout()}>Cerrar sesion</button>
       </section>
     )
   }
@@ -36,18 +36,18 @@ export function SignInPage() {
   return (
     <section className="auth-grid">
       <form className="panel auth-panel" onSubmit={handleLogin}>
-        <h1>Sign in</h1>
-        <input className="input" type="email" placeholder="Email" value={form.email} onChange={event => setForm({ ...form, email: event.target.value })} />
-        <input className="input" type="password" placeholder="Password" value={form.password} onChange={event => setForm({ ...form, password: event.target.value })} />
-        <button className="button" type="submit">Sign in</button>
-        <a className="button ghost" href={`${import.meta.env.VITE_API_URL || '/api/v1'}/auth/google`}>Continue with Google</a>
+        <h1>Iniciar sesion</h1>
+        <input className="input" type="email" placeholder="Correo" value={form.email} onChange={event => setForm({ ...form, email: event.target.value })} />
+        <input className="input" type="password" placeholder="Contrasena" value={form.password} onChange={event => setForm({ ...form, password: event.target.value })} />
+        <button className="button" type="submit">Entrar</button>
+        <a className="button ghost" href={`${import.meta.env.VITE_API_URL || '/api/v1'}/auth/google`}>Continuar con Google</a>
       </form>
       <form className="panel auth-panel" onSubmit={handleRegister}>
-        <h2>Create account</h2>
-        <input className="input" type="text" placeholder="Name" value={form.name} onChange={event => setForm({ ...form, name: event.target.value })} />
-        <input className="input" type="email" placeholder="Email" value={form.email} onChange={event => setForm({ ...form, email: event.target.value })} />
-        <input className="input" type="password" placeholder="Password" value={form.password} onChange={event => setForm({ ...form, password: event.target.value })} />
-        <button className="button" type="submit">Register</button>
+        <h2>Crear cuenta</h2>
+        <input className="input" type="text" placeholder="Nombre" value={form.name} onChange={event => setForm({ ...form, name: event.target.value })} />
+        <input className="input" type="email" placeholder="Correo" value={form.email} onChange={event => setForm({ ...form, email: event.target.value })} />
+        <input className="input" type="password" placeholder="Contrasena" value={form.password} onChange={event => setForm({ ...form, password: event.target.value })} />
+        <button className="button" type="submit">Registrarme</button>
       </form>
     </section>
   )

@@ -4,19 +4,21 @@ import { ProductCard } from '../components/ProductCard.jsx'
 import { useAppStore } from '../store/useAppStore.js'
 
 const SORT_OPTIONS = [
-  { value: 'featured', label: 'Featured' },
-  { value: 'newest', label: 'Newest' },
-  { value: 'price-low', label: 'Price low to high' },
-  { value: 'price-high', label: 'Price high to low' },
-  { value: 'name', label: 'Name A-Z' },
+  { value: 'featured', label: 'Destacados' },
+  { value: 'newest', label: 'Mas nuevos' },
+  { value: 'price-low', label: 'Precio: menor a mayor' },
+  { value: 'price-high', label: 'Precio: mayor a menor' },
+  { value: 'name', label: 'Nombre A-Z' },
 ]
 
 const GENDER_OPTIONS = [
-  { value: 'all', label: 'All', emoji: '✨' },
-  { value: 'girls', label: 'Girls', emoji: '🌸' },
-  { value: 'boys', label: 'Boys', emoji: '🚀' },
+  { value: 'all', label: 'Todos', emoji: '✨' },
+  { value: 'girls', label: 'Ninas', emoji: '🌸' },
+  { value: 'boys', label: 'Ninos', emoji: '🚀' },
   { value: 'unisex', label: 'Unisex', emoji: '🧸' },
 ]
+
+const ITEMS_PER_PAGE = 20
 
 function titleCase(value) {
   return String(value || '')
@@ -27,7 +29,10 @@ function titleCase(value) {
 }
 
 function readFilters(searchParams) {
+  const parsedPage = Number.parseInt(searchParams.get('page') || '1', 10)
+
   return {
+    page: Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1,
     q: searchParams.get('q') || '',
     category: searchParams.get('category') || 'all',
     gender: searchParams.get('gender') || 'all',
@@ -89,6 +94,14 @@ export function CatalogPage() {
     })
   }, [filters, products])
 
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / ITEMS_PER_PAGE))
+  const currentPage = Math.min(filters.page, totalPages)
+  const pageStartIndex = (currentPage - 1) * ITEMS_PER_PAGE
+  const pageEndIndex = pageStartIndex + ITEMS_PER_PAGE
+  const visibleProducts = filteredProducts.slice(pageStartIndex, pageEndIndex)
+  const showingFrom = filteredProducts.length === 0 ? 0 : pageStartIndex + 1
+  const showingTo = Math.min(pageEndIndex, filteredProducts.length)
+
   const activeFilters = [
     filters.category !== 'all' && { key: 'category', label: titleCase(filters.category) },
     filters.gender !== 'all' && { key: 'gender', label: titleCase(filters.gender) },
@@ -99,6 +112,20 @@ export function CatalogPage() {
 
   function updateFilter(key, value) {
     const nextParams = new URLSearchParams(searchParams)
+
+    if (key === 'page') {
+      const nextPage = Math.max(1, Number.parseInt(String(value || 1), 10) || 1)
+
+      if (nextPage <= 1) {
+        nextParams.delete('page')
+      } else {
+        nextParams.set('page', String(nextPage))
+      }
+
+      setSearchParams(nextParams)
+      return
+    }
+
     const fallbackValue = key === 'sort' ? 'featured' : 'all'
 
     if (!value || value === fallbackValue) {
@@ -107,6 +134,7 @@ export function CatalogPage() {
       nextParams.set(key, value)
     }
 
+    nextParams.delete('page')
     setSearchParams(nextParams)
   }
 
@@ -117,39 +145,39 @@ export function CatalogPage() {
 
   return (
     <section className="section">
-      <div className="container">
+      <div className="container container--catalog">
         <div className="mobile-filter-bar">
           <button type="button" className="button button--ghost" onClick={() => setFiltersOpen(true)}>
-            Filter styles {activeFilters.length > 0 ? `(${activeFilters.length})` : ''}
+            Filtrar estilos {activeFilters.length > 0 ? `(${activeFilters.length})` : ''}
           </button>
-          <p className="catalog-count">{filteredProducts.length} products</p>
+          <p className="catalog-count">{filteredProducts.length} productos</p>
         </div>
 
-        {filtersOpen ? <button type="button" className="mobile-filter-backdrop" onClick={() => setFiltersOpen(false)} aria-label="Close filters" /> : null}
+        {filtersOpen ? <button type="button" className="mobile-filter-backdrop" onClick={() => setFiltersOpen(false)} aria-label="Cerrar filtros" /> : null}
 
         <div className="catalog-layout">
           <div className={filtersOpen ? 'catalog-layout__sidebar is-open' : 'catalog-layout__sidebar'}>
             <aside className="filters-panel">
               <div className="filters-panel__header">
-                <strong>Filter styles</strong>
-                <button type="button" className="icon-button" onClick={() => setFiltersOpen(false)}>Close</button>
+                <strong>Filtrar estilos</strong>
+                <button type="button" className="icon-button" onClick={() => setFiltersOpen(false)}>Cerrar</button>
               </div>
 
               <div className="filters-panel__group">
-                <label htmlFor="catalog-search">Search</label>
+                <label htmlFor="catalog-search">Buscar</label>
                 <input
                   id="catalog-search"
                   type="search"
                   value={filters.q}
                   onChange={event => updateFilter('q', event.target.value)}
-                  placeholder="Search by product, age, or season"
+                  placeholder="Busca por producto, edad o temporada"
                 />
               </div>
 
               <div className="filters-panel__group">
-                <span className="filters-panel__label">Category</span>
+                <span className="filters-panel__label">Categoria</span>
                 <div className="filter-pills">
-                  <button type="button" className={filters.category === 'all' ? 'filter-pill is-active' : 'filter-pill'} onClick={() => updateFilter('category', 'all')}>🛍️ All</button>
+                  <button type="button" className={filters.category === 'all' ? 'filter-pill is-active' : 'filter-pill'} onClick={() => updateFilter('category', 'all')}>🛍️ Todos</button>
                   {categories.map(category => (
                     <button
                       key={category.id}
@@ -164,7 +192,7 @@ export function CatalogPage() {
               </div>
 
               <div className="filters-panel__group">
-                <span className="filters-panel__label">Gender</span>
+                <span className="filters-panel__label">Genero</span>
                 <div className="filter-pills">
                   {GENDER_OPTIONS.map(option => (
                     <button
@@ -180,9 +208,9 @@ export function CatalogPage() {
               </div>
 
               <div className="filters-panel__group">
-                <span className="filters-panel__label">Age group</span>
+                <span className="filters-panel__label">Grupo de edad</span>
                 <div className="filter-pills">
-                  <button type="button" className={filters.ageGroup === 'all' ? 'filter-pill is-active' : 'filter-pill'} onClick={() => updateFilter('ageGroup', 'all')}>All ages</button>
+                  <button type="button" className={filters.ageGroup === 'all' ? 'filter-pill is-active' : 'filter-pill'} onClick={() => updateFilter('ageGroup', 'all')}>Todas las edades</button>
                   {meta.ageGroups.map(ageGroup => (
                     <button
                       key={ageGroup}
@@ -197,9 +225,9 @@ export function CatalogPage() {
               </div>
 
               <div className="filters-panel__group">
-                <span className="filters-panel__label">Season</span>
+                <span className="filters-panel__label">Temporada</span>
                 <div className="filter-pills">
-                  <button type="button" className={filters.season === 'all' ? 'filter-pill is-active' : 'filter-pill'} onClick={() => updateFilter('season', 'all')}>All seasons</button>
+                  <button type="button" className={filters.season === 'all' ? 'filter-pill is-active' : 'filter-pill'} onClick={() => updateFilter('season', 'all')}>Todas</button>
                   {meta.seasons.map(season => (
                     <button
                       key={season}
@@ -214,7 +242,7 @@ export function CatalogPage() {
               </div>
 
               <div className="filters-panel__group">
-                <label htmlFor="catalog-sort">Sort by</label>
+                <label htmlFor="catalog-sort">Ordenar por</label>
                 <select id="catalog-sort" className="sort-select" value={filters.sort} onChange={event => updateFilter('sort', event.target.value)}>
                   {SORT_OPTIONS.map(option => (
                     <option key={option.value} value={option.value}>{option.label}</option>
@@ -223,7 +251,7 @@ export function CatalogPage() {
               </div>
 
               <button type="button" className="button button--ghost button--full" onClick={clearFilters}>
-                Clear all filters
+                Limpiar filtros
               </button>
             </aside>
           </div>
@@ -231,10 +259,10 @@ export function CatalogPage() {
           <div className="catalog-layout__content">
             <div className="section-heading">
               <div>
-                <p className="eyebrow">Fresh picks for every playdate</p>
-                <h1>Shop playful pieces for babies, toddlers, and big kids</h1>
+                <p className="eyebrow">Selecciones frescas para cada dia de juego</p>
+                <h1>Compra prendas divertidas para bebes, peques y ninos grandes</h1>
               </div>
-              <p className="catalog-count">{filteredProducts.length} products</p>
+              <p className="catalog-count">{filteredProducts.length} productos</p>
             </div>
 
             {activeFilters.length > 0 ? (
@@ -242,7 +270,7 @@ export function CatalogPage() {
                 {activeFilters.map(filter => (
                   <span key={filter.key} className="active-filter-tag">
                     {filter.label}
-                    <button type="button" onClick={() => updateFilter(filter.key, filter.key === 'q' ? '' : 'all')} aria-label="Remove filter">
+                    <button type="button" onClick={() => updateFilter(filter.key, filter.key === 'q' ? '' : 'all')} aria-label="Quitar filtro">
                       ×
                     </button>
                   </span>
@@ -251,10 +279,35 @@ export function CatalogPage() {
             ) : null}
 
             <div className="product-grid">
-              {filteredProducts.map(product => (
+              {visibleProducts.map(product => (
                 <ProductCard key={product.id} product={product} onAddToCart={variantId => addToCart(variantId)} />
               ))}
             </div>
+
+            {totalPages > 1 ? (
+              <div className="catalog-pagination" aria-label="Paginacion de catalogo">
+                <p className="catalog-pagination__summary">Mostrando {showingFrom}-{showingTo} de {filteredProducts.length}</p>
+                <div className="catalog-pagination__controls">
+                  <button
+                    type="button"
+                    className="button button--ghost"
+                    onClick={() => updateFilter('page', currentPage - 1)}
+                    disabled={currentPage <= 1}
+                  >
+                    Anterior
+                  </button>
+                  <span className="catalog-pagination__page">Pagina {currentPage} de {totalPages}</span>
+                  <button
+                    type="button"
+                    className="button button--ghost"
+                    onClick={() => updateFilter('page', currentPage + 1)}
+                    disabled={currentPage >= totalPages}
+                  >
+                    Siguiente
+                  </button>
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>

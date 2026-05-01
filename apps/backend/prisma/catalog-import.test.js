@@ -33,4 +33,5 @@ test('expandSizes converts numeric size ranges into individual variants', () => 
 
 test('convertMxnToUsd rounds imported MXN pricing for USD storefront output', () => {
   assert.equal(convertMxnToUsd(199, 17), 11.71)
+  assert.equal(convertMxnToUsd('$199.00', 17), 11.71)
 })

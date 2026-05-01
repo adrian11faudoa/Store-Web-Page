@@ -55,7 +55,11 @@ async function seed() {
         slug: entry.slug,
         name: entry.name,
         description: entry.description,
-        categoryId: categories[entry.category.slug].id,
+        category: {
+          connect: {
+            id: categories[entry.category.slug].id,
+          },
+        },
         gender: entry.gender,
         ageGroup: entry.ageGroup,
         ageTags: entry.ageTags,

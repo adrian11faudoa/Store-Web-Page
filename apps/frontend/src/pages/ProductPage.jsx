@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { formatCurrency } from '@store/utils'
+import { useLocale } from '../context/localeContext.jsx'
 import { useAppStore } from '../store/useAppStore.js'
 
 function titleCase(value) {
@@ -17,6 +17,7 @@ export function ProductPage() {
   const product = store.catalog.selectedProduct
   const loadProduct = store.loadProduct
   const addToCart = store.addToCart
+  const { formatMoney } = useLocale()
   const [selectedVariant, setSelectedVariant] = useState('')
 
   useEffect(() => {
@@ -33,7 +34,7 @@ export function ProductPage() {
     return (
       <section className="section">
         <div className="container empty-state">
-          <h2>Loading product...</h2>
+          <h2>Cargando producto...</h2>
         </div>
       </section>
     )
@@ -56,11 +57,11 @@ export function ProductPage() {
             {(product.seasons || []).map(season => <span key={season}>{titleCase(season)}</span>)}
           </div>
           <div className="product-panel__price">
-            <strong>{formatCurrency(product.price)}</strong>
+            <strong>{formatMoney(product.price)}</strong>
             {product.sourcePriceMxn ? <s>{product.sourcePriceMxn} MXN</s> : null}
           </div>
           <fieldset className="product-panel__sizes">
-            <legend>Choose a size</legend>
+            <legend>Elige una talla</legend>
             <div className="product-card__sizes">
               {product.variants.map(variant => (
                 <button
@@ -76,7 +77,7 @@ export function ProductPage() {
           </fieldset>
           <div className="product-panel__actions">
             <button className="button" type="button" onClick={() => addToCart(selectedVariant)} disabled={!selectedVariant}>
-              Add to cart
+              Agregar al carrito
             </button>
           </div>
         </div>
