@@ -44,6 +44,13 @@ export function CartSidebar({ isOpen, onClose }) {
                   <button type="button" className="link-button" onClick={() => updateCartItem(item.variant.id, Math.max(0, item.quantity - 1))}>-</button>
                   <span>{item.quantity}</span>
                   <button type="button" className="link-button" onClick={() => updateCartItem(item.variant.id, item.quantity + 1)}>+</button>
+                  <button
+                    type="button"
+                    className="link-button cart-item__remove"
+                    onClick={() => updateCartItem(item.variant.id, 0)}
+                  >
+                    Eliminar
+                  </button>
                 </div>
               </div>
             </div>
