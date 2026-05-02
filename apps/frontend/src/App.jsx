@@ -29,7 +29,8 @@ function SparkleIcon() {
 function ShopIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M7 8V7a5 5 0 0 1 10 0v1h2a1 1 0 0 1 1 1l-1 10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 9a1 1 0 0 1 1-1h2zm2 0h6V7a3 3 0 0 0-6 0v1z" />
+      <path d="M6.2 8.7h11.6l-1 10.2H7.2L6.2 8.7Z" fill="#ffffff" stroke="#111111" strokeWidth="1.9" strokeLinejoin="round" />
+      <path d="M9 10.2V7.4a3 3 0 1 1 6 0v2.8" fill="none" stroke="#111111" strokeWidth="1.9" strokeLinecap="round" />
     </svg>
   )
 }
@@ -45,7 +46,8 @@ function SearchIcon() {
 function UserIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 13a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0 2c4.42 0 8 2.58 8 5.75a1 1 0 1 1-2 0C18 18.84 15.31 17 12 17s-6 1.84-6 3.75a1 1 0 1 1-2 0C4 17.58 7.58 15 12 15Z" />
+      <circle cx="12" cy="7.5" r="3.9" fill="#ffffff" stroke="#111111" strokeWidth="1.9" />
+      <path d="M4 20c0-3.6 3.6-6.5 8-6.5s8 2.9 8 6.5" fill="none" stroke="#111111" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }
@@ -53,7 +55,10 @@ function UserIcon() {
 function CartIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M2 3a1 1 0 0 1 1-1h2.1a1 1 0 0 1 .96.72l.44 1.53h14a1 1 0 0 1 .97 1.25l-1.7 6.5a2 2 0 0 1-1.94 1.5H8.37l.34 1.2a.4.4 0 0 0 .38.3h10.41a1 1 0 1 1 0 2H9.09a2.4 2.4 0 0 1-2.31-1.74L4.34 4H3a1 1 0 0 1-1-1Zm6.5 18a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Zm10 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Z" />
+      <path d="M2.8 5.3h2.6l1.2 7.4h10.4l1.5-5.2H7.2" fill="#ffffff" stroke="#111111" strokeWidth="1.85" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M8.5 15.4h9.3" fill="none" stroke="#111111" strokeWidth="1.85" strokeLinecap="round" />
+      <circle cx="9.9" cy="18.4" r="1.55" fill="#ffffff" stroke="#111111" strokeWidth="1.85" />
+      <circle cx="16.8" cy="18.4" r="1.55" fill="#ffffff" stroke="#111111" strokeWidth="1.85" />
     </svg>
   )
 }

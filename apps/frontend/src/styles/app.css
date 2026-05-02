@@ -337,11 +337,15 @@ button {
 .header-icon-link svg {
   width: 2rem;
   height: 2rem;
-  fill: currentColor;
 }
 
 .header-cart-button {
   cursor: pointer;
+}
+
+.header-cart-button svg {
+  width: 2.1rem;
+  height: 2.1rem;
 }
 
 .header-cart-count {
