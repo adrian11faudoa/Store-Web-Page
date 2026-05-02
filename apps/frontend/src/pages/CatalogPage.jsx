@@ -144,7 +144,7 @@ export function CatalogPage() {
   }
 
   return (
-    <section className="section">
+    <section className="section section--catalog-page">
       <div className="container container--catalog">
         <div className="mobile-filter-bar">
           <button type="button" className="button button--ghost" onClick={() => setFiltersOpen(true)}>

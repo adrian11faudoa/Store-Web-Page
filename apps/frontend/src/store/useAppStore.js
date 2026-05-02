@@ -142,18 +142,15 @@ export const useAppStore = create((set, get) => ({
     }
   },
 
-  async register(payload) {
-    const { runTracked, loadSession } = get()
-    return runTracked(async () => {
-      await authService.register(payload)
-      await loadSession()
-    })
+  async requestPhoneCode(payload) {
+    const { runTracked } = get()
+    return runTracked(async () => authService.requestPhoneCode(payload))
   },
 
-  async login(payload) {
+  async verifyPhoneCode(payload) {
     const { runTracked, loadSession } = get()
     return runTracked(async () => {
-      await authService.login(payload)
+      await authService.verifyPhoneCode(payload)
       await loadSession()
     })
   },

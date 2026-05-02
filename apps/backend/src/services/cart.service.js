@@ -1,4 +1,4 @@
-import { findOrCreateCart, upsertCartItem } from '../repositories/cart.repository.js'
+import { addCartItemQuantity, findOrCreateCart, upsertCartItem } from '../repositories/cart.repository.js'
 
 function formatCart(cart) {
   return {
@@ -42,5 +42,12 @@ export async function getCart(context) {
 export async function setCartItem(context, variantId, quantity) {
   const cart = await findOrCreateCart(context)
   const updated = await upsertCartItem(cart.id, variantId, quantity)
+  return formatCart(updated)
+}
+
+export async function addCartItem(context, variantId, quantity) {
+  const cart = await findOrCreateCart(context)
+  const safeQuantity = Number.isFinite(Number(quantity)) ? Math.max(1, Number(quantity)) : 1
+  const updated = await addCartItemQuantity(cart.id, variantId, safeQuantity)
   return formatCart(updated)
 }

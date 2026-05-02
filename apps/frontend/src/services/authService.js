@@ -8,11 +8,11 @@ export const authService = {
 
     return fetch(healthUrl, { credentials: 'include' })
   },
-  register(payload) {
-    return apiClient.post('/auth/register', payload)
+  requestPhoneCode(payload) {
+    return apiClient.post('/auth/phone/request-code', payload)
   },
-  login(payload) {
-    return apiClient.post('/auth/login', payload)
+  verifyPhoneCode(payload) {
+    return apiClient.post('/auth/phone/verify-code', payload)
   },
   logout() {
     return apiClient.post('/auth/logout')

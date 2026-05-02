@@ -23,6 +23,20 @@ export const loginSchema = z.object({
   password: z.string().min(10).max(128),
 })
 
+const phoneSchema = z.string().trim().regex(/^\+?[1-9]\d{9,14}$/, 'Invalid phone number')
+
+export const phoneCodeRequestSchema = z.object({
+  phone: phoneSchema,
+  name: z.string().trim().min(2).max(120).optional(),
+})
+
+export const phoneCodeVerifySchema = z.object({
+  challengeId: z.string().uuid(),
+  phone: phoneSchema,
+  code: z.string().trim().regex(/^\d{6}$/, 'Invalid verification code'),
+  name: z.string().trim().min(2).max(120).optional(),
+})
+
 export const cartItemSchema = z.object({
   variantId: z.string().uuid(),
   quantity: z.coerce.number().int().min(1).max(20),

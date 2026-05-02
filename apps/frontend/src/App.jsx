@@ -5,7 +5,6 @@ import { CatalogPage } from './pages/CatalogPage.jsx'
 import { ProductPage } from './pages/ProductPage.jsx'
 import { CheckoutPage } from './pages/CheckoutPage.jsx'
 import { SignInPage } from './pages/SignInPage.jsx'
-import { AuthCallbackPage } from './pages/AuthCallbackPage.jsx'
 import { CartSidebar } from './components/CartSidebar.jsx'
 import { ErrorBoundary } from './components/ErrorBoundary.jsx'
 import { LocaleProvider } from './context/localeContext.jsx'
@@ -179,7 +178,6 @@ export default function App() {
               <Route path="/catalog/:slug" element={<ProductPage />} />
               <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/signin" element={<SignInPage />} />
-              <Route path="/auth/callback" element={<AuthCallbackPage />} />
             </Routes>
           </main>
 

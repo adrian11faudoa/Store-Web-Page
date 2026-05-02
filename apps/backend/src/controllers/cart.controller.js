@@ -15,7 +15,7 @@ export async function getCart(req, res) {
 }
 
 export async function addCartItem(req, res) {
-  const cart = await cartService.setCartItem(
+  const cart = await cartService.addCartItem(
     getCartContext(req),
     req.validated.body.variantId,
     req.validated.body.quantity,

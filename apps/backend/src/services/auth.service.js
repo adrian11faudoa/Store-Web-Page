@@ -1,13 +1,49 @@
-import bcrypt from 'bcryptjs'
-import { findUserByEmail, findUserById, createLocalUser, upsertGoogleAccount, listUsers } from '../repositories/user.repository.js'
+import { findUserByEmail, findUserById, createLocalUser, listUsers } from '../repositories/user.repository.js'
 import { createRefreshSession, findRefreshSession, revokeRefreshSession } from '../repositories/session.repository.js'
 import { createAccessToken, createRefreshToken, hashToken, verifyRefreshToken } from '../utils/tokens.js'
 import { AppError } from '../utils/app-error.js'
+import { createPhoneOtpChallenge, verifyPhoneOtpChallenge } from './phone-otp.service.js'
+import { sendWhatsappVerificationCode } from './whatsapp.service.js'
+
+const INTERNAL_PHONE_EMAIL_DOMAIN = 'phone.saharakids.local'
+
+function normalizePhone(phone) {
+  const raw = String(phone || '').trim()
+
+  if (!raw) {
+    throw new AppError(422, 'Phone number is required')
+  }
+
+  const normalized = raw
+    .replace(/[()\s-]/g, '')
+    .replace(/^00/, '+')
+
+  const digits = normalized.replace(/\D/g, '')
+  const asE164 = `+${digits}`
+
+  if (!/^\+[1-9]\d{9,14}$/.test(asE164)) {
+    throw new AppError(422, 'Invalid phone number')
+  }
+
+  return asE164
+}
+
+function phoneToInternalEmail(phone) {
+  const digits = phone.replace(/\D/g, '')
+  return `wa-${digits}@${INTERNAL_PHONE_EMAIL_DOMAIN}`
+}
+
+function phoneFromInternalEmail(email) {
+  const match = String(email || '').match(/^wa-(\d+)@phone\.saharakids\.local$/)
+  return match ? `+${match[1]}` : null
+}
 
 function sanitizeUser(user) {
+  const phone = phoneFromInternalEmail(user.email)
   return {
     id: user.id,
-    email: user.email,
+    email: phone ? null : user.email,
+    phone,
     name: user.name,
     role: user.role,
     avatarUrl: user.avatarUrl,
@@ -40,41 +76,43 @@ function verifyRefreshTokenSafely(refreshToken) {
   }
 }
 
-export async function register(data, metadata) {
-  const existing = await findUserByEmail(data.email)
+export async function requestPhoneCode(data) {
+  const phone = normalizePhone(data.phone)
+  const challenge = createPhoneOtpChallenge(phone)
+  const ttlMinutes = Math.max(1, Math.round(challenge.expiresInSeconds / 60))
 
-  if (existing) {
-    throw new AppError(409, 'Account already exists')
-  }
-
-  const user = await createLocalUser({
-    email: data.email.toLowerCase(),
-    name: data.name,
-    passwordHash: await bcrypt.hash(data.password, 12),
-    emailVerified: true,
+  await sendWhatsappVerificationCode({
+    phone,
+    code: challenge.code,
+    ttlMinutes,
   })
 
-  const tokens = buildTokens(user)
-  await persistRefreshToken(user, tokens.refreshToken, tokens.tokenId, metadata)
-
   return {
-    user: sanitizeUser(user),
-    accessToken: tokens.accessToken,
-    refreshToken: tokens.refreshToken,
+    challengeId: challenge.challengeId,
+    phone,
+    expiresInSeconds: challenge.expiresInSeconds,
   }
 }
 
-export async function login(data, metadata) {
-  const user = await findUserByEmail(data.email)
+export async function verifyPhoneCode(data, metadata) {
+  const phone = normalizePhone(data.phone)
+  verifyPhoneOtpChallenge({
+    challengeId: data.challengeId,
+    phone,
+    code: data.code,
+  })
 
-  if (!user?.passwordHash) {
-    throw new AppError(401, 'Invalid credentials')
-  }
+  const internalEmail = phoneToInternalEmail(phone)
+  let user = await findUserByEmail(internalEmail)
 
-  const isValid = await bcrypt.compare(data.password, user.passwordHash)
-
-  if (!isValid) {
-    throw new AppError(401, 'Invalid credentials')
+  if (!user) {
+    const fallbackName = `Cliente ${phone.slice(-4)}`
+    user = await createLocalUser({
+      email: internalEmail,
+      name: data.name?.trim() || fallbackName,
+      passwordHash: null,
+      emailVerified: true,
+    })
   }
 
   const tokens = buildTokens(user)
@@ -135,32 +173,6 @@ export async function getCurrentUser(userId) {
   }
 
   return sanitizeUser(user)
-}
-
-export async function findOrCreateGoogleUser(profile) {
-  const email = profile.emails?.[0]?.value?.toLowerCase()
-
-  if (!email) {
-    throw new AppError(422, 'Google account did not return an email')
-  }
-
-  return upsertGoogleAccount({
-    email,
-    name: profile.displayName || 'Google User',
-    avatarUrl: profile.photos?.[0]?.value || null,
-    providerAccountId: profile.id,
-  })
-}
-
-export async function createOauthSession(user, metadata) {
-  const tokens = buildTokens(user)
-  await persistRefreshToken(user, tokens.refreshToken, tokens.tokenId, metadata)
-
-  return {
-    user: sanitizeUser(user),
-    accessToken: tokens.accessToken,
-    refreshToken: tokens.refreshToken,
-  }
 }
 
 export function getAdminUsers() {

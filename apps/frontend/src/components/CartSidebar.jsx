@@ -8,6 +8,7 @@ export function CartSidebar({ isOpen, onClose }) {
   const cart = store.cart.cart
   const updateCartItem = store.updateCartItem
   const items = Array.isArray(cart?.items) ? cart.items : []
+  const totalUnits = items.reduce((sum, item) => sum + Number(item.quantity || 0), 0)
   const subtotal = items.reduce((sum, item) => sum + item.lineTotal, 0)
 
   return (
@@ -17,7 +18,7 @@ export function CartSidebar({ isOpen, onClose }) {
         <div className="drawer__header">
           <div>
             <strong>Carrito</strong>
-            <p>{items.length} articulo(s)</p>
+            <p>{totalUnits} articulo(s)</p>
           </div>
           <button className="icon-button" type="button" onClick={onClose}>Cerrar</button>
         </div>

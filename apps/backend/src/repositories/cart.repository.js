@@ -75,3 +75,29 @@ export async function upsertCartItem(cartId, variantId, quantity) {
     include: cartInclude,
   })
 }
+
+export async function addCartItemQuantity(cartId, variantId, quantity) {
+  await prisma.cartItem.upsert({
+    where: {
+      cartId_variantId: {
+        cartId,
+        variantId,
+      },
+    },
+    update: {
+      quantity: {
+        increment: quantity,
+      },
+    },
+    create: {
+      cartId,
+      variantId,
+      quantity,
+    },
+  })
+
+  return prisma.cart.findUnique({
+    where: { id: cartId },
+    include: cartInclude,
+  })
+}
