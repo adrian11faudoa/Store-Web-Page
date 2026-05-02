@@ -14,14 +14,106 @@ function titleCase(value) {
     .join(' ')
 }
 
+const SEASON_LABELS_ES = {
+  fall: 'Otoño',
+  winter: 'Invierno',
+  spring: 'Primavera',
+  summer: 'Verano',
+  christmas: 'Navidad',
+  halloween: 'Halloween',
+  'todo-el-ano': 'Todo el año',
+  'todo el ano': 'Todo el año',
+  'todo-el-año': 'Todo el año',
+  'todo el año': 'Todo el año',
+}
+
+function seasonLabelEs(value) {
+  const key = String(value || '').toLowerCase()
+  return SEASON_LABELS_ES[key] || titleCase(value)
+}
+
+const GENDER_LABELS_ES = {
+  girls: 'Niñas',
+  boys: 'Niños',
+  unisex: 'Unisex',
+}
+
+const CATEGORY_LABELS_ES = {
+  tops: 'Playeras',
+  bottoms: 'Pantalones',
+  dresses: 'Vestidos',
+  rompers: 'Mamelucos',
+  sleepwear: 'Pijamas',
+}
+
+const SIZE_ORDER = {
+  xxs: 1,
+  xs: 2,
+  s: 3,
+  m: 4,
+  l: 5,
+  xl: 6,
+  xxl: 7,
+}
+
+function genderLabelEs(value) {
+  const key = String(value || '').toLowerCase()
+  return GENDER_LABELS_ES[key] || titleCase(value)
+}
+
+function categoryLabelEs(value) {
+  const key = String(value || '').toLowerCase()
+  return CATEGORY_LABELS_ES[key] || titleCase(value)
+}
+
+function compareSizes(left, right) {
+  const a = String(left || '').trim()
+  const b = String(right || '').trim()
+  const aNum = Number.parseFloat(a)
+  const bNum = Number.parseFloat(b)
+  const aIsNum = Number.isFinite(aNum)
+  const bIsNum = Number.isFinite(bNum)
+
+  if (aIsNum && bIsNum) return aNum - bNum
+  if (aIsNum) return -1
+  if (bIsNum) return 1
+
+  const aOrder = SIZE_ORDER[a.toLowerCase()]
+  const bOrder = SIZE_ORDER[b.toLowerCase()]
+  if (aOrder && bOrder) return aOrder - bOrder
+  if (aOrder) return -1
+  if (bOrder) return 1
+
+  return a.localeCompare(b, 'es', { numeric: true })
+}
+
+function sortVariantsBySize(variants) {
+  return (Array.isArray(variants) ? [...variants] : []).sort((left, right) => compareSizes(left.size, right.size))
+}
+
 export function ProductCard({ product, onAddToCart }) {
   const navigate = useNavigate()
   const { formatMoney } = useLocale()
-  const [selectedSize, setSelectedSize] = useState(product.variants?.[0]?.size || '')
+  const [selectedSize, setSelectedSize] = useState(() => sortVariantsBySize(product.variants)[0]?.size || '')
   const [message, setMessage] = useState('')
-  const variants = Array.isArray(product.variants) ? product.variants : []
+  const variants = sortVariantsBySize(product.variants)
   const activeVariant = variants.find(variant => variant.size === selectedSize) || variants[0] || null
-  const badge = product.badge || (product.isFeatured ? 'featured' : null)
+  const seasons = Array.isArray(product.seasons) ? product.seasons.filter(Boolean).slice(0, 2) : []
+  const seasonBadges = seasons.map((season, index) => ({
+    key: `${season}-${index}`,
+    label: seasonLabelEs(season),
+    className: `pill--season-${badgeClassName(season)}`,
+  }))
+  const fallbackBadge = !seasonBadges.length
+    ? product.badge || (product.isFeatured ? 'featured' : null)
+    : null
+  const badges = seasonBadges.length
+    ? seasonBadges
+    : (fallbackBadge ? [{
+      key: 'fallback',
+      label: fallbackBadge,
+      className: `pill--${badgeClassName(fallbackBadge)}`,
+    }] : [])
 
   function handleAddToCart() {
     if (!activeVariant) {
@@ -49,21 +141,23 @@ export function ProductCard({ product, onAddToCart }) {
     >
       <div className="product-card__visual" style={{ background: `linear-gradient(135deg, ${product.palette[0]}, ${product.palette[1]})` }}>
         {product.imageUrl ? <img src={product.imageUrl} alt={product.name} loading="lazy" /> : null}
-        {badge ? <span className={`pill pill--${badgeClassName(badge)}`}>{badge}</span> : null}
+        {badges.length > 0 ? (
+          <div className="product-card__badges">
+            {badges.map(badge => (
+              <span key={badge.key} className={`pill ${badge.className}`}>{badge.label}</span>
+            ))}
+          </div>
+        ) : null}
       </div>
       <svg className="product-card__wave" viewBox="0 0 320 24" preserveAspectRatio="none" aria-hidden="true">
         <path d="M0 12C32 22 64 22 96 12S160 2 192 12s64 10 128 0v12H0z" />
       </svg>
       <div className="product-card__body">
         <div className="product-card__meta">
-          <span>{product.category?.name || 'Catalogo'}</span>
-          <span>{product.rating?.toFixed(1) || '4.5'} / 5</span>
+          <span>{categoryLabelEs(product.category?.slug || product.category?.name || 'catalogo')}</span>
+          <span>{genderLabelEs(product.gender)}</span>
         </div>
         <h3>{product.name}</h3>
-        <div className="product-card__meta">
-          <span>{titleCase(product.gender)}</span>
-          <span>{titleCase(product.seasons?.[0] || product.ageGroup)}</span>
-        </div>
         <div className="product-card__sizes" aria-label="Tallas disponibles">
           {variants.map(variant => (
             <button

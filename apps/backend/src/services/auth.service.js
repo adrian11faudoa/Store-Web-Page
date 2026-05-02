@@ -78,6 +78,8 @@ function verifyRefreshTokenSafely(refreshToken) {
 
 export async function requestPhoneCode(data) {
   const phone = normalizePhone(data.phone)
+  const internalEmail = phoneToInternalEmail(phone)
+  const existingUser = await findUserByEmail(internalEmail)
   const challenge = createPhoneOtpChallenge(phone)
   const ttlMinutes = Math.max(1, Math.round(challenge.expiresInSeconds / 60))
 
@@ -90,6 +92,7 @@ export async function requestPhoneCode(data) {
   return {
     challengeId: challenge.challengeId,
     phone,
+    isRegistered: Boolean(existingUser),
     expiresInSeconds: challenge.expiresInSeconds,
   }
 }

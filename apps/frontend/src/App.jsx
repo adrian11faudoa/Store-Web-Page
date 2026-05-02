@@ -114,6 +114,10 @@ export default function App() {
     navigate(`/shop${params.toString() ? `?${params.toString()}` : ''}`)
   }
 
+  function handleOpenSignIn() {
+    navigate('/signin', { state: { resetAuthAt: Date.now() } })
+  }
+
   return (
     <LocaleProvider value={localeValue}>
       <div className="app-shell">
@@ -149,9 +153,14 @@ export default function App() {
             </form>
 
             <div className="header-actions">
-              <NavLink className="header-icon-link" to="/signin" aria-label={currentUser ? currentUser.name : 'Iniciar sesion'}>
+              <button
+                type="button"
+                className="header-icon-link"
+                onClick={handleOpenSignIn}
+                aria-label={currentUser ? currentUser.name : 'Iniciar sesión'}
+              >
                 <UserIcon />
-              </NavLink>
+              </button>
               <button
                 className="header-icon-link header-cart-button"
                 type="button"

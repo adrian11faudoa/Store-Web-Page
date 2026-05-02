@@ -1,8 +1,10 @@
 import { createHash, randomInt, randomUUID } from 'node:crypto'
 import { AppError } from '../utils/app-error.js'
+import { env } from '../config/env.js'
 
 const OTP_TTL_MS = 5 * 60 * 1000
 const MAX_ATTEMPTS = 5
+const DEV_FIXED_OTP_CODE = '123456'
 const challengesByPhone = new Map()
 
 function hashCode(code) {
@@ -20,7 +22,7 @@ function clearExpired(phone) {
 export function createPhoneOtpChallenge(phone) {
   clearExpired(phone)
   const challengeId = randomUUID()
-  const code = String(randomInt(100000, 1000000))
+  const code = env.isProduction ? String(randomInt(100000, 1000000)) : DEV_FIXED_OTP_CODE
 
   challengesByPhone.set(phone, {
     id: challengeId,

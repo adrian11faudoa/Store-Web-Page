@@ -5,7 +5,7 @@ import { useAppStore } from '../store/useAppStore.js'
 
 const SORT_OPTIONS = [
   { value: 'featured', label: 'Destacados' },
-  { value: 'newest', label: 'Mas nuevos' },
+  { value: 'newest', label: 'Más nuevos' },
   { value: 'price-low', label: 'Precio: menor a mayor' },
   { value: 'price-high', label: 'Precio: mayor a menor' },
   { value: 'name', label: 'Nombre A-Z' },
@@ -13,12 +13,35 @@ const SORT_OPTIONS = [
 
 const GENDER_OPTIONS = [
   { value: 'all', label: 'Todos' },
-  { value: 'girls', label: 'Ninas' },
-  { value: 'boys', label: 'Ninos' },
+  { value: 'girls', label: 'Niñas' },
+  { value: 'boys', label: 'Niños' },
   { value: 'unisex', label: 'Unisex' },
 ]
 
-const ITEMS_PER_PAGE = 20
+const ITEMS_PER_PAGE = 30
+
+const CATEGORY_LABELS_ES = {
+  tops: 'Playeras',
+  bottoms: 'Pantalones',
+  dresses: 'Vestidos',
+  rompers: 'Mamelucos',
+  sleepwear: 'Pijamas',
+}
+
+const GENDER_LABELS_ES = {
+  girls: 'Niñas',
+  boys: 'Niños',
+  unisex: 'Unisex',
+}
+
+const SEASON_LABELS_ES = {
+  fall: 'Otoño',
+  winter: 'Invierno',
+  spring: 'Primavera',
+  summer: 'Verano',
+  christmas: 'Navidad',
+  halloween: 'Halloween',
+}
 
 function titleCase(value) {
   return String(value || '')
@@ -26,6 +49,21 @@ function titleCase(value) {
     .filter(Boolean)
     .map(part => part[0].toUpperCase() + part.slice(1))
     .join(' ')
+}
+
+function categoryLabelEs(value) {
+  const key = String(value || '').toLowerCase()
+  return CATEGORY_LABELS_ES[key] || titleCase(value)
+}
+
+function genderLabelEs(value) {
+  const key = String(value || '').toLowerCase()
+  return GENDER_LABELS_ES[key] || titleCase(value)
+}
+
+function seasonLabelEs(value) {
+  const key = String(value || '').toLowerCase()
+  return SEASON_LABELS_ES[key] || titleCase(value)
 }
 
 function readFilters(searchParams) {
@@ -153,15 +191,15 @@ export function CatalogPage() {
   const showingTo = Math.min(pageEndIndex, filteredProducts.length)
 
   const activeFilters = [
-    filters.category !== 'all' && { key: 'category', label: titleCase(filters.category) },
-    filters.gender !== 'all' && { key: 'gender', label: titleCase(filters.gender) },
+    filters.category !== 'all' && { key: 'category', label: categoryLabelEs(filters.category) },
+    filters.gender !== 'all' && { key: 'gender', label: genderLabelEs(filters.gender) },
     filters.ageGroup !== 'all' && { key: 'ageGroup', label: filters.ageGroup },
-    filters.season !== 'all' && { key: 'season', label: titleCase(filters.season) },
+    filters.season !== 'all' && { key: 'season', label: seasonLabelEs(filters.season) },
     filters.q && { key: 'q', label: `"${filters.q}"` },
   ].filter(Boolean)
-  const categoryOptions = [{ value: 'all', label: 'Todas' }, ...categories.map(category => ({ value: category.slug, label: titleCase(category.name) }))]
+  const categoryOptions = [{ value: 'all', label: 'Todas' }, ...categories.map(category => ({ value: category.slug, label: categoryLabelEs(category.slug || category.name) }))]
   const ageGroupOptions = [{ value: 'all', label: 'Todas las edades' }, ...meta.ageGroups.map(ageGroup => ({ value: ageGroup, label: ageGroup }))]
-  const seasonOptions = [{ value: 'all', label: 'Todas' }, ...meta.seasons.map(season => ({ value: season, label: titleCase(season) }))]
+  const seasonOptions = [{ value: 'all', label: 'Todas' }, ...meta.seasons.map(season => ({ value: season, label: seasonLabelEs(season) }))]
 
   function updateFilter(key, value) {
     const nextParams = new URLSearchParams(searchParams)
@@ -233,7 +271,7 @@ export function CatalogPage() {
           <button type="button" className="button button--ghost" onClick={() => setFiltersOpen(true)}>
             Filtros{activeFilters.length > 0 ? ` (${activeFilters.length})` : ''}
           </button>
-          <p className="catalog-count">{filteredProducts.length} productos</p>
+          <p className="catalog-count catalog-count--mobile">{filteredProducts.length} productos</p>
         </div>
 
         {filtersOpen ? (
@@ -257,9 +295,12 @@ export function CatalogPage() {
                   </span>
                   Filtros
                 </strong>
-                <button type="button" className="icon-button filters-panel__close" onClick={() => setFiltersOpen(false)}>
-                  Cerrar
-                </button>
+                <div className="filters-panel__header-meta">
+                  <p className="catalog-count catalog-count--panel">{filteredProducts.length} productos</p>
+                  <button type="button" className="icon-button filters-panel__close" onClick={() => setFiltersOpen(false)}>
+                    Cerrar
+                  </button>
+                </div>
               </div>
 
               <div className="filter-toolbar" ref={filterToolbarRef}>
@@ -279,7 +320,7 @@ export function CatalogPage() {
 
                 <FilterDropdown
                   id="filter-category"
-                  label="Categoria"
+                  label="Categoría"
                   value={filters.category}
                   iconClassName="filter-control__icon--rose"
                   icon="👜"
@@ -289,7 +330,7 @@ export function CatalogPage() {
 
                 <FilterDropdown
                   id="filter-gender"
-                  label="Genero"
+                  label="Género"
                   value={filters.gender}
                   iconClassName="filter-control__icon--mint"
                   icon="👗"
@@ -340,13 +381,6 @@ export function CatalogPage() {
           </div>
 
           <div className="catalog-layout__content">
-            <div className="section-heading">
-              <div>
-                <p className="eyebrow">Selecciones frescas para cada dia de juego</p>
-                <h1>Compra prendas divertidas para bebes, peques y ninos grandes</h1>
-              </div>
-              <p className="catalog-count">{filteredProducts.length} productos</p>
-            </div>
 
             {activeFilters.length > 0 ? (
               <div className="active-filters">
@@ -368,7 +402,7 @@ export function CatalogPage() {
             </div>
 
             {totalPages > 1 ? (
-              <div className="catalog-pagination" aria-label="Paginacion de catalogo">
+              <div className="catalog-pagination" aria-label="Paginación de catálogo">
                 <p className="catalog-pagination__summary">Mostrando {showingFrom}-{showingTo} de {filteredProducts.length}</p>
                 <div className="catalog-pagination__controls">
                   <button
@@ -379,7 +413,7 @@ export function CatalogPage() {
                   >
                     Anterior
                   </button>
-                  <span className="catalog-pagination__page">Pagina {currentPage} de {totalPages}</span>
+                  <span className="catalog-pagination__page">Página {currentPage} de {totalPages}</span>
                   <button
                     type="button"
                     className="button button--ghost"
