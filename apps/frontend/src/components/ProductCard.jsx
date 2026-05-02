@@ -18,7 +18,6 @@ export function ProductCard({ product, onAddToCart }) {
   const navigate = useNavigate()
   const { formatMoney } = useLocale()
   const [selectedSize, setSelectedSize] = useState(product.variants?.[0]?.size || '')
-  const [wished, setWished] = useState(false)
   const [message, setMessage] = useState('')
   const variants = Array.isArray(product.variants) ? product.variants : []
   const activeVariant = variants.find(variant => variant.size === selectedSize) || variants[0] || null
@@ -49,17 +48,6 @@ export function ProductCard({ product, onAddToCart }) {
       }}
     >
       <div className="product-card__visual" style={{ background: `linear-gradient(135deg, ${product.palette[0]}, ${product.palette[1]})` }}>
-        <button
-          type="button"
-          className={wished ? 'wishlist-btn is-wished' : 'wishlist-btn'}
-          onClick={event => {
-            event.stopPropagation()
-            setWished(current => !current)
-          }}
-          aria-label={wished ? 'Quitar de favoritos' : 'Agregar a favoritos'}
-        >
-          {wished ? '♥' : '♡'}
-        </button>
         {product.imageUrl ? <img src={product.imageUrl} alt={product.name} loading="lazy" /> : null}
         {badge ? <span className={`pill pill--${badgeClassName(badge)}`}>{badge}</span> : null}
       </div>

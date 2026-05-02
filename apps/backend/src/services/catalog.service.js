@@ -9,6 +9,9 @@ async function getCatalogImageMap() {
 }
 
 function formatProduct(product, imageMap) {
+  const sourcePriceMxn = product.sourcePriceMxn ? Number(product.sourcePriceMxn) : null
+  const usdPrice = Number(product.price)
+  const displayPrice = sourcePriceMxn ?? usdPrice
   const csvImageUrls = imageMap?.get(product.slug)?.filter(Boolean) || []
   const imageUrls = csvImageUrls.length > 0
     ? csvImageUrls
@@ -24,8 +27,9 @@ function formatProduct(product, imageMap) {
     ageGroup: product.ageGroup,
     ageTags: product.ageTags,
     seasons: product.seasons,
-    price: Number(product.price),
-    sourcePriceMxn: product.sourcePriceMxn ? Number(product.sourcePriceMxn) : null,
+    price: displayPrice,
+    sourcePriceMxn,
+    priceUsd: usdPrice,
     rating: Number(product.rating),
     releaseDate: product.releaseDate,
     imageUrl: product.imageUrl,

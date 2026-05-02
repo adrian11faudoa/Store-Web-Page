@@ -86,7 +86,7 @@ export function ProductPage() {
           </div>
           <div className="product-panel__price">
             <strong>{formatMoney(product.price)}</strong>
-            {product.sourcePriceMxn ? <s>{product.sourcePriceMxn} MXN</s> : null}
+            {product.sourcePriceMxn && product.sourcePriceMxn !== product.price ? <s>{product.sourcePriceMxn} MXN</s> : null}
           </div>
           <fieldset className="product-panel__sizes">
             <legend>Elige una talla</legend>

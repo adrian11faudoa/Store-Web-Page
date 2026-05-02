@@ -103,10 +103,8 @@ button {
   position: sticky;
   top: 0;
   z-index: 25;
-  background: color-mix(in srgb, var(--surface) 88%, transparent);
-  backdrop-filter: blur(20px);
-  border-bottom: 1.5px solid var(--line);
-  box-shadow: 0 2px 12px rgba(255, 107, 107, 0.06);
+  padding: 1.1rem 0 0.9rem;
+  background: transparent;
 }
 
 .header-row,
@@ -126,9 +124,13 @@ button {
 .header-row {
   gap: 1rem;
   align-items: center;
-  justify-content: space-between;
-  padding: 1rem 0;
-  flex-wrap: wrap;
+  justify-content: flex-start;
+  padding: 0.85rem 1.3rem;
+  flex-wrap: nowrap;
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: 2rem;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.04);
 }
 
 .brand {
@@ -136,6 +138,8 @@ button {
   align-items: center;
   gap: 0.85rem;
   min-width: 0;
+  padding-right: 1rem;
+  border-right: 1.5px solid var(--line);
 }
 
 .brand__icon {
@@ -177,31 +181,79 @@ button {
 
 .main-nav {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  align-items: center;
+  padding-right: 1rem;
+  border-right: 1.5px solid var(--line);
 }
 
-.main-nav a {
+.main-nav__shop {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 1.35rem;
   font-weight: 700;
-  border-radius: var(--radius-pill);
-  padding: 0.5rem 1rem;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  padding: 0.25rem 0.25rem 0.25rem 0.1rem;
+  color: var(--text);
 }
 
-.main-nav a:hover,
-.main-nav a.active {
-  background: color-mix(in srgb, var(--brand-primary) 12%, transparent);
-  color: var(--brand-primary);
+.main-nav__shop svg {
+  width: 1.85rem;
+  height: 1.85rem;
+  fill: currentColor;
 }
 
 .header-search {
-  flex: 1 1 15rem;
+  flex: 1 1 auto;
   display: flex;
-  gap: 0.75rem;
+  gap: 0;
   align-items: center;
+  min-height: 3.1rem;
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  border: 1.5px solid color-mix(in srgb, var(--line) 80%, var(--surface));
+  background: var(--surface-muted);
+  margin-left: 0.5rem;
+  padding-left: 0.2rem;
+  padding-right: 0.7rem;
 }
 
-.header-search input,
+.header-search input {
+  width: 100%;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+  padding: 0.85rem 0.65rem;
+}
+
+.header-search input::placeholder {
+  color: var(--text-soft);
+  opacity: 1;
+}
+
+.header-search__button {
+  border: 0;
+  border-radius: var(--radius-pill);
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  background: transparent;
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.2rem;
+}
+
+.header-search__button svg {
+  width: 1.85rem;
+  height: 1.85rem;
+  fill: currentColor;
+}
+
+.header-search__button:hover {
+  background: color-mix(in srgb, var(--surface-muted) 75%, transparent);
+}
+
 .filters-panel input[type="search"],
 .sort-select {
   width: 100%;
@@ -213,8 +265,10 @@ button {
 }
 
 .header-actions {
-  gap: 0.75rem;
+  gap: 0;
   align-items: center;
+  margin-left: 0.9rem;
+  border-left: 1.5px solid var(--line);
 }
 
 .button {
@@ -264,39 +318,46 @@ button {
   transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-.icon-button--cart svg {
-  width: 1.15rem;
-  height: 1.15rem;
-  fill: currentColor;
-}
-
-.icon-button--cart span {
-  background: var(--brand-primary);
-  color: #fff;
-  font-weight: 800;
-  min-width: 1.5rem;
-  height: 1.5rem;
-  border-radius: var(--radius-pill);
+.header-icon-link {
+  position: relative;
+  width: 4.1rem;
+  min-height: 3rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
-  padding: 0 0.55rem;
-}
-
-.locale-select {
-  display: grid;
-  gap: 0.2rem;
-  font-size: 0.75rem;
-}
-
-.locale-select select {
-  min-width: 110px;
-  border-radius: var(--radius-sm);
-  border: 2px solid var(--line);
-  background: var(--surface);
+  border: 0;
+  background: transparent;
   color: var(--text);
-  padding: 0.45rem 0.75rem;
+}
+
+.header-icon-link + .header-icon-link {
+  border-left: 1.5px solid var(--line);
+}
+
+.header-icon-link svg {
+  width: 2rem;
+  height: 2rem;
+  fill: currentColor;
+}
+
+.header-cart-button {
+  cursor: pointer;
+}
+
+.header-cart-count {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.55rem;
+  min-width: 1.6rem;
+  height: 1.6rem;
+  border-radius: var(--radius-pill);
+  background: var(--brand-primary);
+  color: #fff;
+  font-size: 0.84rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .hero,
@@ -517,21 +578,6 @@ button {
 .pill--holiday {
   background: var(--brand-secondary);
   color: #fff;
-}
-
-.wishlist-btn {
-  position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  border: none;
-  background: rgba(255, 255, 255, 0.85);
-  border-radius: 50%;
-  width: 2.25rem;
-  height: 2.25rem;
-  font-size: 1.1rem;
-  display: grid;
-  place-items: center;
-  z-index: 1;
 }
 
 .product-card__body,
@@ -1119,9 +1165,22 @@ button {
 }
 
 @media (max-width: 767px) {
+  .header-row {
+    flex-wrap: wrap;
+  }
+
+  .brand,
+  .main-nav,
+  .header-actions {
+    border: 0;
+    padding-right: 0;
+    margin-left: 0;
+  }
+
   .header-search {
     order: 4;
     width: 100%;
+    margin-left: 0;
   }
 
   .hero__stats {

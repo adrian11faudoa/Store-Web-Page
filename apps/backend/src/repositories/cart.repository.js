@@ -1,18 +1,23 @@
 import { prisma } from '../db/client.js'
 
+const cartInclude = {
+  items: {
+    orderBy: {
+      createdAt: 'asc',
+    },
+    include: {
+      variant: {
+        include: { product: true },
+      },
+    },
+  },
+}
+
 export async function findOrCreateCart({ userId, guestCartId }) {
   if (userId) {
     const existing = await prisma.cart.findFirst({
       where: { userId },
-      include: {
-        items: {
-          include: {
-            variant: {
-              include: { product: true },
-            },
-          },
-        },
-      },
+      include: cartInclude,
     })
 
     if (existing) {
@@ -21,29 +26,13 @@ export async function findOrCreateCart({ userId, guestCartId }) {
 
     return prisma.cart.create({
       data: { userId },
-      include: {
-        items: {
-          include: {
-            variant: {
-              include: { product: true },
-            },
-          },
-        },
-      },
+      include: cartInclude,
     })
   }
 
   const existing = await prisma.cart.findUnique({
     where: { guestCartId },
-    include: {
-      items: {
-        include: {
-          variant: {
-            include: { product: true },
-          },
-        },
-      },
-    },
+    include: cartInclude,
   })
 
   if (existing) {
@@ -55,15 +44,7 @@ export async function findOrCreateCart({ userId, guestCartId }) {
       guestCartId,
       expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     },
-    include: {
-      items: {
-        include: {
-          variant: {
-            include: { product: true },
-          },
-        },
-      },
-    },
+    include: cartInclude,
   })
 }
 
@@ -91,14 +72,6 @@ export async function upsertCartItem(cartId, variantId, quantity) {
 
   return prisma.cart.findUnique({
     where: { id: cartId },
-    include: {
-      items: {
-        include: {
-          variant: {
-            include: { product: true },
-          },
-        },
-      },
-    },
+    include: cartInclude,
   })
 }

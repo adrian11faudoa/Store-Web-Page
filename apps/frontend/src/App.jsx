@@ -13,14 +13,8 @@ import { useAppStore } from './store/useAppStore.js'
 
 const UI_TEXT = {
   tagline: 'Pequeno estilo, grandes sonrisas',
-  home: 'Inicio',
   shop: 'Tienda',
-  checkout: 'Pago',
   searchPlaceholder: 'Busca mamelucos, vestidos, chamarras...',
-  searchButton: 'Buscar',
-  currency: 'Moneda',
-  signIn: 'Iniciar sesion',
-  cart: 'Carrito',
   syncing: 'Sincronizando datos...',
 }
 
@@ -32,10 +26,34 @@ function SparkleIcon() {
   )
 }
 
-function BagIcon() {
+function ShopIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path d="M7 8V7a5 5 0 0 1 10 0v1h2a1 1 0 0 1 1 1l-1 10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 9a1 1 0 0 1 1-1h2zm2 0h6V7a3 3 0 0 0-6 0v1z" />
+    </svg>
+  )
+}
+
+function SearchIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M10 3a7 7 0 1 1-4.95 11.95A7 7 0 0 1 10 3Zm0 2a5 5 0 1 0 3.54 1.46A4.97 4.97 0 0 0 10 5Zm10.71 14.29a1 1 0 0 1-1.42 1.42l-3.82-3.82a1 1 0 1 1 1.42-1.42l3.82 3.82Z" />
+    </svg>
+  )
+}
+
+function UserIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 13a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0 2c4.42 0 8 2.58 8 5.75a1 1 0 1 1-2 0C18 18.84 15.31 17 12 17s-6 1.84-6 3.75a1 1 0 1 1-2 0C4 17.58 7.58 15 12 15Z" />
+    </svg>
+  )
+}
+
+function CartIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M2 3a1 1 0 0 1 1-1h2.1a1 1 0 0 1 .96.72l.44 1.53h14a1 1 0 0 1 .97 1.25l-1.7 6.5a2 2 0 0 1-1.94 1.5H8.37l.34 1.2a.4.4 0 0 0 .38.3h10.41a1 1 0 1 1 0 2H9.09a2.4 2.4 0 0 1-2.31-1.74L4.34 4H3a1 1 0 0 1-1-1Zm6.5 18a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Zm10 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Z" />
     </svg>
   )
 }
@@ -44,10 +62,6 @@ export default function App() {
   const bootstrappedRef = useRef(false)
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
-  const [currency, setCurrency] = useState(() => (
-    (typeof window !== 'undefined' && window.localStorage.getItem('sk_currency')) || 'USD'
-  ))
-  const [theme, setTheme] = useState('light')
   const store = useAppStore()
   const bootstrap = store.bootstrap
   const cartOpen = store.ui.cartOpen
@@ -57,6 +71,10 @@ export default function App() {
   const cart = store.cart.cart
   const lastError = store.ui.lastError
   const cartItems = useMemo(() => (Array.isArray(cart?.items) ? cart.items : []), [cart])
+  const cartItemQuantity = useMemo(
+    () => cartItems.reduce((total, item) => total + Number(item.quantity || 0), 0),
+    [cartItems]
+  )
 
   useEffect(() => {
     if (bootstrappedRef.current) {
@@ -67,32 +85,19 @@ export default function App() {
     void bootstrap()
   }, [bootstrap])
 
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme
-  }, [theme])
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem('sk_currency', currency)
-    }
-  }, [currency])
-
-  const usdToMxnRate = 17
-
   const localeValue = useMemo(() => ({
     language: 'es',
-    currency,
+    currency: 'MXN',
     labels: UI_TEXT,
     formatMoney(value) {
       const numeric = Number(value || 0)
-      const converted = currency === 'MXN' ? numeric * usdToMxnRate : numeric
       return new Intl.NumberFormat('es-MX', {
         style: 'currency',
-        currency,
+        currency: 'MXN',
         maximumFractionDigits: 2,
-      }).format(converted)
+      }).format(numeric)
     },
-  }), [currency])
+  }), [])
 
   function handleSearchSubmit(event) {
     event.preventDefault()
@@ -121,42 +126,36 @@ export default function App() {
             </NavLink>
 
             <nav className="main-nav" aria-label="Primary">
-              <NavLink to="/" end>{UI_TEXT.home}</NavLink>
-              <NavLink to="/shop">{UI_TEXT.shop}</NavLink>
-              <NavLink to="/checkout">{UI_TEXT.checkout}</NavLink>
+              <NavLink to="/shop" className="main-nav__shop">
+                <ShopIcon />
+                <span>{UI_TEXT.shop}</span>
+              </NavLink>
             </nav>
 
             <form className="header-search" onSubmit={handleSearchSubmit} role="search">
+              <button className="header-search__button" type="submit" aria-label="Buscar">
+                <SearchIcon />
+              </button>
               <input
                 type="search"
                 placeholder={UI_TEXT.searchPlaceholder}
                 value={search}
                 onChange={event => setSearch(event.target.value)}
               />
-              <button className="button button--ghost" type="submit">{UI_TEXT.searchButton}</button>
             </form>
 
             <div className="header-actions">
-              <label className="locale-select">
-                <span>{UI_TEXT.currency}</span>
-                <select value={currency} onChange={event => setCurrency(event.target.value)}>
-                  <option value="USD">Dolares estadounidenses</option>
-                  <option value="MXN">Pesos mexicanos</option>
-                </select>
-              </label>
-              <button
-                className="icon-button"
-                type="button"
-                onClick={() => setTheme(current => current === 'dark' ? 'light' : 'dark')}
-              >
-                {theme === 'dark' ? 'Claro' : 'Oscuro'}
-              </button>
-              <NavLink className="button button--ghost" to="/signin">
-                {currentUser ? currentUser.name : UI_TEXT.signIn}
+              <NavLink className="header-icon-link" to="/signin" aria-label={currentUser ? currentUser.name : 'Iniciar sesion'}>
+                <UserIcon />
               </NavLink>
-              <button className="icon-button icon-button--cart" type="button" onClick={() => setCartOpen(!cartOpen)}>
-                <BagIcon />
-                <span>{UI_TEXT.cart} ({cartItems.length})</span>
+              <button
+                className="header-icon-link header-cart-button"
+                type="button"
+                onClick={() => setCartOpen(!cartOpen)}
+                aria-label={`Abrir carrito (${cartItemQuantity})`}
+              >
+                <CartIcon />
+                <span className="header-cart-count">{cartItemQuantity}</span>
               </button>
             </div>
           </div>
