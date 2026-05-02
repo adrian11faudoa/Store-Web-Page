@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+﻿import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { ProductCard } from '../components/ProductCard.jsx'
 import { useAppStore } from '../store/useAppStore.js'
@@ -12,10 +12,10 @@ const SORT_OPTIONS = [
 ]
 
 const GENDER_OPTIONS = [
-  { value: 'all', label: 'Todos', emoji: '✨' },
-  { value: 'girls', label: 'Ninas', emoji: '🌸' },
-  { value: 'boys', label: 'Ninos', emoji: '🚀' },
-  { value: 'unisex', label: 'Unisex', emoji: '🧸' },
+  { value: 'all', label: 'Todos' },
+  { value: 'girls', label: 'Ninas' },
+  { value: 'boys', label: 'Ninos' },
+  { value: 'unisex', label: 'Unisex' },
 ]
 
 const ITEMS_PER_PAGE = 20
@@ -42,9 +42,59 @@ function readFilters(searchParams) {
   }
 }
 
+function closeDropdownMenu(event) {
+  const details = event.currentTarget.closest('details')
+  if (details) details.open = false
+}
+
+function handleDropdownToggle(event) {
+  const current = event.currentTarget
+  if (!current.open) return
+
+  const toolbar = current.closest('.filter-toolbar')
+  if (!toolbar) return
+
+  const openDropdowns = toolbar.querySelectorAll('.filter-dropdown-select[open]')
+  openDropdowns.forEach(dropdown => {
+    if (dropdown !== current) dropdown.open = false
+  })
+}
+
+function FilterDropdown({ id, label, value, iconClassName, icon, options, onChange, fieldClassName = '' }) {
+  const selectedOption = options.find(option => option.value === value) || options[0]
+
+  return (
+    <div className={`filter-field ${fieldClassName}`.trim()}>
+      <label htmlFor={`${id}-trigger`}>{label}</label>
+      <details className="filter-dropdown-select" onToggle={handleDropdownToggle}>
+        <summary id={`${id}-trigger`} className="filter-control filter-control--select">
+          <span className={`filter-control__icon ${iconClassName || ''}`} aria-hidden="true">{icon}</span>
+          <span className="filter-control__value">{selectedOption?.label || ''}</span>
+        </summary>
+        <div className="filter-dropdown-menu" role="listbox" aria-label={label}>
+          {options.map(option => (
+            <button
+              key={option.value}
+              type="button"
+              className={value === option.value ? 'filter-dropdown-option is-active' : 'filter-dropdown-option'}
+              onClick={event => {
+                onChange(option.value)
+                closeDropdownMenu(event)
+              }}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </details>
+    </div>
+  )
+}
+
 export function CatalogPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [filtersOpen, setFiltersOpen] = useState(false)
+  const filterToolbarRef = useRef(null)
   const store = useAppStore()
   const products = store.catalog.products
   const categories = store.catalog.categories
@@ -109,6 +159,9 @@ export function CatalogPage() {
     filters.season !== 'all' && { key: 'season', label: titleCase(filters.season) },
     filters.q && { key: 'q', label: `"${filters.q}"` },
   ].filter(Boolean)
+  const categoryOptions = [{ value: 'all', label: 'Todas' }, ...categories.map(category => ({ value: category.slug, label: titleCase(category.name) }))]
+  const ageGroupOptions = [{ value: 'all', label: 'Todas las edades' }, ...meta.ageGroups.map(ageGroup => ({ value: ageGroup, label: ageGroup }))]
+  const seasonOptions = [{ value: 'all', label: 'Todas' }, ...meta.seasons.map(season => ({ value: season, label: titleCase(season) }))]
 
   function updateFilter(key, value) {
     const nextParams = new URLSearchParams(searchParams)
@@ -142,117 +195,147 @@ export function CatalogPage() {
     setSearchParams(new URLSearchParams())
     setFiltersOpen(false)
   }
+  useEffect(() => {
+    function closeAllFilterDropdowns() {
+      if (!filterToolbarRef.current) return
+      const openDropdowns = filterToolbarRef.current.querySelectorAll('.filter-dropdown-select[open]')
+      openDropdowns.forEach(dropdown => {
+        dropdown.open = false
+      })
+    }
+
+    function handlePointerDown(event) {
+      const toolbar = filterToolbarRef.current
+      if (!toolbar) return
+
+      const target = event.target
+      const clickedInsideDropdown = target instanceof Element && Boolean(target.closest('.filter-dropdown-select'))
+      if (!clickedInsideDropdown) closeAllFilterDropdowns()
+    }
+
+    function handleKeyDown(event) {
+      if (event.key === 'Escape') closeAllFilterDropdowns()
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown)
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [])
 
   return (
     <section className="section section--catalog-page">
       <div className="container container--catalog">
         <div className="mobile-filter-bar">
           <button type="button" className="button button--ghost" onClick={() => setFiltersOpen(true)}>
-            Filtrar estilos {activeFilters.length > 0 ? `(${activeFilters.length})` : ''}
+            Filtros{activeFilters.length > 0 ? ` (${activeFilters.length})` : ''}
           </button>
           <p className="catalog-count">{filteredProducts.length} productos</p>
         </div>
 
-        {filtersOpen ? <button type="button" className="mobile-filter-backdrop" onClick={() => setFiltersOpen(false)} aria-label="Cerrar filtros" /> : null}
+        {filtersOpen ? (
+          <button
+            type="button"
+            className="mobile-filter-backdrop"
+            onClick={() => setFiltersOpen(false)}
+            aria-label="Cerrar filtros"
+          />
+        ) : null}
 
         <div className="catalog-layout">
           <div className={filtersOpen ? 'catalog-layout__sidebar is-open' : 'catalog-layout__sidebar'}>
             <aside className="filters-panel">
               <div className="filters-panel__header">
-                <strong>Filtrar estilos</strong>
-                <button type="button" className="icon-button" onClick={() => setFiltersOpen(false)}>Cerrar</button>
+                <strong>
+                  <span className="filters-panel__header-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" role="presentation">
+                      <path d="M4 5h16l-6 7v6l-4 2v-8z" />
+                    </svg>
+                  </span>
+                  Filtros
+                </strong>
+                <button type="button" className="icon-button filters-panel__close" onClick={() => setFiltersOpen(false)}>
+                  Cerrar
+                </button>
               </div>
 
-              <div className="filters-panel__group">
-                <label htmlFor="catalog-search">Buscar</label>
-                <input
-                  id="catalog-search"
-                  type="search"
-                  value={filters.q}
-                  onChange={event => updateFilter('q', event.target.value)}
-                  placeholder="Busca por producto, edad o temporada"
+              <div className="filter-toolbar" ref={filterToolbarRef}>
+                <div className="filter-field filter-field--search">
+                  <label htmlFor="catalog-search">Buscar</label>
+                  <div className="filter-control filter-control--search">
+                    <span className="filter-control__icon" aria-hidden="true">🔎</span>
+                    <input
+                      id="catalog-search"
+                      type="search"
+                      value={filters.q}
+                      onChange={event => updateFilter('q', event.target.value)}
+                      placeholder="Busca por producto, edad o temporada"
+                    />
+                  </div>
+                </div>
+
+                <FilterDropdown
+                  id="filter-category"
+                  label="Categoria"
+                  value={filters.category}
+                  iconClassName="filter-control__icon--rose"
+                  icon="👜"
+                  options={categoryOptions}
+                  onChange={value => updateFilter('category', value)}
                 />
-              </div>
 
-              <div className="filters-panel__group">
-                <span className="filters-panel__label">Categoria</span>
-                <div className="filter-pills">
-                  <button type="button" className={filters.category === 'all' ? 'filter-pill is-active' : 'filter-pill'} onClick={() => updateFilter('category', 'all')}>🛍️ Todos</button>
-                  {categories.map(category => (
-                    <button
-                      key={category.id}
-                      type="button"
-                      className={filters.category === category.slug ? 'filter-pill is-active' : 'filter-pill'}
-                      onClick={() => updateFilter('category', category.slug)}
-                    >
-                      {titleCase(category.name)}
-                    </button>
-                  ))}
+                <FilterDropdown
+                  id="filter-gender"
+                  label="Genero"
+                  value={filters.gender}
+                  iconClassName="filter-control__icon--mint"
+                  icon="👗"
+                  options={GENDER_OPTIONS}
+                  onChange={value => updateFilter('gender', value)}
+                />
+
+                <FilterDropdown
+                  id="filter-age"
+                  label="Edad"
+                  value={filters.ageGroup}
+                  iconClassName="filter-control__icon--sand"
+                  icon="🧒"
+                  options={ageGroupOptions}
+                  onChange={value => updateFilter('ageGroup', value)}
+                  fieldClassName="filter-field--wide"
+                />
+
+                <FilterDropdown
+                  id="filter-season"
+                  label="Temporada"
+                  value={filters.season}
+                  iconClassName="filter-control__icon--lavender"
+                  icon="📅"
+                  options={seasonOptions}
+                  onChange={value => updateFilter('season', value)}
+                />
+
+                <FilterDropdown
+                  id="filter-sort"
+                  label="Ordenar por"
+                  value={filters.sort}
+                  iconClassName=""
+                  icon="↕"
+                  options={SORT_OPTIONS}
+                  onChange={value => updateFilter('sort', value)}
+                  fieldClassName="filter-field--wide"
+                />
+
+                <div className="filter-field filter-field--clear">
+                  <label aria-hidden="true">&nbsp;</label>
+                  <button type="button" className="button filter-clear-button" onClick={clearFilters}>
+                    Limpiar filtros
+                  </button>
                 </div>
               </div>
-
-              <div className="filters-panel__group">
-                <span className="filters-panel__label">Genero</span>
-                <div className="filter-pills">
-                  {GENDER_OPTIONS.map(option => (
-                    <button
-                      key={option.value}
-                      type="button"
-                      className={filters.gender === option.value ? 'filter-pill is-active' : 'filter-pill'}
-                      onClick={() => updateFilter('gender', option.value)}
-                    >
-                      {option.emoji} {option.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="filters-panel__group">
-                <span className="filters-panel__label">Grupo de edad</span>
-                <div className="filter-pills">
-                  <button type="button" className={filters.ageGroup === 'all' ? 'filter-pill is-active' : 'filter-pill'} onClick={() => updateFilter('ageGroup', 'all')}>Todas las edades</button>
-                  {meta.ageGroups.map(ageGroup => (
-                    <button
-                      key={ageGroup}
-                      type="button"
-                      className={filters.ageGroup === ageGroup ? 'filter-pill is-active' : 'filter-pill'}
-                      onClick={() => updateFilter('ageGroup', ageGroup)}
-                    >
-                      {ageGroup}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="filters-panel__group">
-                <span className="filters-panel__label">Temporada</span>
-                <div className="filter-pills">
-                  <button type="button" className={filters.season === 'all' ? 'filter-pill is-active' : 'filter-pill'} onClick={() => updateFilter('season', 'all')}>Todas</button>
-                  {meta.seasons.map(season => (
-                    <button
-                      key={season}
-                      type="button"
-                      className={filters.season === season ? 'filter-pill is-active' : 'filter-pill'}
-                      onClick={() => updateFilter('season', season)}
-                    >
-                      {titleCase(season)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="filters-panel__group">
-                <label htmlFor="catalog-sort">Ordenar por</label>
-                <select id="catalog-sort" className="sort-select" value={filters.sort} onChange={event => updateFilter('sort', event.target.value)}>
-                  {SORT_OPTIONS.map(option => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </select>
-              </div>
-
-              <button type="button" className="button button--ghost button--full" onClick={clearFilters}>
-                Limpiar filtros
-              </button>
             </aside>
           </div>
 
@@ -271,7 +354,7 @@ export function CatalogPage() {
                   <span key={filter.key} className="active-filter-tag">
                     {filter.label}
                     <button type="button" onClick={() => updateFilter(filter.key, filter.key === 'q' ? '' : 'all')} aria-label="Quitar filtro">
-                      ×
+                      x
                     </button>
                   </span>
                 ))}
@@ -314,3 +397,7 @@ export function CatalogPage() {
     </section>
   )
 }
+
+
+
+
