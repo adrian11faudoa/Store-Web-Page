@@ -29,10 +29,7 @@ export function CheckoutPage() {
             <ul className="checkout-items">
               {items.map(item => (
                 <li key={item.id} className="checkout-item">
-                  <div
-                    className="checkout-item__media"
-                    style={{ background: `linear-gradient(135deg, ${item.product.palette?.[0] || '#ffd0c7'}, ${item.product.palette?.[1] || '#a8e6cf'})` }}
-                  >
+                  <div className="checkout-item__media">
                     {item.product?.imageUrl ? (
                       <img src={item.product.imageUrl} alt={item.product?.name || 'Producto'} loading="lazy" />
                     ) : null}
