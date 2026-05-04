@@ -194,6 +194,26 @@ export default function App() {
     navigate('/signin', { state: { resetAuthAt: Date.now() } })
   }
 
+  function handleSearchButton() {
+    setSearchOpen(previous => {
+      const next = !previous
+      if (next) {
+        setCartOpen(false)
+      }
+      return next
+    })
+  }
+
+  function handleCartButton() {
+    if (searchOpen) {
+      setSearchOpen(false)
+      setCartOpen(true)
+      return
+    }
+
+    setCartOpen(!cartOpen)
+  }
+
   return (
     <LocaleProvider value={localeValue}>
       <div className="app-shell">
@@ -222,7 +242,7 @@ export default function App() {
               className="header-search-trigger"
               type="button"
               aria-label="Abrir busqueda"
-              onClick={() => setSearchOpen(true)}
+              onClick={handleSearchButton}
             >
               <SearchIcon />
             </button>
@@ -242,7 +262,7 @@ export default function App() {
               <button
                 className="header-icon-link header-cart-button"
                 type="button"
-                onClick={() => setCartOpen(!cartOpen)}
+                onClick={handleCartButton}
                 aria-label={`Abrir carrito (${cartItemQuantity})`}
               >
                 <span className="header-icon-link__art">
@@ -264,6 +284,24 @@ export default function App() {
               onClick={() => setSearchOpen(false)}
             />
             <div className="search-overlay__panel">
+              <div className="search-overlay__header">
+                <div>
+                  <strong>Busqueda</strong>
+                  <p>
+                    {search.trim()
+                      ? `${searchSuggestions.length} coincidencia(s)`
+                      : 'Explora tu catalogo por nombre, categoria o temporada'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="icon-button search-overlay__dismiss"
+                  onClick={() => setSearchOpen(false)}
+                >
+                  Cerrar
+                </button>
+              </div>
+
               <form className="search-overlay__form" onSubmit={handleSearchSubmit} role="search">
                 <span className="search-overlay__icon" aria-hidden="true">
                   <SearchIcon />
@@ -281,14 +319,6 @@ export default function App() {
                   onClick={() => setSearch('')}
                 >
                   BORRAR
-                </button>
-                <button
-                  type="button"
-                  className="search-overlay__close"
-                  aria-label="Cerrar busqueda"
-                  onClick={() => setSearchOpen(false)}
-                >
-                  X
                 </button>
               </form>
 
