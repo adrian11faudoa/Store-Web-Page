@@ -139,7 +139,7 @@ export function ProductCard({ product, onAddToCart }) {
         }
       }}
     >
-      <div className="product-card__visual" style={{ background: `linear-gradient(135deg, ${product.palette[0]}, ${product.palette[1]})` }}>
+      <div className="product-card__visual">
         {product.imageUrl ? <img src={product.imageUrl} alt={product.name} loading="lazy" /> : null}
         {badges.length > 0 ? (
           <div className="product-card__badges">
