@@ -240,19 +240,18 @@ export default function App() {
               </NavLink>
             </nav>
 
-            <button
-              className="header-search-trigger"
-              type="button"
-              aria-label="Abrir busqueda"
-              onClick={handleSearchButton}
-            >
-              <span className="header-icon-link__art">
-                <SearchIcon />
-              </span>
-              <span className="header-icon-link__label">{UI_TEXT.search}</span>
-            </button>
-
             <div className="header-actions">
+              <button
+                className="header-icon-link header-search-trigger"
+                type="button"
+                aria-label="Abrir busqueda"
+                onClick={handleSearchButton}
+              >
+                <span className="header-icon-link__art">
+                  <SearchIcon />
+                </span>
+                <span className="header-icon-link__label">{UI_TEXT.search}</span>
+              </button>
               <button
                 type="button"
                 className="header-icon-link"

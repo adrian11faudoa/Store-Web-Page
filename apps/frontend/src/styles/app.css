@@ -177,7 +177,8 @@ button {
 .main-nav {
   display: flex;
   align-items: center;
-  padding-right: 1rem;
+  margin-left: 0;
+  padding-right: 0.45rem;
   border-right: 1.5px solid var(--line);
 }
 
@@ -203,20 +204,8 @@ button {
 
 .header-search-trigger {
   margin-left: 0;
-  width: 4.3rem;
-  min-height: 3.1rem;
-  border: 0;
-  border-left: 1.5px solid var(--line);
-  border-right: 1.5px solid var(--line);
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--text);
-  display: inline-grid;
-  justify-items: center;
-  align-content: center;
-  gap: 0.22rem;
-  padding: 0.2rem 0.35rem;
-  flex: 0 0 auto;
+  border-left: 0;
+  border-radius: 0;
 }
 
 .header-search-trigger svg {
@@ -226,15 +215,15 @@ button {
 }
 
 .header-search-trigger:hover {
-  background: color-mix(in srgb, var(--brand-primary) 8%, transparent);
+  background: transparent;
   color: var(--text);
 }
 
 .header-actions {
   gap: 0;
   align-items: center;
-  margin-left: 0;
-  border-left: 0;
+  margin-left: auto;
+  border-left: 1.5px solid var(--line);
 }
 
 .button {
@@ -1970,7 +1959,7 @@ button {
   .header-actions {
     order: 1;
     flex: 0 0 auto;
-    margin-left: 0;
+    margin-left: auto;
     border: 0;
     padding-right: 0;
   }
@@ -1982,8 +1971,6 @@ button {
 
   .header-search-trigger {
     order: 1;
-    width: 3.95rem;
-    min-height: 3.2rem;
     margin-left: 0;
   }
 
