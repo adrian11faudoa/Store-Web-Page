@@ -350,9 +350,10 @@ button {
 .search-overlay__backdrop {
   position: fixed;
   inset: 0;
+  opacity: 0;
   border: 0;
   background: rgba(0, 0, 0, 0.38);
-  pointer-events: auto;
+  transition: opacity var(--transition-fast);
 }
 
 .search-overlay__panel {
@@ -366,7 +367,20 @@ button {
   border-radius: var(--radius-lg) 0 0 var(--radius-lg);
   padding: 1rem;
   overflow-y: auto;
+  transform: translateX(100%);
+  transition: transform var(--transition);
+}
+
+.search-overlay.is-open {
   pointer-events: auto;
+}
+
+.search-overlay.is-open .search-overlay__backdrop {
+  opacity: 1;
+}
+
+.search-overlay.is-open .search-overlay__panel {
+  transform: translateX(0);
 }
 
 .search-overlay__header {

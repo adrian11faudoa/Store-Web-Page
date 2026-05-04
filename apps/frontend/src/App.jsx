@@ -275,68 +275,72 @@ export default function App() {
           </div>
         </header>
 
-        {searchOpen ? (
-          <section className="search-overlay" role="dialog" aria-modal="true" aria-label="Busqueda de productos">
-            <button
-              type="button"
-              className="search-overlay__backdrop"
-              aria-label="Cerrar busqueda"
-              onClick={() => setSearchOpen(false)}
-            />
-            <div className="search-overlay__panel">
-              <div className="search-overlay__header">
-                <div>
-                  <strong>Busqueda</strong>
-                  <p>
-                    {search.trim()
-                      ? `${searchSuggestions.length} coincidencia(s)`
-                      : 'Explora tu catalogo por nombre, categoria o temporada'}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  className="icon-button search-overlay__dismiss"
-                  onClick={() => setSearchOpen(false)}
-                >
-                  Cerrar
-                </button>
+        <section
+          className={searchOpen ? 'search-overlay is-open' : 'search-overlay'}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Busqueda de productos"
+          aria-hidden={!searchOpen}
+        >
+          <button
+            type="button"
+            className="search-overlay__backdrop"
+            aria-label="Cerrar busqueda"
+            onClick={() => setSearchOpen(false)}
+          />
+          <div className="search-overlay__panel">
+            <div className="search-overlay__header">
+              <div>
+                <strong>Busqueda</strong>
+                <p>
+                  {search.trim()
+                    ? `${searchSuggestions.length} coincidencia(s)`
+                    : 'Explora tu catalogo por nombre, categoria o temporada'}
+                </p>
               </div>
-
-              <form className="search-overlay__form" onSubmit={handleSearchSubmit} role="search">
-                <span className="search-overlay__icon" aria-hidden="true">
-                  <SearchIcon />
-                </span>
-                <input
-                  ref={searchInputRef}
-                  type="search"
-                  value={search}
-                  onChange={event => setSearch(event.target.value)}
-                  placeholder="Buscar"
-                />
-                <button
-                  type="button"
-                  className="search-overlay__clear"
-                  onClick={() => setSearch('')}
-                >
-                  BORRAR
-                </button>
-              </form>
-
-              <ul className="search-overlay__results" aria-label="Sugerencias de busqueda">
-                {searchSuggestions.map(suggestion => (
-                  <li key={suggestion}>
-                    <button type="button" onClick={() => runSearch(suggestion)}>
-                      {suggestion.toUpperCase()}
-                    </button>
-                  </li>
-                ))}
-                {search.trim() && searchSuggestions.length === 0 ? (
-                  <li className="search-overlay__empty">Sin coincidencias</li>
-                ) : null}
-              </ul>
+              <button
+                type="button"
+                className="icon-button search-overlay__dismiss"
+                onClick={() => setSearchOpen(false)}
+              >
+                Cerrar
+              </button>
             </div>
-          </section>
-        ) : null}
+
+            <form className="search-overlay__form" onSubmit={handleSearchSubmit} role="search">
+              <span className="search-overlay__icon" aria-hidden="true">
+                <SearchIcon />
+              </span>
+              <input
+                ref={searchInputRef}
+                type="search"
+                value={search}
+                onChange={event => setSearch(event.target.value)}
+                placeholder="Buscar"
+              />
+              <button
+                type="button"
+                className="search-overlay__clear"
+                onClick={() => setSearch('')}
+              >
+                BORRAR
+              </button>
+            </form>
+
+            <ul className="search-overlay__results" aria-label="Sugerencias de busqueda">
+              {searchSuggestions.map(suggestion => (
+                <li key={suggestion}>
+                  <button type="button" onClick={() => runSearch(suggestion)}>
+                    {suggestion.toUpperCase()}
+                  </button>
+                </li>
+              ))}
+              {search.trim() && searchSuggestions.length === 0 ? (
+                <li className="search-overlay__empty">Sin coincidencias</li>
+              ) : null}
+            </ul>
+          </div>
+        </section>
 
         {pendingRequests > 0 ? <div className="status-banner">{UI_TEXT.syncing}</div> : null}
         {lastError ? <div className="error-banner">{lastError}</div> : null}
