@@ -13,16 +13,10 @@ import { useAppStore } from './store/useAppStore.js'
 const UI_TEXT = {
   tagline: 'Pequeno estilo, grandes sonrisas',
   shop: 'Tienda',
+  cart: 'Carrito',
+  account: 'Cuenta',
   searchPlaceholder: 'Busca mamelucos, vestidos, chamarras...',
   syncing: 'Sincronizando datos...',
-}
-
-function SparkleIcon() {
-  return (
-    <svg viewBox="0 0 64 64" aria-hidden="true">
-      <path d="M32 6l5.5 14.5L52 26l-14.5 5.5L32 46l-5.5-14.5L12 26l14.5-5.5L32 6zm16 30l2.2 5.8L56 44l-5.8 2.2L48 52l-2.2-5.8L40 44l5.8-2.2L48 36zM17 37l2.6 6.9L26.5 46l-6.9 2.1L17 55l-2.6-6.9L7.5 46l6.9-2.1L17 37z" />
-    </svg>
-  )
 }
 
 function ShopIcon() {
@@ -64,7 +58,9 @@ function CartIcon() {
 
 export default function App() {
   const bootstrappedRef = useRef(false)
+  const searchInputRef = useRef(null)
   const navigate = useNavigate()
+  const [searchOpen, setSearchOpen] = useState(false)
   const [search, setSearch] = useState('')
   const store = useAppStore()
   const bootstrap = store.bootstrap
@@ -72,6 +68,8 @@ export default function App() {
   const setCartOpen = store.setCartOpen
   const pendingRequests = store.ui.pendingRequests
   const currentUser = store.auth.user
+  const catalogProducts = store.catalog.products
+  const catalogCategories = store.catalog.categories
   const cart = store.cart.cart
   const lastError = store.ui.lastError
   const cartItems = useMemo(() => (Array.isArray(cart?.items) ? cart.items : []), [cart])
@@ -89,6 +87,34 @@ export default function App() {
     void bootstrap()
   }, [bootstrap])
 
+  useEffect(() => {
+    if (!searchOpen) {
+      document.body.classList.remove('search-overlay-open')
+      return
+    }
+
+    document.body.classList.add('search-overlay-open')
+
+    const timerId = window.setTimeout(() => {
+      searchInputRef.current?.focus()
+      searchInputRef.current?.select()
+    }, 30)
+
+    function handleEscapeKey(event) {
+      if (event.key === 'Escape') {
+        setSearchOpen(false)
+      }
+    }
+
+    document.addEventListener('keydown', handleEscapeKey)
+
+    return () => {
+      window.clearTimeout(timerId)
+      document.removeEventListener('keydown', handleEscapeKey)
+      document.body.classList.remove('search-overlay-open')
+    }
+  }, [searchOpen])
+
   const localeValue = useMemo(() => ({
     language: 'es',
     currency: 'MXN',
@@ -103,15 +129,65 @@ export default function App() {
     },
   }), [])
 
-  function handleSearchSubmit(event) {
-    event.preventDefault()
-    const params = new URLSearchParams()
+  const searchSuggestions = useMemo(() => {
+    const query = search.trim().toLowerCase()
+    if (!query) return []
 
-    if (search.trim()) {
-      params.set('q', search.trim())
+    const values = []
+    for (const product of catalogProducts) {
+      values.push(product.name)
+      values.push(product.category?.name)
+      values.push(product.category?.slug?.replaceAll('-', ' '))
+      values.push(product.gender)
+      values.push(product.ageGroup)
+      values.push(...(product.seasons || []))
+      values.push(...(product.ageTags || []))
+    }
+
+    for (const category of catalogCategories) {
+      values.push(category.name)
+      values.push(category.slug?.replaceAll('-', ' '))
+    }
+
+    const deduped = []
+    const seen = new Set()
+    for (const value of values) {
+      const cleanValue = String(value || '').trim()
+      if (!cleanValue) continue
+      const key = cleanValue.toLowerCase()
+      if (seen.has(key)) continue
+      seen.add(key)
+      deduped.push(cleanValue)
+    }
+
+    return deduped
+      .filter(value => value.toLowerCase().includes(query))
+      .sort((left, right) => {
+        const leftStarts = left.toLowerCase().startsWith(query)
+        const rightStarts = right.toLowerCase().startsWith(query)
+        if (leftStarts !== rightStarts) {
+          return leftStarts ? -1 : 1
+        }
+        return left.localeCompare(right)
+      })
+      .slice(0, 10)
+  }, [catalogCategories, catalogProducts, search])
+
+  function runSearch(value = search) {
+    const params = new URLSearchParams()
+    const cleaned = String(value || '').trim()
+
+    if (cleaned) {
+      params.set('q', cleaned)
     }
 
     navigate(`/shop${params.toString() ? `?${params.toString()}` : ''}`)
+    setSearchOpen(false)
+  }
+
+  function handleSearchSubmit(event) {
+    event.preventDefault()
+    runSearch(search)
   }
 
   function handleOpenSignIn() {
@@ -122,44 +198,46 @@ export default function App() {
     <LocaleProvider value={localeValue}>
       <div className="app-shell">
         <header className="site-header">
-          <div className="container header-row">
+          <div className="header-row">
             <NavLink className="brand" to="/">
-              <span className="brand__icon">
-                <SparkleIcon />
-              </span>
               <span className="brand__text">
-                <span className="brand__wordmark">Sahara Kids</span>
+                <span className="brand__wordmark" aria-label="Sahara Kids">
+                  <span className="brand__wordmark-sahara">Sahara</span>{' '}
+                  <span className="brand__wordmark-kids">Kids</span>
+                </span>
                 <small className="brand__tagline">{UI_TEXT.tagline}</small>
               </span>
             </NavLink>
 
             <nav className="main-nav" aria-label="Primary">
               <NavLink to="/shop" className="main-nav__shop">
-                <ShopIcon />
-                <span>{UI_TEXT.shop}</span>
+                <span className="header-icon-link__art">
+                  <ShopIcon />
+                </span>
+                <span className="header-icon-link__label">{UI_TEXT.shop}</span>
               </NavLink>
             </nav>
 
-            <form className="header-search" onSubmit={handleSearchSubmit} role="search">
-              <button className="header-search__button" type="submit" aria-label="Buscar">
-                <SearchIcon />
-              </button>
-              <input
-                type="search"
-                placeholder={UI_TEXT.searchPlaceholder}
-                value={search}
-                onChange={event => setSearch(event.target.value)}
-              />
-            </form>
+            <button
+              className="header-search-trigger"
+              type="button"
+              aria-label="Abrir busqueda"
+              onClick={() => setSearchOpen(true)}
+            >
+              <SearchIcon />
+            </button>
 
             <div className="header-actions">
               <button
                 type="button"
                 className="header-icon-link"
                 onClick={handleOpenSignIn}
-                aria-label={currentUser ? currentUser.name : 'Iniciar sesión'}
+                aria-label={currentUser ? currentUser.name : 'Iniciar sesion'}
               >
-                <UserIcon />
+                <span className="header-icon-link__art">
+                  <UserIcon />
+                </span>
+                <span className="header-icon-link__label">{UI_TEXT.account}</span>
               </button>
               <button
                 className="header-icon-link header-cart-button"
@@ -167,12 +245,68 @@ export default function App() {
                 onClick={() => setCartOpen(!cartOpen)}
                 aria-label={`Abrir carrito (${cartItemQuantity})`}
               >
-                <CartIcon />
-                <span className="header-cart-count">{cartItemQuantity}</span>
+                <span className="header-icon-link__art">
+                  <CartIcon />
+                </span>
+                <span className="header-icon-link__label">{UI_TEXT.cart}</span>
+                {cartItemQuantity > 0 ? <span className="header-cart-count">{cartItemQuantity}</span> : null}
               </button>
             </div>
           </div>
         </header>
+
+        {searchOpen ? (
+          <section className="search-overlay" role="dialog" aria-modal="true" aria-label="Busqueda de productos">
+            <button
+              type="button"
+              className="search-overlay__backdrop"
+              aria-label="Cerrar busqueda"
+              onClick={() => setSearchOpen(false)}
+            />
+            <div className="search-overlay__panel">
+              <form className="search-overlay__form" onSubmit={handleSearchSubmit} role="search">
+                <span className="search-overlay__icon" aria-hidden="true">
+                  <SearchIcon />
+                </span>
+                <input
+                  ref={searchInputRef}
+                  type="search"
+                  value={search}
+                  onChange={event => setSearch(event.target.value)}
+                  placeholder="Buscar"
+                />
+                <button
+                  type="button"
+                  className="search-overlay__clear"
+                  onClick={() => setSearch('')}
+                >
+                  BORRAR
+                </button>
+                <button
+                  type="button"
+                  className="search-overlay__close"
+                  aria-label="Cerrar busqueda"
+                  onClick={() => setSearchOpen(false)}
+                >
+                  X
+                </button>
+              </form>
+
+              <ul className="search-overlay__results" aria-label="Sugerencias de busqueda">
+                {searchSuggestions.map(suggestion => (
+                  <li key={suggestion}>
+                    <button type="button" onClick={() => runSearch(suggestion)}>
+                      {suggestion.toUpperCase()}
+                    </button>
+                  </li>
+                ))}
+                {search.trim() && searchSuggestions.length === 0 ? (
+                  <li className="search-overlay__empty">Sin coincidencias</li>
+                ) : null}
+              </ul>
+            </div>
+          </section>
+        ) : null}
 
         {pendingRequests > 0 ? <div className="status-banner">{UI_TEXT.syncing}</div> : null}
         {lastError ? <div className="error-banner">{lastError}</div> : null}

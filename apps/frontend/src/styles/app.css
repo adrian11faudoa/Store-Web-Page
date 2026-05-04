@@ -1,5 +1,6 @@
 :root {
   color-scheme: light;
+  --header-offset: 6.2rem;
   --brand-primary: #ff6b6b;
   --brand-secondary: #4ecdc4;
   --brand-accent: #ffe66d;
@@ -97,14 +98,19 @@ button {
 
 .app-shell {
   min-height: 100vh;
+  padding-top: var(--header-offset);
 }
 
 .site-header {
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 25;
-  padding: 1.1rem 0 0.9rem;
-  background: transparent;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 40;
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  border-bottom: 1.5px solid var(--line);
+  backdrop-filter: blur(8px);
 }
 
 .header-row,
@@ -125,58 +131,47 @@ button {
   gap: 1rem;
   align-items: center;
   justify-content: flex-start;
-  padding: 0.85rem 1.3rem;
+  width: 100%;
+  padding: 0.7rem clamp(0.85rem, 2.2vw, 2.1rem);
   flex-wrap: nowrap;
-  background: var(--surface);
-  border: 1.5px solid var(--line);
-  border-radius: 2rem;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.04);
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
+  gap: 0.55rem;
   min-width: 0;
   padding-right: 1rem;
   border-right: 1.5px solid var(--line);
 }
 
-.brand__icon {
-  width: 3rem;
-  height: 3rem;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: #e15151;
-  box-shadow: var(--shadow-card);
-  flex-shrink: 0;
-}
-
-.brand__icon svg {
-  width: 1.7rem;
-  height: 1.7rem;
-  fill: #f4bf21;
-}
-
 .brand__text {
   display: grid;
-  gap: 0.15rem;
+  gap: 0.1rem;
 }
 
 .brand__wordmark {
-  font-size: 1.35rem;
+  font-size: clamp(1.5rem, 2.35vw, 2.5rem);
   font-weight: 900;
-  background: linear-gradient(120deg, #e15151 0%, #ff7b7b 45%, #f4bf21 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  letter-spacing: -0.02em;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.28rem;
   line-height: 1;
 }
 
+.brand__wordmark-sahara {
+  color: #ff5a57;
+}
+
+.brand__wordmark-kids {
+  color: #ffad24;
+}
+
 .brand__tagline {
-  font-size: 11px;
-  color: var(--text-soft);
+  font-size: clamp(0.68rem, 0.92vw, 0.98rem);
+  color: #4c4d5a;
+  line-height: 1.1;
 }
 
 .main-nav {
@@ -187,71 +182,47 @@ button {
 }
 
 .main-nav__shop {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.8rem;
-  font-size: 1.35rem;
-  font-weight: 700;
-  padding: 0.25rem 0.25rem 0.25rem 0.1rem;
+  position: relative;
+  width: 4.9rem;
+  min-height: 3.8rem;
+  display: inline-grid;
+  justify-items: center;
+  align-content: center;
+  gap: 0.22rem;
+  font-size: 1rem;
+  font-weight: 800;
+  padding: 0.2rem 0.35rem;
   color: var(--text);
 }
 
 .main-nav__shop svg {
-  width: 1.85rem;
-  height: 1.85rem;
+  width: 1.95rem;
+  height: 1.95rem;
   fill: currentColor;
 }
 
-.header-search {
-  flex: 1 1 auto;
-  display: flex;
-  gap: 0;
-  align-items: center;
-  min-height: 3.1rem;
-  border-radius: var(--radius-pill);
-  overflow: hidden;
-  border: 1.5px solid color-mix(in srgb, var(--line) 80%, var(--surface));
-  background: var(--surface-muted);
-  margin-left: 0.5rem;
-  padding-left: 0.2rem;
-  padding-right: 0.7rem;
-}
-
-.header-search input {
-  width: 100%;
+.header-search-trigger {
+  margin-left: auto;
+  width: 3.6rem;
+  height: 3.6rem;
   border: 0;
   border-radius: 0;
   background: transparent;
-  color: var(--text);
-  padding: 0.85rem 0.65rem;
+  color: #111111;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
 }
 
-.header-search input::placeholder {
-  color: var(--text-soft);
-  opacity: 1;
-}
-
-.header-search__button {
-  border: 0;
-  border-radius: var(--radius-pill);
-  min-width: 2.5rem;
-  min-height: 2.5rem;
-  background: transparent;
-  color: var(--text);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 0.2rem;
-}
-
-.header-search__button svg {
-  width: 1.85rem;
-  height: 1.85rem;
+.header-search-trigger svg {
+  width: 1.7rem;
+  height: 1.7rem;
   fill: currentColor;
 }
 
-.header-search__button:hover {
-  background: color-mix(in srgb, var(--surface-muted) 75%, transparent);
+.header-search-trigger:hover {
+  background: transparent;
+  color: #333333;
 }
 
 .header-actions {
@@ -310,11 +281,13 @@ button {
 
 .header-icon-link {
   position: relative;
-  width: 4.1rem;
-  min-height: 3rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  width: 4.9rem;
+  min-height: 3.8rem;
+  display: inline-grid;
+  justify-items: center;
+  align-content: center;
+  gap: 0.22rem;
+  padding: 0.2rem 0.35rem;
   border: 0;
   background: transparent;
   color: var(--text);
@@ -324,24 +297,33 @@ button {
   border-left: 1.5px solid var(--line);
 }
 
-.header-icon-link svg {
-  width: 2rem;
-  height: 2rem;
+.header-icon-link__art {
+  width: 2.35rem;
+  height: 2.35rem;
+  display: grid;
+  place-items: center;
+}
+
+.header-icon-link__art svg {
+  width: 1.95rem;
+  height: 1.95rem;
+}
+
+.header-icon-link__label {
+  font-size: 0.72rem;
+  line-height: 1;
+  font-weight: 800;
+  color: var(--text-soft);
 }
 
 .header-cart-button {
   cursor: pointer;
 }
 
-.header-cart-button svg {
-  width: 2.1rem;
-  height: 2.1rem;
-}
-
 .header-cart-count {
   position: absolute;
-  top: 0.25rem;
-  right: 0.55rem;
+  top: 0.15rem;
+  right: 0.65rem;
   min-width: 1.6rem;
   height: 1.6rem;
   border-radius: var(--radius-pill);
@@ -352,6 +334,104 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+.search-overlay-open {
+  overflow: hidden;
+}
+
+.search-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  display: grid;
+  grid-template-columns: 1fr min(640px, 100%);
+}
+
+.search-overlay__backdrop {
+  border: 0;
+  background: rgba(25, 25, 25, 0.72);
+}
+
+.search-overlay__panel {
+  background: #f3f3f3;
+  padding: 1.6rem 2rem 2rem;
+  overflow-y: auto;
+}
+
+.search-overlay__form {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 0.9rem;
+  align-items: center;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid #101010;
+}
+
+.search-overlay__icon {
+  width: 1.7rem;
+  height: 1.7rem;
+  display: inline-grid;
+  place-items: center;
+  color: #111111;
+}
+
+.search-overlay__icon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  fill: currentColor;
+}
+
+.search-overlay__form input {
+  border: 0;
+  background: transparent;
+  color: #101010;
+  font-size: 2rem;
+  line-height: 1;
+  min-width: 0;
+  outline: none;
+}
+
+.search-overlay__clear,
+.search-overlay__close {
+  border: 0;
+  background: transparent;
+  color: #111111;
+}
+
+.search-overlay__clear {
+  text-decoration: underline;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.search-overlay__close {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.search-overlay__results {
+  list-style: none;
+  margin: 1.8rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 1.05rem;
+}
+
+.search-overlay__results button {
+  border: 0;
+  background: transparent;
+  color: #111111;
+  font-size: 2rem;
+  text-align: left;
+  padding: 0;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.search-overlay__empty {
+  color: #4e4e4e;
+  font-size: 1.2rem;
 }
 
 .hero,
@@ -1681,14 +1761,19 @@ button {
 }
 
 @media (max-width: 767px) {
+  :root {
+    --header-offset: 8.3rem;
+  }
+
   .header-row {
     flex-wrap: wrap;
     row-gap: 0.75rem;
+    padding-block: 0.5rem;
   }
 
   .main-nav__shop {
-    gap: 0;
-    padding-right: 0;
+    width: 4.35rem;
+    min-height: 3.6rem;
   }
 
   .brand {
@@ -1717,14 +1802,15 @@ button {
   }
 
   .header-icon-link {
-    width: 3.5rem;
-    min-height: 2.8rem;
+    width: 4.35rem;
+    min-height: 3.6rem;
   }
 
-  .header-search {
-    order: 4;
-    width: 100%;
-    margin-left: 0;
+  .header-search-trigger {
+    order: 1;
+    width: 3.25rem;
+    height: 3.25rem;
+    margin-left: auto;
   }
 
   .hero__stats {
@@ -1841,10 +1927,29 @@ button {
   .checkout-item__heading {
     flex-wrap: wrap;
   }
-}
 
-@media (max-width: 680px) {
-  .main-nav__shop span {
+  .search-overlay {
+    grid-template-columns: 1fr;
+  }
+
+  .search-overlay__backdrop {
     display: none;
+  }
+
+  .search-overlay__panel {
+    padding: 1rem 1rem 1.5rem;
+  }
+
+  .search-overlay__form {
+    grid-template-columns: auto 1fr auto auto;
+    gap: 0.6rem;
+  }
+
+  .search-overlay__form input {
+    font-size: 1.35rem;
+  }
+
+  .search-overlay__results button {
+    font-size: 1.45rem;
   }
 }
