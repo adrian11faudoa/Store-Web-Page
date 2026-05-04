@@ -7,6 +7,7 @@ import { CheckoutPage } from './pages/CheckoutPage.jsx'
 import { SignInPage } from './pages/SignInPage.jsx'
 import { CartSidebar } from './components/CartSidebar.jsx'
 import { ErrorBoundary } from './components/ErrorBoundary.jsx'
+import { SiteFooter } from './components/SiteFooter.jsx'
 import { LocaleProvider } from './context/localeContext.jsx'
 import { useAppStore } from './store/useAppStore.js'
 
@@ -15,6 +16,7 @@ const UI_TEXT = {
   shop: 'Tienda',
   cart: 'Carrito',
   account: 'Cuenta',
+  search: 'Buscar',
   searchPlaceholder: 'Busca mamelucos, vestidos, chamarras...',
   syncing: 'Sincronizando datos...',
 }
@@ -244,7 +246,10 @@ export default function App() {
               aria-label="Abrir busqueda"
               onClick={handleSearchButton}
             >
-              <SearchIcon />
+              <span className="header-icon-link__art">
+                <SearchIcon />
+              </span>
+              <span className="header-icon-link__label">{UI_TEXT.search}</span>
             </button>
 
             <div className="header-actions">
@@ -360,6 +365,8 @@ export default function App() {
 
           <CartSidebar isOpen={cartOpen} onClose={() => setCartOpen(false)} />
         </ErrorBoundary>
+
+        <SiteFooter />
       </div>
     </LocaleProvider>
   )
